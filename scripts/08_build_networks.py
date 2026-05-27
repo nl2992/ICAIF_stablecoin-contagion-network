@@ -49,18 +49,24 @@ def main() -> None:
         raise SystemExit("No edge table found. Run scripts 05, 06, or 07 first.")
 
     # Determine edge columns
-    src_col = "node_i" if "node_i" in edge_df.columns else "source"
-    tgt_col = "node_j" if "node_j" in edge_df.columns else "target"
+    if {"causing_node", "caused_node"}.issubset(edge_df.columns):
+        src_col, tgt_col = "causing_node", "caused_node"
+    else:
+        src_col = "node_i" if "node_i" in edge_df.columns else "source"
+        tgt_col = "node_j" if "node_j" in edge_df.columns else "target"
     w_col = "branching_ratio_ij" if "branching_ratio_ij" in edge_df.columns else (
         "fevd_share" if "fevd_share" in edge_df.columns else "te_i_to_j"
     )
-    method_col = "method" if "method" in edge_df.columns else None
+    if src_col in edge_df.columns and tgt_col in edge_df.columns:
+        edge_df = edge_df.filter(pl.col(src_col) != pl.col(tgt_col))
 
     edges = edges_from_table(
         edge_df,
         source_col=src_col,
         target_col=tgt_col,
         weight_col=w_col,
+        method_col="method" if "method" in edge_df.columns else "method_missing",
+        p_col="p_value" if "p_value" in edge_df.columns else None,
         event_id=args.event,
     )
     G = build_networkx_graph(edges, weight_threshold=args.weight_threshold,

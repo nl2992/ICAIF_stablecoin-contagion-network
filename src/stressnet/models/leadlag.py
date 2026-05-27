@@ -75,7 +75,8 @@ def block_bootstrap_pvalue(
     observed = np.corrcoef(x_obs, y_obs)[0, 1]
 
     n = len(x_obs)
-    n_blocks = max(1, n // block_size)
+    block_size = max(1, min(block_size, n))
+    n_blocks = max(1, int(np.ceil(n / block_size)))
     null_corrs = np.zeros(n_reps)
     for rep in range(n_reps):
         # Shuffle blocks of y, keeping x fixed
@@ -104,23 +105,22 @@ def compute_leadlag_table(
     """
     results = []
     rng = np.random.default_rng(42)
+    needed_nodes = sorted({node for pair in node_pairs for node in pair})
+    pivot = (
+        panel.filter(pl.col("node_id").is_in(needed_nodes))
+        .select([ts_col, "node_id", feature_col])
+        .pivot(values=feature_col, index=ts_col, on="node_id")
+        .sort(ts_col)
+    )
 
     for node_i, node_j in node_pairs:
-        xi = (
-            panel.filter(pl.col("node_id") == node_i)
-            .sort(ts_col)[feature_col]
-            .to_numpy()
-        )
-        xj = (
-            panel.filter(pl.col("node_id") == node_j)
-            .sort(ts_col)[feature_col]
-            .to_numpy()
-        )
+        if node_i not in pivot.columns or node_j not in pivot.columns:
+            continue
+        aligned = pivot.select([node_i, node_j]).drop_nulls()
+        xi = aligned[node_i].to_numpy()
+        xj = aligned[node_j].to_numpy()
         if len(xi) < 10 or len(xj) < 10:
             continue
-
-        min_len = min(len(xi), len(xj))
-        xi, xj = xi[:min_len], xj[:min_len]
 
         lags, corrs = cross_correlation_lags(xi, xj, max_lag=max_lag)
         peak_idx = np.argmax(np.abs(corrs))

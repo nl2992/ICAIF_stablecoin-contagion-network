@@ -1,0 +1,337 @@
+%% ACM ICAIF 2026 — Stablecoin Stress Contagion Network
+%% 8 pages + references, two-column, sigconf format
+%%
+%% Build: pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
+%%
+\documentclass[sigconf,review,anonymous]{acmart}
+
+%% Metadata
+\acmConference[ICAIF '26]{ACM International Conference on AI in Finance}{November 2026}{New York, NY, USA}
+\acmBooktitle{Proceedings of the 7th ACM International Conference on AI in Finance}
+\acmDOI{}
+\acmISBN{}
+\copyrightyear{2026}
+\acmYear{2026}
+\setcopyright{acmlicensed}
+
+%% Packages
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+%% Abbreviations
+\newcommand{\te}{\mathrm{TE}}
+\newcommand{\fevd}{\mathrm{FEVD}}
+\newcommand{\usdc}{\textsc{usdc}}
+\newcommand{\usdt}{\textsc{usdt}}
+\newcommand{\pval}{$p$\nobreakdash-value}
+
+%% ============================================================
+\begin{document}
+
+\title{Stablecoin Stress Contagion: A Multi-Layer Benchmark for Measuring
+       Cross-Venue and Cross-Protocol Propagation}
+
+\begin{abstract}
+We present \textbf{Stablecoin Stress Contagion Network}, an open benchmark that
+measures how stress initiated at one node of the stablecoin system propagates
+to other nodes across centralized exchange (CEX) venue pairs, decentralized
+liquidity pools (DEX), and on-chain settlement channels.
+Across five historical events---\usdc/SVB (2023), Terra/LUNA (2022),
+\usdt/Curve (2023), FTX (2022), and BUSD (2023)---we construct event-time
+feature panels, estimate directed edges via lead-lag cross-correlation with
+block-bootstrap inference, VAR/FEVD, multivariate Hawkes processes, and
+transfer entropy, and aggregate evidence into a weighted temporal network.
+We further evaluate whether incorporating graph structure into a temporal GNN
+improves downstream stress-propagation prediction over non-graph baselines.
+All code, configs, and fixture data are released publicly to support
+reproducible financial-AI research.
+\end{abstract}
+
+\keywords{stablecoin, financial contagion, multi-layer network, Hawkes process,
+  transfer entropy, temporal GNN, DeFi, microstructure}
+
+\maketitle
+
+%% ============================================================
+\section{Introduction}
+\label{sec:intro}
+
+Stablecoins now settle trillions of dollars in daily volume across centralized
+and decentralized venues.  When a stablecoin de-pegs, its stress does not
+stay local: order books on competing CEX venues re-price in seconds, DEX
+liquidity pools absorb toxic flow and shift reserve imbalance over minutes, and
+on-chain settlement channels may slow or redirect over hours.  Yet rigorous,
+reproducible benchmarks for measuring this \emph{temporal propagation} are
+absent from the financial AI literature.
+
+Prior work on stablecoin stability focuses on static peg accuracy
+\cite{ante2021stablecoin}, single-venue depth \cite{clark2019stressbench}, or
+high-level price co-movement \cite{grobys2021information}.  Co-movement is
+not contagion: contagion requires time-directed evidence---a shock in node $i$
+at time $t$ that \emph{predictably} elevates stress in node $j$ at $t+k$.
+
+This paper makes four contributions:
+\begin{enumerate}
+  \item A \textbf{multi-layer node taxonomy} (CEX, DEX, flow) with
+    transparent data-provenance tiers (A/B/C) that bound the strength of
+    every empirical claim (\S\ref{sec:data}).
+  \item An \textbf{event-time feature panel} covering five historical shock
+    windows with 11 nodes per event (\S\ref{sec:data}).
+  \item A four-layer \textbf{directed estimation pipeline}---lead-lag,
+    VAR/FEVD, Hawkes, transfer entropy---with block-bootstrap inference and
+    Benjamini-Hochberg FDR correction (\S\ref{sec:methods}).
+  \item An evaluation of whether a \textbf{temporal GNN} (TGN)
+    improves next-minute downstream-stress prediction over non-graph baselines
+    (\S\ref{sec:prediction}).
+\end{enumerate}
+
+\noindent\textbf{Non-claims.}\ Price co-movement across venues is not treated
+as contagion.  Tier-A L2 coverage is not available for every historical event.
+Temporal GNN improvements do not imply causal mechanisms.
+
+%% ============================================================
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Stablecoin stability.}
+\citet{ante2021stablecoin} survey peg-maintenance mechanisms;
+\citet{grobys2021information} study USDT information transmission;
+\citet{gorton2022tether} examine USDT's role as a monetary instrument.
+None of these quantify cross-venue lag structure at microstructure resolution.
+
+\paragraph{Financial contagion networks.}
+\citet{billio2012econometric} introduced Granger-causality networks for
+systemic risk; \citet{diebold2014network} generalized FEVD spillover indices.
+We adapt both to the high-frequency stablecoin setting and add Hawkes and
+transfer-entropy layers for non-linear excitation.
+
+\paragraph{DeFi and AMM liquidity.}
+\citet{angeris2020improved} analyze AMM price dynamics;
+\citet{capponi2021adoption} study liquidity provision in Curve pools.
+We treat DEX reserve imbalance as a second contagion channel alongside CEX
+order-book depth.
+
+\paragraph{Temporal GNNs.}
+\citet{rossi2020temporal} introduce TGN; \citet{sankar2020dysat} introduce
+DySAT.  Both have been applied to social and knowledge graphs but not yet to
+multi-layer financial contagion at sub-minute granularity.
+
+%% ============================================================
+\section{Data and Node Taxonomy}
+\label{sec:data}
+
+\subsection{Event set}
+Table~\ref{tab:events} summarizes the five shock windows.  We choose events
+that span the three principal stablecoin stress mechanisms: fiat-reserve bank
+shock (USDC/SVB), algorithmic collapse (Terra/LUNA), DEX pool imbalance
+(\usdt/Curve), exchange credit/liquidity shock (FTX), and regulatory wind-down
+(BUSD).
+
+\begin{table}[h]
+  \centering
+  \caption{Event set and analysis windows.}
+  \label{tab:events}
+  \small
+  \begin{tabular}{llr}
+    \toprule
+    Event & Mechanism & Window \\
+    \midrule
+    \usdc/SVB 2023    & Fiat-reserve bank shock   & 2023-03-08--20 \\
+    Terra/LUNA 2022   & Algorithmic collapse      & 2022-05-01--31 \\
+    \usdt/Curve 2023  & DEX pool imbalance        & 2023-06-10--25 \\
+    FTX 2022          & Exchange credit shock     & 2022-11-01--30 \\
+    BUSD 2023         & Regulatory wind-down      & 2023-02-06--03-13 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Node taxonomy}
+Each event graph contains three node layers:
+
+\begin{description}
+  \item[Market nodes (CEX).] Venue-specific stablecoin order books: mid price,
+    spread, 10\,bps depth, orderbook imbalance, executable price.
+    Venues: Binance, Coinbase, Kraken.
+  \item[Pool nodes (DEX).] Curve 3pool and Uniswap USDC/USDT\,0.05\%:
+    reserve imbalance, implied pool price, swap flow, slippage.
+  \item[Flow nodes.] ETH exchange inflow/outflow, USDC/USDT bridge flows,
+    mint/burn events, gas base fee.
+\end{description}
+
+\subsection{Provenance tiers}
+Every node is assigned a data-provenance tier:
+\textbf{A} (real L2, verified pool state),
+\textbf{B} (trades, OHLCV, aggregate on-chain flows), or
+\textbf{C} (proxy or sparse).
+No edge can support a claim stronger than the weaker of its two endpoint tiers.
+Table~\ref{tab:coverage} (Appendix) lists per-node tier assignments.
+
+%% ============================================================
+\section{Methods}
+\label{sec:methods}
+
+Let $\mathbf{x}_i(t) \in \mathbb{R}$ be the log-basis deviation of node $i$
+at event time $t$ (seconds since shock onset), defined as
+$\log(\text{mid or pool price})$ for CEX/DEX nodes and a normalized net-flow
+for flow nodes.
+
+\subsection{Lead-lag cross-correlation}
+For node pair $(i,j)$ we compute
+\[
+  \rho_{ij}(k) = \mathrm{Corr}\bigl(x_i(t),\, x_j(t+k)\bigr),
+  \quad k \in [-K, K],
+\]
+and report the peak lag $k^* = \arg\max_k |\rho_{ij}(k)|$.  Statistical
+significance is assessed via block-bootstrap \pval s (block size = 300\,s),
+with Benjamini-Hochberg FDR correction across all pairs at $\alpha = 0.01$.
+
+\subsection{VAR / FEVD spillovers}
+We fit a Vector Autoregression VAR($p$) on the $N$-dimensional panel
+($p$ selected by BIC) and compute the Forecast Error Variance Decomposition
+at horizon $h=10$ steps.  The off-diagonal FEVD share
+$\hat\Omega_{ij} = \fevd_h(x_j \leftarrow x_i)$
+measures the fraction of $j$'s $h$-step forecast error explained by $i$.
+We report edges with $\hat\Omega_{ij} > 10\%$.
+
+For time-varying dynamics we run a rolling-window VAR (window $W=3600$\,s,
+step $\delta=300$\,s) and a forgetting-factor variant ($\lambda=0.99$).
+
+\subsection{Multivariate Hawkes processes}
+We extract stress event arrivals $\mathcal{T}_i = \{t : |x_i(t)| > \epsilon\}$
+(crossing events at 10\,bps) and fit a multivariate exponential Hawkes model:
+\[
+  \lambda_i(t) = \mu_i + \sum_{j \neq i} \alpha_{ij}
+                 \sum_{t_k^j < t} e^{-\beta(t - t_k^j)}.
+\]
+The branching ratio $\eta_{ij} = \alpha_{ij}/\beta$ measures the expected
+number of node-$i$ stress events triggered per node-$j$ event.
+We report edges with $\eta_{ij} > 0.1$ and bootstrap 95\% CIs.
+
+\subsection{Transfer entropy}
+Transfer entropy from $X$ to $Y$ quantifies directional information flow:
+\[
+  \te(X \to Y) = H(Y_t \mid Y_{t-1}) - H(Y_t \mid Y_{t-1}, X_{t-1}),
+\]
+estimated via equal-frequency binning ($B=10$ bins, lag $L=10$).
+Significance is assessed against a shuffle null ($n_s = 200$) with
+BH-FDR correction.
+
+\subsection{Ensemble network}
+We combine directed edges from all four estimators via vote-weighted ensemble:
+an edge $(i,j)$ is included if it appears as significant ($p < 0.05$ after FDR)
+in at least two of the four estimators, with weight proportional to vote count
+and mean effect size.
+
+%% ============================================================
+\section{Results}
+\label{sec:results}
+
+\subsection{USDC/SVB 2023 (primary event)}
+\label{sec:results-usdc}
+
+[Table of lead-lag results — Table~\ref{tab:leadlag}]
+
+[Table of VAR/FEVD spillovers — Table~\ref{tab:var}]
+
+[Figure: directed contagion network — Figure~\ref{fig:network}]
+
+\begin{table}[h]
+  \centering
+  \caption{Lead-lag test results, USDC/SVB 2023.  Peak lag and bootstrap
+    \pval\ (block-bootstrap, $n=1000$ reps, BH-FDR $\alpha=0.01$).}
+  \label{tab:leadlag}
+  \small
+  \input{tables/table_leadlag_tests_usdc_svb_2023.tex}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/figure_contagion_map_usdc_svb_2023.png}
+  \caption{Directed contagion network for USDC/SVB 2023.  Node colour indicates
+    role (originator / amplifier / sink); edge weight is ensemble vote count.
+    Tier-A edges are shown with solid lines; Tier-B with dashed.}
+  \label{fig:network}
+\end{figure}
+
+\subsection{Multi-event replication}
+\label{sec:results-multi}
+
+[Summary table across all five events.]
+
+%% ============================================================
+\section{Prediction}
+\label{sec:prediction}
+
+We evaluate whether graph structure improves next-minute downstream stress
+prediction.  The target label is
+$\mathbb{1}[|\text{basis}_{j}(t + 60\text{s})| > 10\text{bps}]$
+for downstream node $j$, using features from all upstream nodes.
+
+Table~\ref{tab:prediction} compares Logistic Regression, Random Forest, and the
+Temporal GNN (TGN) on the USDC/SVB event using an event-time split (70\%/30\%).
+
+\begin{table}[h]
+  \centering
+  \caption{Prediction performance: AUROC and AUPRC on USDC/SVB 2023 test set.
+    GNN improvement threshold: $>5\%$ over best non-graph baseline.}
+  \label{tab:prediction}
+  \small
+  \input{tables/table_prediction_metrics_usdc_svb_2023.tex}
+\end{table}
+
+%% ============================================================
+\section{Robustness}
+\label{sec:robustness}
+
+We verify lead-lag conclusions under: (1) alternative 1\,s / 5\,s / 60\,s
+sampling grids; (2) CEX-only node subsample; (3) Binance removal;
+(4) bootstrap block sizes of 50, 300, and 1800 rows; (5) basis thresholds of
+10, 25, and 50\,bps; (6) event-phase subsetting (pre / peak / post); and
+(7) placebo windows from the same calendar period one year earlier.
+
+The core upstream-to-downstream propagation ordering is replicated in
+[X of 7] sampling configurations on the primary event and in [Y of 5] events.
+
+%% ============================================================
+\section{Limitations}
+\label{sec:limitations}
+
+Route-complete Tier-A L2 data is not available for every historical event;
+Terra/LUNA and FTX analyses rely on Tier-B OHLCV data.  Our Hawkes excitation
+model assumes a single exponential kernel and a shared decay rate across node
+pairs.  AMM implied prices are not directly comparable to CEX mid prices because
+they reflect realized swap paths rather than passive limit orders.  Temporal GNN
+prediction improvements do not imply causal mechanisms.
+
+%% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We introduced a multi-layer, provenance-tiered benchmark for measuring
+stablecoin stress contagion.  Across five events we find that [primary finding]
+and that [secondary finding].  The open-source pipeline reduces the barrier to
+reproducible financial-AI research in this domain.
+
+%% ============================================================
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+%% ============================================================
+\appendix
+\section{Data Coverage}
+\label{app:coverage}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/figure_heatmap_coverage.png}
+  \caption{Data coverage heatmap.  Colour indicates provenance tier per
+    (event, node) cell.}
+  \label{fig:coverage}
+\end{figure}
+
+\end{document}

@@ -1,4 +1,4 @@
-"""Lead-lag cross-correlation with block-bootstrap inference."""
+"""Lead-lag cross-correlation with block-bootstrap inference and BH-FDR correction."""
 
 from __future__ import annotations
 
@@ -9,6 +9,37 @@ from scipy import stats
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+def fdr_correct(p_values: np.ndarray, alpha: float = 0.05) -> tuple[np.ndarray, np.ndarray]:
+    """Benjamini-Hochberg FDR correction (step-up procedure).
+
+    Returns:
+        reject: Boolean array, True where the null is rejected at FDR level alpha.
+        adj_p:  BH-adjusted p-values (monotone, clipped to [0, 1]).
+    """
+    n = len(p_values)
+    if n == 0:
+        return np.array([], dtype=bool), np.array([])
+
+    sorted_idx = np.argsort(p_values)
+    sorted_p = p_values[sorted_idx]
+    thresholds = (np.arange(1, n + 1) / n) * alpha
+
+    below = sorted_p <= thresholds
+    reject_sorted = np.zeros(n, dtype=bool)
+    if below.any():
+        reject_sorted[: np.where(below)[0].max() + 1] = True
+
+    reject = np.zeros(n, dtype=bool)
+    reject[sorted_idx] = reject_sorted
+
+    raw_adj = np.minimum(1.0, sorted_p * n / np.arange(1, n + 1))
+    raw_adj = np.minimum.accumulate(raw_adj[::-1])[::-1]
+    adj_p = np.empty(n)
+    adj_p[sorted_idx] = raw_adj
+
+    return reject, adj_p
 
 
 def cross_correlation_lags(
@@ -79,7 +110,6 @@ def block_bootstrap_pvalue(
     n_blocks = max(1, int(np.ceil(n / block_size)))
     null_corrs = np.zeros(n_reps)
     for rep in range(n_reps):
-        # Shuffle blocks of y, keeping x fixed
         starts = rng.integers(0, n - block_size + 1, size=n_blocks)
         y_shuffled = np.concatenate([y_obs[s : s + block_size] for s in starts])[:n]
         if len(y_shuffled) < 2:
@@ -98,10 +128,13 @@ def compute_leadlag_table(
     block_size: int = 300,
     n_reps: int = 1000,
     ts_col: str = "event_time_seconds",
+    fdr_alpha: float = 0.05,
 ) -> pl.DataFrame:
-    """Compute pairwise lead-lag statistics for a list of (node_i, node_j) pairs.
+    """Compute pairwise lead-lag statistics with BH-FDR correction.
 
     Returns a DataFrame suitable for export as table_leadlag_tests.csv.
+    Columns: node_i, node_j, peak_lag_steps, peak_corr, p_value,
+             significant_p01, p_value_fdr, significant_fdr.
     """
     results = []
     rng = np.random.default_rng(42)
@@ -127,8 +160,9 @@ def compute_leadlag_table(
         peak_lag = int(lags[peak_idx])
         peak_corr = float(corrs[peak_idx])
 
-        p_val = block_bootstrap_pvalue(xi, xj, peak_lag, block_size=block_size,
-                                       n_reps=n_reps, rng=rng)
+        p_val = block_bootstrap_pvalue(
+            xi, xj, peak_lag, block_size=block_size, n_reps=n_reps, rng=rng
+        )
 
         results.append({
             "node_i": node_i,
@@ -139,4 +173,18 @@ def compute_leadlag_table(
             "significant_p01": p_val < 0.01,
         })
 
-    return pl.DataFrame(results)
+    if not results:
+        return pl.DataFrame(schema={
+            "node_i": pl.String, "node_j": pl.String,
+            "peak_lag_steps": pl.Int64, "peak_corr": pl.Float64,
+            "p_value": pl.Float64, "significant_p01": pl.Boolean,
+            "p_value_fdr": pl.Float64, "significant_fdr": pl.Boolean,
+        })
+
+    df = pl.DataFrame(results)
+    p_arr = df["p_value"].to_numpy()
+    reject, adj_p = fdr_correct(p_arr, alpha=fdr_alpha)
+    return df.with_columns(
+        pl.Series("p_value_fdr", adj_p),
+        pl.Series("significant_fdr", reject),
+    )

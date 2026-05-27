@@ -6,6 +6,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import entropy as scipy_entropy
 
+from stressnet.models.leadlag import fdr_correct
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -17,42 +18,36 @@ def _conditional_entropy_binned(
     x_past: np.ndarray,
     n_bins: int = 10,
 ) -> float:
-    """Estimate H(Y_t | Y_{t-1}, X_{t-1}) - H(Y_t | Y_{t-1}) via binning.
-
-    This is the discrete approximation of transfer entropy.
-    """
-    # Bin all signals
+    """Estimate H(Y_t | Y_{t-1}, X_{t-1}) - H(Y_t | Y_{t-1}) via binning."""
     y_f = np.digitize(y_future, np.percentile(y_future, np.linspace(0, 100, n_bins + 1)[1:-1]))
     y_p = np.digitize(y_past, np.percentile(y_past, np.linspace(0, 100, n_bins + 1)[1:-1]))
     x_p = np.digitize(x_past, np.percentile(x_past, np.linspace(0, 100, n_bins + 1)[1:-1]))
 
     n = len(y_f)
-    n_bins_actual = n_bins - 1  # after digitize
+    nb = n_bins - 1  # effective bin count after digitize
 
-    # H(Y_t | Y_{t-1}) = H(Y_t, Y_{t-1}) - H(Y_{t-1})
-    joint_yy = np.zeros((n_bins_actual, n_bins_actual))
-    joint_yyx = np.zeros((n_bins_actual, n_bins_actual, n_bins_actual))
+    joint_yy = np.zeros((nb, nb))
+    joint_yyx = np.zeros((nb, nb, nb))
 
     for t in range(n):
-        yf, yp_, xp_ = min(y_f[t], n_bins_actual - 1), min(y_p[t], n_bins_actual - 1), min(x_p[t], n_bins_actual - 1)
+        yf = min(y_f[t], nb - 1)
+        yp_ = min(y_p[t], nb - 1)
+        xp_ = min(x_p[t], nb - 1)
         joint_yy[yf, yp_] += 1
         joint_yyx[yf, yp_, xp_] += 1
 
     joint_yy /= (n + 1e-12)
     joint_yyx /= (n + 1e-12)
 
-    # H(Y | Y_past) via marginalisation
     p_ypast = joint_yy.sum(axis=0)
     p_yfut_given_ypast = joint_yy / (p_ypast + 1e-12)
     h_y_given_ypast = -np.sum(joint_yy * np.log(p_yfut_given_ypast + 1e-12))
 
-    # H(Y | Y_past, X_past)
     p_yxpast = joint_yyx.sum(axis=0)
     p_yfut_given_yxpast = joint_yyx / (p_yxpast + 1e-12)
     h_y_given_yxpast = -np.sum(joint_yyx * np.log(p_yfut_given_yxpast + 1e-12))
 
-    te = h_y_given_ypast - h_y_given_yxpast
-    return max(0.0, float(te))
+    return max(0.0, float(h_y_given_ypast - h_y_given_yxpast))
 
 
 def transfer_entropy(
@@ -63,8 +58,7 @@ def transfer_entropy(
 ) -> float:
     """Estimate TE(X→Y): how much X's past reduces uncertainty about Y's future.
 
-    Uses binned discrete approximation. For more accurate estimates with
-    continuous data, prefer a KNN estimator (not included in base dependencies).
+    Uses binned discrete approximation.
     """
     x_clean = x[~np.isnan(x)]
     y_clean = y[~np.isnan(y)]
@@ -105,17 +99,30 @@ def compute_te_table(
     n_bins: int = 10,
     n_shuffles: int = 200,
     ts_col: str = "event_time_seconds",
+    fdr_alpha: float = 0.05,
 ) -> pl.DataFrame:
-    """Compute pairwise transfer entropy and p-values.
+    """Compute pairwise transfer entropy with shuffle null and BH-FDR correction.
 
     Returns a DataFrame suitable for export as table_transfer_entropy.csv.
+    Columns: node_i, node_j, te_i_to_j, p_value, significant_p05,
+             p_value_fdr, significant_fdr.
     """
     rng = np.random.default_rng(42)
     results = []
 
     for node_i, node_j in node_pairs:
-        xi = panel.filter(pl.col("node_id") == node_i).sort(ts_col)[feature_col].drop_nulls().to_numpy()
-        xj = panel.filter(pl.col("node_id") == node_j).sort(ts_col)[feature_col].drop_nulls().to_numpy()
+        xi = (
+            panel.filter(pl.col("node_id") == node_i)
+            .sort(ts_col)[feature_col]
+            .drop_nulls()
+            .to_numpy()
+        )
+        xj = (
+            panel.filter(pl.col("node_id") == node_j)
+            .sort(ts_col)[feature_col]
+            .drop_nulls()
+            .to_numpy()
+        )
         if len(xi) < 30 or len(xj) < 30:
             continue
 
@@ -131,4 +138,18 @@ def compute_te_table(
             "significant_p05": p_val < 0.05,
         })
 
-    return pl.DataFrame(results).sort("te_i_to_j", descending=True)
+    if not results:
+        return pl.DataFrame(schema={
+            "node_i": pl.String, "node_j": pl.String,
+            "te_i_to_j": pl.Float64, "p_value": pl.Float64,
+            "significant_p05": pl.Boolean,
+            "p_value_fdr": pl.Float64, "significant_fdr": pl.Boolean,
+        })
+
+    df = pl.DataFrame(results).sort("te_i_to_j", descending=True)
+    p_arr = df["p_value"].to_numpy()
+    reject, adj_p = fdr_correct(p_arr, alpha=fdr_alpha)
+    return df.with_columns(
+        pl.Series("p_value_fdr", adj_p),
+        pl.Series("significant_fdr", reject),
+    )

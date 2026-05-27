@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict gnn robustness paper mvp usdc all
+.PHONY: setup test windows coverage audit ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness paper mvp usdc all
 
 setup:
 	pip install -r requirements.txt
@@ -55,6 +55,9 @@ network:
 
 predict:
 	python scripts/09_run_prediction.py --event $(EVENT)
+
+predset:
+	python scripts/09b_make_prediction_dataset.py --event $(EVENT)
 
 gnn:
 	python scripts/09d_train_temporal_gnn.py --event $(EVENT)

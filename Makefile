@@ -1,11 +1,11 @@
-.PHONY: setup test windows coverage panel leadlag var hawkes te network predict robustness paper all
+.PHONY: setup test windows coverage ingest reconstruct panel maps leadlag var hawkes te network predict robustness paper mvp usdc all
 
 setup:
 	pip install -r requirements.txt
 	pip install -e .
 
 test:
-	pytest tests -q
+	python -m pytest tests -q
 
 # --- pipeline steps (default: USDC/SVB) ---
 
@@ -17,8 +17,17 @@ windows:
 coverage:
 	python scripts/00_make_event_windows.py --coverage-audit
 
+ingest:
+	python scripts/01_ingest_raw_data.py --event $(EVENT)
+
+reconstruct:
+	python scripts/02_reconstruct_silver.py --event $(EVENT)
+
 panel:
 	python scripts/03_build_feature_panel.py --event $(EVENT)
+
+maps:
+	python scripts/03b_make_event_maps.py --event $(EVENT)
 
 leadlag:
 	python scripts/04_run_leadlag.py --event $(EVENT)
@@ -44,8 +53,12 @@ robustness:
 paper:
 	python scripts/99_make_paper_outputs.py
 
-# run full analysis pipeline for one event
-mvp: panel leadlag var hawkes te network
+# run empirical-control pipeline for one event. Hawkes is optional until its
+# dependency is installed and configured.
+mvp: windows ingest reconstruct panel maps leadlag var te network
+
+usdc:
+	$(MAKE) mvp EVENT=usdc_svb_2023
 
 # run all events sequentially
 all:

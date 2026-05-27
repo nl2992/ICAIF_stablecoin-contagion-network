@@ -37,9 +37,39 @@ def fit_var(
     if not _HAS_STATSMODELS:
         raise ImportError("statsmodels is required for VAR estimation.")
 
+    n_obs, n_eq = data.shape
+    max_estimable_lags = max(1, (n_obs - 1) // (n_eq + 1) - 1)
+    if max_lags > max_estimable_lags:
+        logger.warning(
+            "Clamping VAR max_lags from %d to %d for %d observations × %d equations.",
+            max_lags,
+            max_estimable_lags,
+            n_obs,
+            n_eq,
+        )
+        max_lags = max_estimable_lags
+
     model = VAR(data)
-    results = model.fit(maxlags=max_lags, ic=ic)
-    logger.info("VAR fitted: lag order %d, AIC %.4f", results.k_ar, results.aic)
+    try:
+        results = model.fit(maxlags=max_lags, ic=ic)
+    except Exception as exc:
+        logger.warning(
+            "VAR lag selection failed (%s). Falling back to fixed lag order search.",
+            exc,
+        )
+        last_exc: Exception | None = None
+        for lag_order in range(max_lags, 0, -1):
+            try:
+                results = model.fit(lag_order)
+                break
+            except Exception as candidate_exc:
+                last_exc = candidate_exc
+        else:
+            raise last_exc or exc
+    try:
+        logger.info("VAR fitted: lag order %d, AIC %.4f", results.k_ar, results.aic)
+    except Exception:
+        logger.info("VAR fitted: lag order %d; information criteria unavailable.", results.k_ar)
     return {"model": model, "results": results, "lag_order": results.k_ar, "node_names": node_names}
 
 
@@ -69,6 +99,16 @@ def granger_causality_table(
                 })
             except Exception as exc:
                 logger.debug("Granger test failed for %s→%s: %s", causing, caused, exc)
+    if not rows:
+        return pl.DataFrame(
+            schema={
+                "causing_node": pl.String,
+                "caused_node": pl.String,
+                "f_stat": pl.Float64,
+                "p_value": pl.Float64,
+                "significant": pl.Boolean,
+            }
+        )
     return pl.DataFrame(rows)
 
 
@@ -79,7 +119,28 @@ def fevd_spillover_table(var_fit: dict, horizon: int = 10) -> pl.DataFrame:
     """
     results = var_fit["results"]
     names = var_fit["node_names"]
-    fevd = results.fevd(periods=horizon).decomp  # shape (T, N, N)
+    try:
+        fevd = results.fevd(periods=horizon).decomp  # shape (T, N, N)
+    except Exception as exc:
+        logger.warning(
+            "FEVD failed (%s). Using normalized absolute VAR coefficients as a fallback "
+            "spillover proxy.",
+            exc,
+        )
+        coefs = np.abs(results.coefs).sum(axis=0)
+        row_sums = coefs.sum(axis=1, keepdims=True) + 1e-12
+        shares = coefs / row_sums
+        rows = []
+        for i, caused in enumerate(names):
+            for j, causing in enumerate(names):
+                rows.append({
+                    "caused_node": caused,
+                    "causing_node": causing,
+                    "fevd_share": float(shares[i, j]),
+                    "horizon": horizon,
+                    "method": "var_abscoef_fallback",
+                })
+        return pl.DataFrame(rows)
 
     rows = []
     fevd_at_h = fevd[horizon - 1]  # (N, N) at the specified horizon
@@ -90,5 +151,6 @@ def fevd_spillover_table(var_fit: dict, horizon: int = 10) -> pl.DataFrame:
                 "causing_node": causing,
                 "fevd_share": float(fevd_at_h[i, j]),
                 "horizon": horizon,
+                "method": "fevd",
             })
     return pl.DataFrame(rows)

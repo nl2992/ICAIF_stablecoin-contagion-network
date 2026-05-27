@@ -1,0 +1,171 @@
+features:
+  # ---------------------------------------------------------------------------
+  # Market node features (CEX order-book based)
+  # ---------------------------------------------------------------------------
+  market:
+    mid_price:
+      description: "(best_bid + best_ask) / 2"
+      unit: "USD per stablecoin"
+      requires_tier: A
+
+    spread_bps:
+      description: "(best_ask - best_bid) / mid * 10000"
+      unit: "bps"
+      requires_tier: A
+
+    top_depth_bid_usd:
+      description: "Quoted size at best bid, in USD notional"
+      unit: "USD"
+      requires_tier: A
+
+    top_depth_ask_usd:
+      description: "Quoted size at best ask, in USD notional"
+      unit: "USD"
+      requires_tier: A
+
+    depth_10bps_bid_usd:
+      description: "Cumulative bid-side depth within 10 bps of mid"
+      unit: "USD"
+      requires_tier: A
+
+    depth_10bps_ask_usd:
+      description: "Cumulative ask-side depth within 10 bps of mid"
+      unit: "USD"
+      requires_tier: A
+
+    orderbook_imbalance:
+      description: "(bid_depth_10bps - ask_depth_10bps) / (bid_depth_10bps + ask_depth_10bps)"
+      unit: "dimensionless [-1, 1]"
+      requires_tier: A
+
+    signed_trade_imbalance_1m:
+      description: "Net buyer-initiated volume minus seller-initiated, 1-minute window"
+      unit: "USD notional"
+      requires_tier: B
+
+    cancellation_proxy:
+      description: "Rate of price-level removals with no fill; proxy for cancel intensity"
+      unit: "events/second"
+      requires_tier: "A (Coinbase full); A- proxy elsewhere"
+
+    executable_price_10k:
+      description: "VWAP book-walk price for $10,000 notional; separate for buy and sell"
+      unit: "USD per stablecoin"
+      requires_tier: A
+
+    basis_vs_usd:
+      description: "log(mid_price) - 0  [i.e. log deviation from $1.00 peg]"
+      unit: "log points (approx bps / 100)"
+      requires_tier: A
+
+  # ---------------------------------------------------------------------------
+  # Cross-node basis features
+  # ---------------------------------------------------------------------------
+  basis:
+    directional_basis:
+      description: "log(exec_price_j(q)) - log(exec_price_i(q)) for fixed notional q"
+      unit: "log points"
+      requires_tier: A
+
+    mid_basis:
+      description: "log(mid_j) - log(mid_i)"
+      unit: "log points"
+      requires_tier: A
+
+  # ---------------------------------------------------------------------------
+  # DEX pool features
+  # ---------------------------------------------------------------------------
+  dex:
+    reserve_imbalance:
+      description: "(reserve_0 / (reserve_0 + reserve_1)) - 0.5; positive = skewed toward token_0"
+      unit: "dimensionless [-0.5, 0.5]"
+      requires_tier: A
+
+    implied_pool_price:
+      description: "Marginal spot price derived from pool invariant or sqrtPriceX96"
+      unit: "token_1 per token_0"
+      requires_tier: A
+
+    pool_slippage_10k:
+      description: "Price impact (bps) for $10k notional swap inferred from pool state"
+      unit: "bps"
+      requires_tier: A
+
+    lp_mint_burn_net:
+      description: "Net LP share mints minus burns in a time window"
+      unit: "LP token units"
+      requires_tier: A
+
+    swap_imbalance_1m:
+      description: "(buy_volume - sell_volume) / (buy_volume + sell_volume), 1-minute window"
+      unit: "dimensionless"
+      requires_tier: A
+
+    virtual_price:
+      description: "Curve virtual_price() or equivalent pool health invariant"
+      unit: "dimensionless (1.0 = balanced)"
+      requires_tier: A
+
+  # ---------------------------------------------------------------------------
+  # On-chain flow features
+  # ---------------------------------------------------------------------------
+  onchain:
+    exchange_inflow_1h:
+      description: "Stablecoin inflow to exchange-labelled wallets, 1-hour rolling sum"
+      unit: "USD"
+      requires_tier: B
+
+    exchange_outflow_1h:
+      description: "Stablecoin outflow from exchange-labelled wallets, 1-hour rolling sum"
+      unit: "USD"
+      requires_tier: B
+
+    exchange_netflow_1h:
+      description: "inflow - outflow; negative = net withdrawal"
+      unit: "USD"
+      requires_tier: B
+
+    bridge_inflow_1h:
+      description: "Bridge inflow (funds bridging to L1/L2), 1-hour rolling sum"
+      unit: "USD"
+      requires_tier: B
+
+    bridge_outflow_1h:
+      description: "Bridge outflow, 1-hour rolling sum"
+      unit: "USD"
+      requires_tier: B
+
+    mint_burn_net_1h:
+      description: "Net on-chain minting minus redemption, 1-hour window"
+      unit: "USD"
+      requires_tier: A
+
+    gas_base_fee_gwei:
+      description: "Ethereum base fee per gas unit; proxy for on-chain congestion"
+      unit: "Gwei"
+      requires_tier: B
+
+  # ---------------------------------------------------------------------------
+  # Stress event labels
+  # ---------------------------------------------------------------------------
+  labels:
+    basis_gt10bps:
+      description: "|basis_vs_usd| > 10 bps at node i"
+      type: binary
+
+    basis_gt50bps:
+      description: "|basis_vs_usd| > 50 bps"
+      type: binary
+
+    downstream_basis_gt10bps_1m:
+      description: "Will |basis_j| > 10 bps within the next 1 minute?"
+      type: binary
+      note: "Primary prediction target"
+
+    downstream_basis_gt50bps_5m:
+      description: "Will |basis_j| > 50 bps within the next 5 minutes?"
+      type: binary
+
+    stress_event_onset:
+      description: "Binary flag for event-time T=0 ± 5 minutes"
+      type: binary

@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.DS_Store
+.ipynb_checkpoints/
+
+# raw and reconstructed data — never committed
+data/raw/
+data/bronze/
+data/silver/
+data/gold/
+
+# model artefacts and logs
+results/models/
+results/logs/
+
+# IDE
+.vscode/
+.idea/
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# build
+dist/
+*.egg-info/

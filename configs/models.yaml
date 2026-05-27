@@ -1,0 +1,71 @@
+models:
+  leadlag:
+    grids_seconds: [1, 5, 60]         # sampling grids for synchronisation
+    max_lag_steps: 60                  # max lag to search
+    bootstrap_blocks: 300              # block bootstrap block size (seconds)
+    bootstrap_reps: 1000
+    significance_level: 0.01
+
+  var_granger:
+    max_lag: 10
+    information_criterion: BIC
+    rolling_window_size: 3600          # seconds for rolling/TVP-VAR
+    fevd_horizon: 10                   # FEVD horizon (steps)
+    significance_level: 0.05
+
+  tvp_var:
+    forgetting_factor: 0.99
+    state_noise_scale: 0.01
+    window_type: rolling               # rolling | forgetting_factor | kalman
+
+  hawkes:
+    kernel: exponential                # exponential | power_law
+    max_jumps: null                    # null = no limit
+    branching_ratio_threshold: 0.1    # minimum n_ij to call an edge contagious
+    decay_bounds: [0.001, 100.0]
+    baseline_bounds: [1.0e-6, 10.0]
+    excitation_bounds: [0.0, 5.0]
+    threshold_bps: [10, 50]            # basis thresholds for event definitions
+
+  transfer_entropy:
+    history_length: 10                 # L in TE_{i->j}
+    n_bins: 10
+    kernel: gaussian                   # gaussian | knn | binned
+    n_shuffles: 200                    # for null distribution
+    significance_level: 0.05
+
+  baselines:
+    - name: LogisticRegression
+      type: classification
+    - name: RandomForest
+      type: classification
+      n_estimators: 200
+    - name: LightGBM
+      type: classification
+    - name: XGBoost
+      type: classification
+    - name: LSTM
+      type: sequence
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.1
+
+  temporal_gnn:
+    architecture: TGN                  # TGN | DySAT
+    node_feature_dim: 32
+    edge_feature_dim: 8
+    memory_dim: 64
+    time_dim: 16
+    n_heads: 4
+    dropout: 0.1
+    epochs: 100
+    lr: 1.0e-3
+    batch_size: 200
+    prediction_horizon_seconds: 60
+    threshold_bps: 10
+
+  evaluation:
+    primary_metrics: [AUROC, AUPRC, F1, Brier]
+    economic_metrics: [lift, precision_at_k]
+    split: event_based               # never random; split by event window
+    gnn_improvement_threshold: 0.05  # >5% AUC/AUPRC lift = success criterion

@@ -1,0 +1,196 @@
+nodes:
+  # ---------------------------------------------------------------------------
+  # Market nodes — stablecoin-venue pairs
+  # ---------------------------------------------------------------------------
+  market_nodes:
+    - id: usdc_coinbase
+      asset: USDC
+      venue: Coinbase
+      layer: CEX
+      symbols: ["USDC-USD", "USDC-USDT"]
+      provenance_best: "real_l2"
+      tier: A
+      events_covered: [usdc_svb_2023]
+      notes: "Primary Tier-A node. Coinbase WS Level2 available."
+
+    - id: usdc_binance
+      asset: USDC
+      venue: Binance
+      layer: CEX
+      symbols: ["USDCUSDT", "BTCUSDC"]
+      provenance_best: "real_l2"
+      tier: A
+      events_covered: [usdc_svb_2023, busd_2023]
+      notes: "Binance Vision diff-depth available for USDCUSDT."
+
+    - id: usdt_binance
+      asset: USDT
+      venue: Binance
+      layer: CEX
+      symbols: ["USDCUSDT", "BTCUSDT", "ETHUSDT"]
+      provenance_best: "real_l2"
+      tier: A
+      events_covered: [usdc_svb_2023, usdt_curve_2023, ftx_2022, busd_2023, terra_luna_2022]
+      notes: "Binance is the dominant USDT venue. Most events covered."
+
+    - id: usdt_kraken
+      asset: USDT
+      venue: Kraken
+      layer: CEX
+      symbols: ["USDT/USD", "USDC/USD"]
+      provenance_best: "real_l2"
+      tier: A
+      events_covered: [usdc_svb_2023, usdt_curve_2023]
+      notes: "Kraken WS book snapshots and updates. Useful for USDT/USD premium."
+
+    - id: usdc_kraken
+      asset: USDC
+      venue: Kraken
+      layer: CEX
+      symbols: ["USDC/USD", "USDC/USDT"]
+      provenance_best: "real_l2"
+      tier: A
+      events_covered: [usdc_svb_2023]
+      notes: "Secondary CEX check on USDC/SVB propagation."
+
+    - id: busd_binance
+      asset: BUSD
+      venue: Binance
+      layer: CEX
+      symbols: ["BUSDUSDT", "BUSDUSDC"]
+      provenance_best: "real_l2"
+      tier: A
+      events_covered: [busd_2023, ftx_2022]
+      notes: "Binance was the primary BUSD venue."
+
+    - id: ust_binance
+      asset: UST
+      venue: Binance
+      layer: CEX
+      symbols: ["USTUSDT", "USTBUSD"]
+      provenance_best: "trade_level"
+      tier: B
+      events_covered: [terra_luna_2022]
+      notes: "Delisted. Trade-level archive may be available via Tardis/Kaiko."
+
+  # ---------------------------------------------------------------------------
+  # Pool nodes — DEX liquidity pools
+  # ---------------------------------------------------------------------------
+  pool_nodes:
+    - id: curve_3pool
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["DAI", "USDC", "USDT"]
+      contract: "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"
+      subgraph: "messari/curve-finance-ethereum"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [usdc_svb_2023, usdt_curve_2023, terra_luna_2022, ftx_2022, busd_2023]
+      notes: "Primary DEX node. Reserve imbalance and virtual_price from on-chain logs."
+
+    - id: curve_ust_wormhole
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["UST", "3CRV"]
+      contract: "0xCEAF7747579696A2F0bb206a14210e3c9e6fB269"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [terra_luna_2022]
+      notes: "Key pool for Terra collapse propagation. Extreme imbalance in May 2022."
+
+    - id: uniswap_usdc_usdt_005
+      venue: Uniswap
+      layer: DEX
+      chain: Ethereum
+      assets: ["USDC", "USDT"]
+      fee_tier: 500
+      factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [usdc_svb_2023, usdt_curve_2023]
+      notes: "Low-fee stable pool. sqrtPriceX96 and tick from Swap events."
+
+    - id: curve_crvusd_usdt
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["crvUSD", "USDT"]
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [usdt_curve_2023]
+      notes: "Relevant for June 2023 USDT stress in crvUSD pools."
+
+  # ---------------------------------------------------------------------------
+  # Flow nodes — settlement, bridge, and on-chain flow channels
+  # ---------------------------------------------------------------------------
+  flow_nodes:
+    - id: eth_usdc_exchange_flows
+      layer: onchain_flow
+      chain: Ethereum
+      asset: USDC
+      token_contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      sources: ["coin_metrics", "dune", "etherscan"]
+      provenance_best: "aggregate_onchain_flow"
+      tier: B
+      events_covered: [usdc_svb_2023, ftx_2022]
+      notes: "Exchange-labelled netflows from Coin Metrics. Tier-B: label completeness uncertain."
+
+    - id: eth_usdt_exchange_flows
+      layer: onchain_flow
+      chain: Ethereum
+      asset: USDT
+      token_contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      sources: ["coin_metrics", "dune", "etherscan"]
+      provenance_best: "aggregate_onchain_flow"
+      tier: B
+      events_covered: [usdt_curve_2023, ftx_2022, usdc_svb_2023]
+      notes: "USDT exchange inflow/outflow. Companion to usdc flows."
+
+    - id: tron_usdt_exchange_flows
+      layer: onchain_flow
+      chain: Tron
+      asset: USDT
+      token_contract: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+      sources: ["coin_metrics", "dune"]
+      provenance_best: "aggregate_onchain_flow"
+      tier: B
+      events_covered: [usdt_curve_2023]
+      notes: "Tron USDT flows relevant for June 2023 stress. Dune/Coin Metrics."
+
+    - id: eth_bridge_flows
+      layer: bridge_flow
+      chain: multi
+      asset: multi
+      sources: ["dune", "etherscan"]
+      provenance_best: "aggregate_onchain_flow"
+      tier: B
+      events_covered: [ftx_2022, usdc_svb_2023]
+      notes: >
+        Bridge inflows/outflows across major Ethereum L1/L2 bridges.
+        Label confidence varies by bridge contract coverage.
+
+    - id: usdc_mint_burn
+      layer: mint_burn
+      chain: Ethereum
+      asset: USDC
+      issuer: "Circle"
+      token_contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      sources: ["etherscan", "the_graph"]
+      provenance_best: "onchain_event"
+      tier: A
+      events_covered: [usdc_svb_2023]
+      notes: "Mint/burn from Transfer events to/from null address. Tier-A: directly observable."
+
+    - id: usdt_mint_burn
+      layer: mint_burn
+      chain: Ethereum
+      asset: USDT
+      issuer: "Tether"
+      token_contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      sources: ["etherscan", "the_graph"]
+      provenance_best: "onchain_event"
+      tier: A
+      events_covered: [usdt_curve_2023]
+      notes: "Mint/burn from Issue/Redeem events on Tether ERC20 contract."

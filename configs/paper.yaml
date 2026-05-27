@@ -1,0 +1,51 @@
+paper:
+  title: "Stress Propagation in a Multi-Layer Stablecoin Network"
+  venue: ICAIF
+  page_limit: 8
+  template: ACM
+
+  headline_claim: >
+    Stablecoin stress propagates through a multi-layer network of centralized venues,
+    decentralized liquidity pools, and settlement/flow channels. CEX price discovery
+    often leads at shock onset, DEX pool imbalance amplifies or prolongs deviations,
+    and on-chain settlement frictions help explain persistence.
+
+  core_research_question: >
+    How does stress propagate across stablecoins, venues, and liquidity pools once
+    a shock starts?
+
+  contributions:
+    - "Node taxonomy richer than coin-level returns: market nodes, pool nodes, flow nodes"
+    - "Time-directed transmission estimation combining linear and non-linear causality tools"
+    - "Evaluation of whether temporal graph structure improves prediction of downstream basis widening"
+
+  success_criteria:
+    leadlag_p_threshold: 0.01
+    var_fevd_spillover_threshold: 0.10
+    hawkes_branching_threshold: 0.10
+    flow_rmse_reduction_threshold: 0.10
+    gnn_auc_improvement_threshold: 0.05
+    external_validity_events: 4        # must replicate in at least 4 of 5 events
+
+  required_figures:
+    - figure_heatmap_coverage
+    - figure_event_time_map
+    - figure_contagion_map
+    - figure_flow_sankey
+    - figure_auc_by_event
+
+  required_tables:
+    - table_event_windows
+    - table_node_coverage
+    - table_leadlag_tests
+    - table_var_spillovers
+    - table_hawkes_params
+    - table_transfer_entropy
+    - table_node_centrality
+    - table_prediction_metrics
+
+  non_claims:
+    - "All cross-node co-movement is causal contagion"
+    - "Route-complete Tier-A L2 coverage for every historical event"
+    - "Correlation implies directed transmission"
+    - "Temporal GNN predictions imply causal mechanisms"

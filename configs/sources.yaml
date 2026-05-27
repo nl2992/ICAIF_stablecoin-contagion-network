@@ -1,0 +1,145 @@
+sources:
+  # ---------------------------------------------------------------------------
+  # Tier A — real L2, verified pool state, high-quality timestamps
+  # ---------------------------------------------------------------------------
+
+  binance_ws_depth:
+    name: "Binance WebSocket diff-depth stream"
+    tier: A
+    data_types: [cex_l2_book]
+    endpoint_doc: "https://developers.binance.com/docs/binance-spot-api-docs/web-socket-streams#diff-depth-stream"
+    fields: [exchange, symbol, server_ts, event_ts, update_id, bids, asks, snapshot_flag]
+    notes: "Diff-depth updates every 100ms or 1000ms. Must apply to snapshot."
+
+  binance_vision_archive:
+    name: "Binance Vision historical data"
+    tier: A
+    data_types: [cex_l2_book, cex_trades, cex_aggTrades, cex_klines]
+    endpoint_doc: "https://github.com/binance/binance-public-data"
+    fields: [symbol, open_time, open, high, low, close, volume, trade_count]
+    notes: "Free daily/monthly archives. bookDepth available for futures."
+
+  coinbase_ws_level2:
+    name: "Coinbase Advanced Trade WebSocket level2"
+    tier: A
+    data_types: [cex_l2_book]
+    endpoint_doc: "https://docs.cdp.coinbase.com/advanced-trade/docs/ws-channels#level2-channel"
+    fields: [product_id, server_ts, event_ts, sequence_num, bids, asks, snapshot_flag]
+    notes: "50ms batched updates. Checksum available."
+
+  coinbase_rest_book:
+    name: "Coinbase Advanced Trade REST product book"
+    tier: A
+    data_types: [cex_l2_book]
+    endpoint_doc: "https://docs.cdp.coinbase.com/advanced-trade/reference/retailbrokerageapi_getbestbidask"
+    notes: "Point-in-time snapshots. Use WS for continuous coverage."
+
+  kraken_ws_book:
+    name: "Kraken WebSocket book"
+    tier: A
+    data_types: [cex_l2_book]
+    endpoint_doc: "https://docs.kraken.com/api/docs/websocket-v2/book"
+    fields: [symbol, server_ts, seq, bids, asks, checksum]
+    notes: "Snapshot on subscribe then incremental updates."
+
+  curve_onchain_logs:
+    name: "Curve pool on-chain event logs"
+    tier: A
+    data_types: [dex_pool_state, dex_swap_events]
+    sources: [etherscan, the_graph]
+    fields: [block_number, block_ts, tx_hash, log_index, pool_address, reserves,
+             token_amounts, virtual_price, lp_supply]
+    notes: "TokenExchange, AddLiquidity, RemoveLiquidity events. Tier-A for pool state."
+
+  uniswap_v3_pool_events:
+    name: "Uniswap v3 pool Swap/Mint/Burn events"
+    tier: A
+    data_types: [dex_pool_state, dex_swap_events]
+    sources: [the_graph, etherscan]
+    endpoint_doc: "https://docs.uniswap.org/sdk/v3/reference/overview"
+    fields: [pool_address, block_number, block_ts, tx_hash, sqrtPriceX96,
+             tick, liquidity, amount0, amount1, fee_growth_global0, fee_growth_global1]
+    notes: "sqrtPriceX96 gives exact pool price. Tick gives current active range."
+
+  usdc_mint_burn_events:
+    name: "Circle USDC mint/burn Transfer events"
+    tier: A
+    data_types: [mint_burn]
+    sources: [etherscan]
+    contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    notes: "Transfer from 0x0 = mint; Transfer to 0x0 = burn."
+
+  usdt_issue_redeem_events:
+    name: "Tether USDT Issue/Redeem events"
+    tier: A
+    data_types: [mint_burn]
+    sources: [etherscan]
+    contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    notes: "Tether-specific Issue and Redeem events on ERC20 contract."
+
+  # ---------------------------------------------------------------------------
+  # Tier B — trades, OHLCV, aggregate on-chain flows
+  # ---------------------------------------------------------------------------
+
+  binance_rest_trades:
+    name: "Binance REST trades endpoint"
+    tier: B
+    data_types: [cex_trades]
+    endpoint_doc: "https://developers.binance.com/docs/binance-spot-api-docs/rest-api/public-api-endpoints#recent-trades-list"
+    fields: [trade_id, price, qty, quoteQty, time, isBuyerMaker]
+    notes: "Rate-limited. Historical requires aggTrades or Vision archive."
+
+  coinbase_rest_candles:
+    name: "Coinbase REST candles"
+    tier: B
+    data_types: [cex_ohlcv]
+    endpoint_doc: "https://docs.cdp.coinbase.com/advanced-trade/reference/retailbrokerageapi_getpubliccandles"
+    fields: [start, low, high, open, close, volume]
+    notes: "Already used in stressbench. Granularity: 60s."
+
+  the_graph_uniswap:
+    name: "The Graph Uniswap v3 subgraph"
+    tier: B
+    data_types: [dex_pool_snapshot, dex_analytics]
+    endpoint_doc: "https://thegraph.com/docs/en/querying/graphql-api/"
+    notes: "Aggregated pool metrics. Use on-chain logs for Tier-A precision."
+
+  etherscan_token_transfers:
+    name: "Etherscan ERC-20 token transfer logs"
+    tier: B
+    data_types: [onchain_flow]
+    endpoint_doc: "https://docs.etherscan.io/etherscan-api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address"
+    fields: [blockNumber, blockHash, timeStamp, hash, from, to, contractAddress,
+             tokenSymbol, tokenDecimal, value]
+    notes: "Label quality depends on address nametag coverage. Completeness: ~80%."
+
+  coin_metrics_exchange_flows:
+    name: "Coin Metrics exchange flow metrics"
+    tier: B
+    data_types: [onchain_flow, exchange_netflow]
+    endpoint_doc: "https://docs.coinmetrics.io/api/v4/"
+    fields: [asset, exchange, flow_in, flow_out, netflow, frequency]
+    notes: "Pre-computed exchange-labelled flows. Convenient but label confidence varies."
+
+  dune_analytics:
+    name: "Dune Analytics queries"
+    tier: B
+    data_types: [onchain_flow, dex_analytics, bridge_flows]
+    endpoint_doc: "https://docs.dune.com/api-reference/overview/introduction"
+    notes: "Custom SQL against decoded on-chain data. Useful for bridge flows."
+
+  # ---------------------------------------------------------------------------
+  # Paid / optional
+  # ---------------------------------------------------------------------------
+
+  tardis_historical:
+    name: "Tardis.dev historical tick data"
+    tier: A
+    data_types: [cex_l2_book, cex_trades]
+    notes: "Best-in-class historical L2 for most exchanges. Paid. Strongly preferred for FTX."
+
+  kaiko_historical:
+    name: "Kaiko historical tick data"
+    tier: A
+    data_types: [cex_l2_book, cex_trades, cex_ohlcv]
+    notes: "Paid alternative to Tardis. Strong CEX coverage."

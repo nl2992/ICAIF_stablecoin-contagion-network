@@ -115,6 +115,16 @@ make paper
 
 See `Makefile` for per-step targets (`leadlag`, `var`, `hawkes`, `te`, `network`, `predict`).
 
+> **⚠ Fixture data notice**
+>
+> Until real vendor/API ingestion is configured, `make ingest` writes
+> **deterministic fixture files** into `data/bronze/` and marks them
+> `tier_actual = fixture_non_empirical` in `data/manifests/`.
+> These fixtures are valid for **pipeline testing only** and must
+> **never be used as paper evidence**.  All empirical claims in the paper
+> must be reproduced using real data; see `docs/reproducibility.md` and
+> `docs/provenance_tiers.md`.
+
 ## Repository structure
 
 ```

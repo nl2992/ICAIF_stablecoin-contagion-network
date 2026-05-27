@@ -122,7 +122,15 @@ def _node_features(event_id: str, node: Node, df: pl.DataFrame, shock_onset) -> 
     )
 
 
-def _add_downstream_labels(panel: pl.DataFrame) -> pl.DataFrame:
+def _add_downstream_labels(panel: pl.DataFrame, grid_seconds: int = 60) -> pl.DataFrame:
+    """Add forward-looking downstream stress labels.
+
+    Args:
+        panel: Gold feature panel with wall_clock_utc and basis_vs_usd columns.
+        grid_seconds: Sampling grid interval in seconds (from --grid argument).
+            Used to convert horizon_seconds to a row-count shift so the label
+            is correct regardless of whether the panel was built at 1s, 5s, or 60s.
+    """
     if "basis_vs_usd" not in panel.columns:
         return panel
 
@@ -135,6 +143,7 @@ def _add_downstream_labels(panel: pl.DataFrame) -> pl.DataFrame:
         (60, threshold_10, "label_downstream_gt10bps_1m"),
         (300, threshold_50, "label_downstream_gt50bps_5m"),
     ]:
+        shift_steps = max(1, int(round(horizon_seconds / grid_seconds)))
         node_frames = []
         for node_id in base["node_id"].unique().to_list():
             this_node = base.filter(pl.col("node_id") == node_id)
@@ -145,7 +154,7 @@ def _add_downstream_labels(panel: pl.DataFrame) -> pl.DataFrame:
                 .sort("wall_clock_utc")
                 .with_columns(
                     pl.col("_any_stress")
-                    .shift(-max(1, horizon_seconds // 60))
+                    .shift(-shift_steps)
                     .fill_null(False)
                     .alias(name)
                 )
@@ -202,7 +211,7 @@ def main() -> None:
     panel = pl.concat(list(node_frames.values()), how="diagonal")
     if "basis_vs_usd" in panel.columns:
         panel = label_basis_exceedance(panel)
-    panel = _add_downstream_labels(panel)
+    panel = _add_downstream_labels(panel, grid_seconds=args.grid)
     for col in GOLD_COLUMNS:
         if col not in panel.columns:
             panel = panel.with_columns(pl.lit(None).alias(col))

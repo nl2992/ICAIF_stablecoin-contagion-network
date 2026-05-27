@@ -12,6 +12,7 @@ from stressnet.features.basis import label_basis_exceedance
 from stressnet.features.panels import save_panel
 from stressnet.graph.nodes import Node
 from stressnet.utils.logging import get_logger
+from stressnet.utils.manifest import write_manifest_row
 from stressnet.utils.time import parse_iso_utc
 from stressnet.utils.validation import check_no_lookahead
 
@@ -215,6 +216,23 @@ def main() -> None:
         check_no_lookahead(panel, feature_cols, label_cols)
 
     save_panel(panel, args.event)
+    write_manifest_row(
+        event_id=args.event,
+        node_id="__event_panel__",
+        source_name="gold_panel_builder",
+        source_tier_nominal="mixed",
+        source_tier_actual="fixture_non_empirical"
+        if "fixture_non_empirical" in panel["tier_actual"].unique().to_list()
+        else "mixed",
+        start_utc=f"{event_cfg['analysis_window_utc'][0]}T00:00:00Z",
+        end_utc=f"{event_cfg['analysis_window_utc'][1]}T23:59:59Z",
+        file_path=gold_root() / f"dataset_contagion_features_{args.event}.parquet",
+        row_count=panel.height,
+        notes="Gold event feature panel assembled from silver node states.",
+        layer="gold_panel",
+        file_stage="gold",
+        url_or_query="silver://event_nodes",
+    )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage ingest reconstruct panel maps leadlag var hawkes te network predict robustness paper mvp usdc all
+.PHONY: setup test windows coverage audit ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict gnn robustness paper mvp usdc all
 
 setup:
 	pip install -r requirements.txt
@@ -10,12 +10,16 @@ test:
 # --- pipeline steps (default: USDC/SVB) ---
 
 EVENT ?= usdc_svb_2023
+GRID ?= 60
 
 windows:
 	python scripts/00_make_event_windows.py
 
 coverage:
 	python scripts/00_make_event_windows.py --coverage-audit
+
+audit:
+	python scripts/00b_audit_provenance.py --event $(EVENT)
 
 ingest:
 	python scripts/01_ingest_raw_data.py --event $(EVENT)
@@ -24,16 +28,21 @@ reconstruct:
 	python scripts/02_reconstruct_silver.py --event $(EVENT)
 
 panel:
-	python scripts/03_build_feature_panel.py --event $(EVENT)
+	python scripts/03_build_feature_panel.py --event $(EVENT) --grid $(GRID)
 
-maps:
+eventmaps:
 	python scripts/03b_make_event_maps.py --event $(EVENT)
+
+maps: eventmaps
 
 leadlag:
 	python scripts/04_run_leadlag.py --event $(EVENT)
 
 var:
 	python scripts/05_run_var_granger.py --event $(EVENT)
+
+tvpvar:
+	python scripts/05b_run_tvp_var.py --event $(EVENT)
 
 hawkes:
 	python scripts/06_run_hawkes.py --event $(EVENT)
@@ -47,6 +56,9 @@ network:
 predict:
 	python scripts/09_run_prediction.py --event $(EVENT)
 
+gnn:
+	python scripts/09d_train_temporal_gnn.py --event $(EVENT)
+
 robustness:
 	python scripts/10_run_robustness.py --event $(EVENT)
 
@@ -55,7 +67,7 @@ paper:
 
 # run empirical-control pipeline for one event. Hawkes is optional until its
 # dependency is installed and configured.
-mvp: windows ingest reconstruct panel maps leadlag var te network
+mvp: windows ingest reconstruct panel eventmaps leadlag var te network
 
 usdc:
 	$(MAKE) mvp EVENT=usdc_svb_2023

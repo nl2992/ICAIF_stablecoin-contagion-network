@@ -147,7 +147,12 @@ stablecoin-contagion-network/
 │   ├── event_windows.md
 │   ├── methodology.md
 │   ├── limitations.md
-│   └── reproducibility.md
+│   ├── reproducibility.md
+│   └── project_control/
+│       ├── full_project_control_report.md
+│       ├── implementation_todo.md
+│       ├── icaif_2026_submission_plan.md
+│       └── gnn_extension_plan.md
 ├── tests/
 └── paper/
 ```

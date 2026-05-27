@@ -172,6 +172,9 @@ def main() -> None:
             file_path=out_path,
             row_count=df.height,
             notes="Generated fixture for pipeline validation only; not empirical evidence.",
+            layer=node.layer,
+            file_stage="bronze",
+            url_or_query="fixture://deterministic_pipeline_fixture",
         )
         logger.info("Wrote bronze fixture %s (%d rows)", out_path, df.height)
 

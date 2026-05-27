@@ -123,6 +123,9 @@ def main() -> None:
             file_path=out_path,
             row_count=silver.height,
             notes=f"Standardized silver output from {in_path}.",
+            layer=node.layer,
+            file_stage="silver",
+            url_or_query=str(in_path),
         )
         logger.info("Wrote silver %s (%d rows)", out_path, silver.height)
         wrote += 1

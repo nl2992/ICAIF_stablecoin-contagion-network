@@ -1,111 +1,111 @@
-node_i,node_j,te_i_to_j,p_value,significant_p05,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed
-curve_3pool,eth_bridge_flows,1.0203459185268393,0.005,true,0.012790697674418606,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,eth_bridge_flows,1.0203459185268393,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,eth_bridge_flows,0.9950274599576844,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_kraken,eth_bridge_flows,0.9473494149247894,0.02,true,0.04680851063829788,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,usdc_kraken,0.9363881867456186,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,usdc_binance,0.9272693553481542,0.435,false,0.74765625,false,fixture_non_empirical,B,fixture_non_empirical,false
-eth_bridge_flows,usdt_binance,0.9272693553481542,0.48,false,0.7880597014925372,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_kraken,eth_usdt_exchange_flows,0.919509214363085,0.005,true,0.012790697674418606,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_kraken,usdc_mint_burn,0.919509214363085,0.015,true,0.03666666666666667,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdt_exchange_flows,usdc_binance,0.9060262441857041,0.55,false,0.8721428571428572,false,fixture_non_empirical,B,fixture_non_empirical,false
-eth_usdt_exchange_flows,usdt_binance,0.9060262441857041,0.625,false,0.9417808219178082,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_mint_burn,usdc_binance,0.9060262441857041,0.61,false,0.9319444444444444,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_mint_burn,usdt_binance,0.9060262441857041,0.6,false,0.9295774647887324,false,fixture_non_empirical,B,fixture_non_empirical,false
-eth_usdc_exchange_flows,usdc_binance,0.88777268205395,0.745,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false
-eth_usdc_exchange_flows,usdt_binance,0.88777268205395,0.745,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_coinbase,eth_usdt_exchange_flows,0.8439909687634375,0.12,false,0.2588235294117647,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_coinbase,usdc_mint_burn,0.8439909687634375,0.15,false,0.3173076923076923,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,eth_bridge_flows,0.8150342928913956,0.555,false,0.8721428571428572,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,eth_bridge_flows,0.8150342928913956,0.495,false,0.8007352941176471,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,eth_usdt_exchange_flows,0.8022306679187281,0.3,false,0.5409836065573771,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,usdc_mint_burn,0.8022306679187281,0.26,false,0.5017543859649123,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,eth_usdt_exchange_flows,0.8022306679187281,0.27,false,0.5120689655172415,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,usdc_mint_burn,0.8022306679187281,0.28,false,0.5220338983050848,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_kraken,eth_usdc_exchange_flows,0.7892480272872222,0.16,false,0.33207547169811324,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_coinbase,eth_usdc_exchange_flows,0.7892480272852223,0.17,false,0.3462962962962963,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_coinbase,eth_bridge_flows,0.7856404869235195,0.745,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,eth_bridge_flows,0.7849145654391672,0.85,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,usdt_kraken,0.777201000735043,0.01,true,0.025,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,eth_usdc_exchange_flows,0.7698473129111236,0.185,false,0.37000000000000005,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,eth_usdt_exchange_flows,0.7486348786917282,0.68,false,0.9973333333333335,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,usdc_mint_burn,0.7486348786917282,0.68,false,0.9973333333333335,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,eth_usdc_exchange_flows,0.7292341643067427,0.45,false,0.7583333333333334,false,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,eth_usdc_exchange_flows,0.7292341643067427,0.41,false,0.7158730158730158,false,B,fixture_non_empirical,fixture_non_empirical,false
-eth_usdt_exchange_flows,usdc_kraken,0.7178358060273993,0.705,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,usdc_kraken,0.7178358060273993,0.735,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdt_exchange_flows,usdt_kraken,0.7101222413281623,0.245,false,0.48125,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,usdt_kraken,0.7101222413281623,0.285,false,0.5225,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,usdt_kraken,0.6946178586889782,0.34,false,0.603225806451613,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,usdc_kraken,0.6870367333700216,0.855,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,curve_3pool,0.6705948910935804,0.875,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,uniswap_usdc_usdt_005,0.6705948910935804,0.91,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-curve_3pool,usdc_coinbase,0.6417592381082846,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-eth_bridge_flows,eth_usdc_exchange_flows,0.6074124634236464,0.965,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,usdc_coinbase,0.6008887384480773,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-eth_usdt_exchange_flows,eth_bridge_flows,0.5983243089847858,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,eth_bridge_flows,0.5983243089847858,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,eth_usdt_exchange_flows,0.5928436948947244,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,usdc_mint_burn,0.5928436948947244,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_bridge_flows,usdc_coinbase,0.5895500980444689,0.045,true,0.10102040816326531,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_kraken,usdt_kraken,0.5891260207766125,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,usdc_coinbase,0.5882603648331999,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-eth_usdt_exchange_flows,usdc_coinbase,0.584069483951311,0.045,true,0.10102040816326531,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_mint_burn,usdc_coinbase,0.584069483951311,0.05,false,0.11,false,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_kraken,usdc_coinbase,0.572780019829511,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-curve_3pool,eth_usdt_exchange_flows,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-curve_3pool,usdc_mint_burn,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,eth_usdt_exchange_flows,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,usdc_mint_burn,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,usdc_coinbase,0.5085512383546796,0.455,false,0.7583333333333334,false,fixture_non_empirical,B,fixture_non_empirical,false
-eth_usdc_exchange_flows,eth_usdt_exchange_flows,0.506075429732259,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,usdc_mint_burn,0.506075429732259,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,usdc_kraken,0.4615323877782529,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,usdc_binance,0.42378779245200127,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-uniswap_usdc_usdt_005,usdt_binance,0.42378779245200127,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_coinbase,curve_3pool,0.397146412723953,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-curve_3pool,usdc_binance,0.39545334898214,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-curve_3pool,usdt_binance,0.39545334898214,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_coinbase,usdt_kraken,0.3821189812745035,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_coinbase,usdc_kraken,0.37282471140771134,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_coinbase,uniswap_usdc_usdt_005,0.34088218798512027,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,uniswap_usdc_usdt_005,0.33153889762108757,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,uniswap_usdc_usdt_005,0.33153889762108757,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdc_kraken,usdc_binance,0.3275183994168621,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_kraken,usdt_binance,0.3275183994168621,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-usdc_binance,curve_3pool,0.3258876592762945,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,curve_3pool,0.3258876592762945,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,usdc_binance,0.29813124170071753,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-usdt_kraken,usdt_binance,0.29813124170071753,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false
-usdt_kraken,curve_3pool,0.28331831667999163,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,usdt_kraken,0.28221405753175643,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,usdt_kraken,0.28221405753175643,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-eth_usdt_exchange_flows,curve_3pool,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdt_exchange_flows,uniswap_usdc_usdt_005,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,curve_3pool,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,uniswap_usdc_usdt_005,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,usdc_kraken,0.2731894139214508,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-usdt_binance,usdc_kraken,0.2731894139214508,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false
-eth_usdt_exchange_flows,eth_usdc_exchange_flows,0.23321723764617452,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,eth_usdc_exchange_flows,0.23321723764617452,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-curve_3pool,usdt_kraken,0.21559168584914934,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,usdt_kraken,0.21465988770751476,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,curve_3pool,0.2074125905724571,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_kraken,curve_3pool,0.2036420927570961,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,usdc_kraken,0.1774192464566191,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-curve_3pool,usdc_kraken,0.17081567020664046,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdt_kraken,uniswap_usdc_usdt_005,0.1672949894559701,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_kraken,uniswap_usdc_usdt_005,0.1469299906867214,0.02,true,0.04680851063829788,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,curve_3pool,0.11391727876245006,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-eth_usdc_exchange_flows,uniswap_usdc_usdt_005,0.11391727876245006,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-curve_3pool,uniswap_usdc_usdt_005,0.08295258457307164,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,usdc_coinbase,0.0666451007861315,0.0,true,0.0,true,B,B,B,true
-usdt_binance,usdc_coinbase,0.0666451007861315,0.0,true,0.0,true,B,B,B,true
-usdc_coinbase,usdc_binance,0.04372355221789026,0.0,true,0.0,true,B,B,B,true
-usdc_coinbase,usdt_binance,0.04372355221789026,0.0,true,0.0,true,B,B,B,true
-curve_3pool,eth_usdc_exchange_flows,0.036814750812607655,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-uniswap_usdc_usdt_005,eth_usdc_exchange_flows,0.036814750812607655,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_binance,usdt_binance,0.0,1.0,false,1.0,false,B,B,B,true
-usdt_binance,usdc_binance,0.0,1.0,false,1.0,false,B,B,B,true
-eth_usdt_exchange_flows,usdc_mint_burn,0.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
-usdc_mint_burn,eth_usdt_exchange_flows,0.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false
+node_i,node_j,te_i_to_j,p_value,significant_p05,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+curve_3pool,eth_bridge_flows,1.0203459185268393,0.005,true,0.012790697674418606,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,eth_bridge_flows,1.0203459185268393,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,eth_bridge_flows,0.9950274599576844,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,eth_bridge_flows,0.9473494149247894,0.02,true,0.04680851063829788,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdc_kraken,0.9363881867456186,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdc_binance,0.9272693553481542,0.435,false,0.74765625,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdt_binance,0.9272693553481542,0.48,false,0.7880597014925372,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,eth_usdt_exchange_flows,0.919509214363085,0.005,true,0.012790697674418606,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,usdc_mint_burn,0.919509214363085,0.015,true,0.03666666666666667,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,usdc_binance,0.9060262441857041,0.55,false,0.8721428571428572,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,usdt_binance,0.9060262441857041,0.625,false,0.9417808219178082,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,usdc_binance,0.9060262441857041,0.61,false,0.9319444444444444,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,usdt_binance,0.9060262441857041,0.6,false,0.9295774647887324,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdc_binance,0.88777268205395,0.745,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdt_binance,0.88777268205395,0.745,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,eth_usdt_exchange_flows,0.8439909687634375,0.12,false,0.2588235294117647,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,usdc_mint_burn,0.8439909687634375,0.15,false,0.3173076923076923,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,eth_bridge_flows,0.8150342928913956,0.555,false,0.8721428571428572,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,eth_bridge_flows,0.8150342928913956,0.495,false,0.8007352941176471,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,eth_usdt_exchange_flows,0.8022306679187281,0.3,false,0.5409836065573771,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,usdc_mint_burn,0.8022306679187281,0.26,false,0.5017543859649123,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,eth_usdt_exchange_flows,0.8022306679187281,0.27,false,0.5120689655172415,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,usdc_mint_burn,0.8022306679187281,0.28,false,0.5220338983050848,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,eth_usdc_exchange_flows,0.7892480272872222,0.16,false,0.33207547169811324,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,eth_usdc_exchange_flows,0.7892480272852223,0.17,false,0.3462962962962963,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,eth_bridge_flows,0.7856404869235195,0.745,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,eth_bridge_flows,0.7849145654391672,0.85,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdt_kraken,0.777201000735043,0.01,true,0.025,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,eth_usdc_exchange_flows,0.7698473129111236,0.185,false,0.37000000000000005,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,eth_usdt_exchange_flows,0.7486348786917282,0.68,false,0.9973333333333335,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,usdc_mint_burn,0.7486348786917282,0.68,false,0.9973333333333335,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,eth_usdc_exchange_flows,0.7292341643067427,0.45,false,0.7583333333333334,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,eth_usdc_exchange_flows,0.7292341643067427,0.41,false,0.7158730158730158,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,usdc_kraken,0.7178358060273993,0.705,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,usdc_kraken,0.7178358060273993,0.735,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,usdt_kraken,0.7101222413281623,0.245,false,0.48125,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,usdt_kraken,0.7101222413281623,0.285,false,0.5225,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdt_kraken,0.6946178586889782,0.34,false,0.603225806451613,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdc_kraken,0.6870367333700216,0.855,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,curve_3pool,0.6705948910935804,0.875,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,uniswap_usdc_usdt_005,0.6705948910935804,0.91,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdc_coinbase,0.6417592381082846,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,eth_usdc_exchange_flows,0.6074124634236464,0.965,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,usdc_coinbase,0.6008887384480773,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,eth_bridge_flows,0.5983243089847858,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,eth_bridge_flows,0.5983243089847858,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,eth_usdt_exchange_flows,0.5928436948947244,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdc_mint_burn,0.5928436948947244,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdc_coinbase,0.5895500980444689,0.045,true,0.10102040816326531,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,usdt_kraken,0.5891260207766125,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,usdc_coinbase,0.5882603648331999,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,usdc_coinbase,0.584069483951311,0.045,true,0.10102040816326531,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,usdc_coinbase,0.584069483951311,0.05,false,0.11,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,usdc_coinbase,0.572780019829511,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,eth_usdt_exchange_flows,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdc_mint_burn,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,eth_usdt_exchange_flows,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,usdc_mint_burn,0.5200746287865019,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdc_coinbase,0.5085512383546796,0.455,false,0.7583333333333334,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,eth_usdt_exchange_flows,0.506075429732259,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdc_mint_burn,0.506075429732259,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,usdc_kraken,0.4615323877782529,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,usdc_binance,0.42378779245200127,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,usdt_binance,0.42378779245200127,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,curve_3pool,0.397146412723953,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdc_binance,0.39545334898214,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdt_binance,0.39545334898214,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,usdt_kraken,0.3821189812745035,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,usdc_kraken,0.37282471140771134,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_coinbase,uniswap_usdc_usdt_005,0.34088218798512027,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,uniswap_usdc_usdt_005,0.33153889762108757,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,uniswap_usdc_usdt_005,0.33153889762108757,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,usdc_binance,0.3275183994168621,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,usdt_binance,0.3275183994168621,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,curve_3pool,0.3258876592762945,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,curve_3pool,0.3258876592762945,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,usdc_binance,0.29813124170071753,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,usdt_binance,0.29813124170071753,0.0,true,0.0,true,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,curve_3pool,0.28331831667999163,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,usdt_kraken,0.28221405753175643,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,usdt_kraken,0.28221405753175643,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,curve_3pool,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,uniswap_usdc_usdt_005,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,curve_3pool,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,uniswap_usdc_usdt_005,0.27664091961136483,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,usdc_kraken,0.2731894139214508,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,usdc_kraken,0.2731894139214508,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,eth_usdc_exchange_flows,0.23321723764617452,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,eth_usdc_exchange_flows,0.23321723764617452,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdt_kraken,0.21559168584914934,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,usdt_kraken,0.21465988770751476,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,curve_3pool,0.2074125905724571,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,curve_3pool,0.2036420927570961,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,usdc_kraken,0.1774192464566191,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdc_kraken,0.17081567020664046,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_kraken,uniswap_usdc_usdt_005,0.1672949894559701,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_kraken,uniswap_usdc_usdt_005,0.1469299906867214,0.02,true,0.04680851063829788,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,curve_3pool,0.11391727876245006,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,uniswap_usdc_usdt_005,0.11391727876245006,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,uniswap_usdc_usdt_005,0.08295258457307164,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,usdc_coinbase,0.0666451007861315,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,usdc_coinbase,0.0666451007861315,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_coinbase,usdc_binance,0.04372355221789026,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_coinbase,usdt_binance,0.04372355221789026,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,eth_usdc_exchange_flows,0.036814750812607655,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+uniswap_usdc_usdt_005,eth_usdc_exchange_flows,0.036814750812607655,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_binance,usdt_binance,0.0,1.0,false,1.0,false,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,usdc_binance,0.0,1.0,false,1.0,false,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+eth_usdt_exchange_flows,usdc_mint_burn,0.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdc_mint_burn,eth_usdt_exchange_flows,0.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.

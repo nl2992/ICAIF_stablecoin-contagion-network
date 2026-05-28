@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness summary paper empirical mvp usdc all
+.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness summary paper empirical empirical_all mvp usdc all
 
 setup:
 	pip install -r requirements.txt
@@ -85,13 +85,22 @@ empirical:
 	python scripts/01_ingest_raw_data.py --event $(EVENT) --no-fixture
 	python scripts/02_reconstruct_silver.py --event $(EVENT)
 	python scripts/03_build_feature_panel.py --event $(EVENT) --grid $(GRID)
-	python scripts/00c_claim_gate.py --event $(EVENT)
+	python scripts/03b_make_event_maps.py --event $(EVENT)
 	python scripts/04_run_leadlag.py --event $(EVENT)
 	python scripts/05_run_var_granger.py --event $(EVENT)
+	python scripts/05b_run_tvp_var.py --event $(EVENT)
+	python scripts/06_run_hawkes.py --event $(EVENT) || true
 	python scripts/07_run_transfer_entropy.py --event $(EVENT)
-	python scripts/08_build_networks.py --event $(EVENT)
+	python scripts/08_build_networks.py --event $(EVENT) --edge-source te
+	python scripts/09_run_prediction.py --event $(EVENT)
 	python scripts/10_run_robustness.py --event $(EVENT)
 	python scripts/00c_claim_gate.py --event $(EVENT) --require-real
+
+empirical_all:
+	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
+		$(MAKE) empirical EVENT=$$event GRID=$(GRID); \
+	done
+	$(MAKE) paper
 
 # run empirical-control pipeline for one event. Hawkes is optional until its
 # dependency is installed and configured.

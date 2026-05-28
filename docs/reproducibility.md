@@ -60,6 +60,16 @@ estimation. `make paper` also runs `scripts/00c_claim_gate.py --paper
 --require-real`, so it refuses to build paper outputs from edge tables that use
 fixture or missing endpoint tiers.
 
+Once every configured event has sufficient real data coverage, run the full
+empirical benchmark with:
+
+```bash
+make empirical_all GRID=60
+```
+
+`make empirical_all` runs the empirical target for all five configured events
+and then invokes `make paper`.
+
 ## Manifests
 
 Every raw data fetch writes a manifest to `data/manifests/` with:

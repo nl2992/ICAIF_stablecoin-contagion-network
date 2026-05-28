@@ -221,19 +221,48 @@ def get_all_logs(
     topic0: str,
     from_block: int,
     to_block: int,
+    max_results: int = 200_000,
+    _depth: int = 0,
 ) -> list[dict[str, Any]]:
-    """Fully paginated event logs for a block range."""
+    """Fully paginated event logs with block-range splitting.
+
+    Mirrors ``get_all_token_transfers``: uses offset=1_000 to stay within
+    Etherscan's PageNo×Offset≤10000 constraint, then recursively halves the
+    block range when a full 10-page batch arrives.  ``max_results`` prevents
+    runaway recursion on contracts with millions of events.
+
+    Default max_results=200_000 is generous for DEX pools (Curve 3pool had
+    ~100k events in March 2023).
+    """
+    if _depth > _MAX_SPLIT_DEPTH or from_block > to_block:
+        return []
+
+    _LOG_OFFSET = 1_000
     all_rows: list[dict[str, Any]] = []
-    page = 1
-    while True:
+    for page in range(1, _MAX_PAGES + 1):
         rows = get_logs(contract_address, topic0, from_block, to_block,
-                        offset=1_000, page=page)
+                        offset=_LOG_OFFSET, page=page)
         all_rows.extend(rows)
-        if len(rows) < 1_000:
-            break
-        page += 1
+        if len(all_rows) >= max_results:
+            logger.debug(
+                "Log fetch capped at %d results (depth=%d, contract=%s)",
+                max_results, _depth, contract_address[:10],
+            )
+            return all_rows[:max_results]
+        if len(rows) < _LOG_OFFSET:
+            return all_rows
         time.sleep(_RATE_SLEEP)
-    return all_rows
+
+    # Exhausted all safe pages without partial result → split block range.
+    mid = (from_block + to_block) // 2
+    left = get_all_logs(contract_address, topic0, from_block, mid,
+                        max_results=max_results, _depth=_depth + 1)
+    remaining = max_results - len(left)
+    if remaining <= 0:
+        return left
+    right = get_all_logs(contract_address, topic0, mid + 1, to_block,
+                         max_results=remaining, _depth=_depth + 1)
+    return left + right
 
 
 # ---------------------------------------------------------------------------

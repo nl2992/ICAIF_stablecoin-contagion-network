@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import polars as pl
 
 from stressnet.utils.logging import get_logger
@@ -49,7 +50,11 @@ def fit_var(
         )
         max_lags = max_estimable_lags
 
-    model = VAR(data)
+    # Wrap as pandas DataFrame so statsmodels stores proper column names;
+    # otherwise test_causality receives generic 'y1'/'y2'/... names that
+    # don't match our node_names strings.
+    df_pd = pd.DataFrame(data, columns=node_names)
+    model = VAR(df_pd)
     try:
         results = model.fit(maxlags=max_lags, ic=ic)
     except Exception as exc:
@@ -143,7 +148,8 @@ def fevd_spillover_table(var_fit: dict, horizon: int = 10) -> pl.DataFrame:
         return pl.DataFrame(rows)
 
     rows = []
-    fevd_at_h = fevd[horizon - 1]  # (N, N) at the specified horizon
+    h_idx = min(horizon - 1, len(fevd) - 1)  # clamp to available periods
+    fevd_at_h = fevd[h_idx]  # (N, N) at the specified horizon
     for i, caused in enumerate(names):
         for j, causing in enumerate(names):
             rows.append({

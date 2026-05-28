@@ -51,7 +51,7 @@ te:
 	python scripts/07_run_transfer_entropy.py --event $(EVENT)
 
 network:
-	python scripts/08_build_networks.py --event $(EVENT)
+	python scripts/08_build_networks.py --event $(EVENT) --edge-source te
 
 predict:
 	python scripts/09_run_prediction.py --event $(EVENT)

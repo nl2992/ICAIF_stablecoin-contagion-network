@@ -147,9 +147,9 @@ def ingest_kraken_ohlc(
 
     df = pl.DataFrame(
         {
-            "wall_clock_utc": pl.Series(
-                [r[0] for r in unique], dtype=pl.Int64
-            ).cast(pl.Datetime("us")).dt.replace_time_zone("UTC"),
+            "wall_clock_utc": (
+                pl.Series([r[0] for r in unique], dtype=pl.Int64) * 1_000_000
+            ).cast(pl.Datetime("us", "UTC")),
             "open":    pl.Series([r[1] for r in unique]),
             "high":    pl.Series([r[2] for r in unique]),
             "low":     pl.Series([r[3] for r in unique]),

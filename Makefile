@@ -66,7 +66,9 @@ robustness:
 	python scripts/10_run_robustness.py --event $(EVENT)
 
 summary:
-	python scripts/11_make_preliminary_summary.py
+	python scripts/11b_summarise_real_only_results.py
+	python scripts/11c_summarise_robustness.py
+	python scripts/11_summarise_results.py
 
 paper:
 	python scripts/99_make_paper_outputs.py

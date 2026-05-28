@@ -1,0 +1,5 @@
+table,event_id,status,rows,blocked_rows,fixture_or_missing_rows
+table_granger_usdc_svb_2023.csv,usdc_svb_2023,annotated,2,0,0
+table_leadlag_tests_usdc_svb_2023.csv,usdc_svb_2023,annotated,78,72,72
+table_transfer_entropy_usdc_svb_2023.csv,usdc_svb_2023,annotated,110,104,104
+table_var_spillovers_usdc_svb_2023.csv,usdc_svb_2023,annotated,4,0,0

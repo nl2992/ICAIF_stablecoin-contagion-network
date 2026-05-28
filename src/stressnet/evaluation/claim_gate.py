@@ -26,6 +26,7 @@ _CLAIM_SENTENCES = {
     "B_B_context_only":               "We document contextual co-movement between {i} and {j} (Tier B proxy data).",
     "fixture_disallowed":             "Not claimable: fixture data.",
     "C_taxonomy_only":                "Not claimable: taxonomy context only.",
+    "diagnostic_only":                "Not claimable: diagnostic fallback output.",
 }
 
 _CLAIM_LANGUAGE = {
@@ -34,11 +35,13 @@ _CLAIM_LANGUAGE = {
     "B_B_context_only":               "context-only",
     "fixture_disallowed":             "not claimable (fixture)",
     "C_taxonomy_only":                "not claimable (taxonomy)",
+    "diagnostic_only":                "not claimable (diagnostic)",
 }
 
 RESULT_TABLE_PREFIXES = (
     "table_leadlag_tests",
     "table_transfer_entropy",
+    "table_hayashi_yoshida",
     "table_granger",
     "table_var_spillovers",
     "table_tvp_var_summary",
@@ -292,6 +295,16 @@ def annotate_edge_table(
         source = str(row.get(source_col))
         target = str(row.get(target_col))
         decision = decide_claim(event_tiers.get(source, MISSING), event_tiers.get(target, MISSING))
+        claim_allowed = decision.claim_allowed
+        claim_level = decision.claim_level
+        claim_reason = decision.claim_reason
+        claim_sentence = decision.claim_sentence
+
+        if str(row.get("method", "")) in {"var_coeff_fallback", "var_abscoef_fallback"}:
+            claim_allowed = False
+            claim_level = "diagnostic_only"
+            claim_reason = "VAR spillover used coefficient fallback after FEVD failed."
+            claim_sentence = _CLAIM_SENTENCES[claim_level]
 
         # Note: __event_panel__ tier is intentionally excluded from edge annotation;
         # only individual node tiers matter.
@@ -299,12 +312,12 @@ def annotate_edge_table(
         row["tier_j_actual"] = decision.tier_j_actual
         row["edge_tier_actual"] = decision.edge_tier_actual
         row["uses_fixture"] = decision.uses_fixture
-        row["claim_allowed"] = decision.claim_allowed
-        row["claim_level"] = decision.claim_level
-        row["claim_reason"] = decision.claim_reason
-        row["claim_language"] = _CLAIM_LANGUAGE.get(decision.claim_level, "unknown")
+        row["claim_allowed"] = claim_allowed
+        row["claim_level"] = claim_level
+        row["claim_reason"] = claim_reason
+        row["claim_language"] = _CLAIM_LANGUAGE.get(claim_level, "unknown")
         row["claim_sentence"] = (
-            decision.claim_sentence
+            claim_sentence
             .replace("{i}", str(row.get(source_col, "node_i")))
             .replace("{j}", str(row.get(target_col, "node_j")))
         )

@@ -19,11 +19,25 @@ from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+_CORE_FEATURES = [
+    "basis_vs_usd",
+    "spread_bps",
+    "depth_10bps_bid_usd",
+    "orderbook_imbalance",
+    "reserve_imbalance",
+    "exchange_netflow_1h",
+]
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run lead-lag analysis.")
     parser.add_argument("--event", required=True)
     parser.add_argument("--feature-col", default="basis_vs_usd")
+    parser.add_argument("--feature-cols", nargs="+", default=None)
+    parser.add_argument("--all-core-features", action="store_true")
+    parser.add_argument("--grid-seconds", type=int, default=60)
+    parser.add_argument("--max-staleness-seconds", type=int, default=None)
+    parser.add_argument("--phase", default=None, help="Optional event_phase filter.")
     parser.add_argument("--max-lag", type=int, default=60)
     parser.add_argument("--bootstrap-reps", type=int, default=1000)
     parser.add_argument("--paper-mode", action="store_true",
@@ -35,6 +49,12 @@ def main() -> None:
         raise SystemExit(f"Panel not found: {panel_path}. Run script 03 first.")
 
     panel = pl.read_parquet(panel_path)
+    if args.phase:
+        if "event_phase" not in panel.columns:
+            raise SystemExit("--phase requested but panel lacks event_phase.")
+        panel = panel.filter(pl.col("event_phase") == args.phase)
+        if panel.height == 0:
+            raise SystemExit(f"No rows found for phase '{args.phase}'.")
     nodes = nodes_for_event(args.event)
 
     if args.paper_mode:
@@ -57,14 +77,37 @@ def main() -> None:
     node_pairs = list(itertools.permutations(node_ids, 2))
     logger.info("Computing lead-lag for %d node pairs", len(node_pairs))
 
-    results = compute_leadlag_table(
-        panel,
-        node_pairs=node_pairs,
-        feature_col=args.feature_col,
-        max_lag=args.max_lag,
-        n_reps=args.bootstrap_reps,
+    if args.all_core_features:
+        feature_cols = [col for col in _CORE_FEATURES if col in panel.columns]
+    elif args.feature_cols:
+        feature_cols = args.feature_cols
+    else:
+        feature_cols = [args.feature_col]
+
+    frames = []
+    for feature_col in feature_cols:
+        if feature_col not in panel.columns:
+            logger.warning("Skipping missing feature column: %s", feature_col)
+            continue
+        result = compute_leadlag_table(
+            panel,
+            node_pairs=node_pairs,
+            feature_col=feature_col,
+            max_lag=args.max_lag,
+            n_reps=args.bootstrap_reps,
+            grid_seconds=args.grid_seconds,
+            max_staleness_seconds=args.max_staleness_seconds,
+        )
+        if result.height > 0:
+            frames.append(result)
+
+    if not frames:
+        raise SystemExit("No lead-lag results produced.")
+
+    results = pl.concat(frames, how="diagonal").with_columns(
+        pl.lit(args.event).alias("event_id"),
+        pl.lit(args.phase or "all").alias("event_phase"),
     )
-    results = results.with_columns(pl.lit(args.event).alias("event_id"))
 
     out_dir = results_root() / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)

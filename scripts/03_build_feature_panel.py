@@ -36,6 +36,7 @@ GOLD_COLUMNS = [
     "executable_price_10k_buy",
     "executable_price_10k_sell",
     "basis_vs_usd",
+    "basis_bps",
     "reserve_imbalance",
     "implied_pool_price",
     "pool_slippage_10k",
@@ -227,6 +228,7 @@ def main() -> None:
     panel = pl.concat(list(node_frames.values()), how="diagonal")
     if "basis_vs_usd" in panel.columns:
         panel = label_basis_exceedance(panel)
+        panel = panel.with_columns((pl.col("basis_vs_usd") * 10_000).alias("basis_bps"))
     panel = _add_downstream_labels(panel, grid_seconds=args.grid)
     for col in GOLD_COLUMNS:
         if col not in panel.columns:
@@ -246,9 +248,7 @@ def main() -> None:
         node_id="__event_panel__",
         source_name="gold_panel_builder",
         source_tier_nominal="mixed",
-        source_tier_actual="fixture_non_empirical"
-        if "fixture_non_empirical" in panel["tier_actual"].unique().to_list()
-        else "mixed",
+        source_tier_actual="mixed",
         start_utc=f"{event_cfg['analysis_window_utc'][0]}T00:00:00Z",
         end_utc=f"{event_cfg['analysis_window_utc'][1]}T23:59:59Z",
         file_path=gold_root() / f"dataset_contagion_features_{args.event}.parquet",

@@ -23,6 +23,8 @@ def main() -> None:
     parser.add_argument("--feature-col", default="basis_vs_usd")
     parser.add_argument("--max-lags", type=int, default=10)
     parser.add_argument("--fevd-horizon", type=int, default=10)
+    parser.add_argument("--bucket-seconds", type=int, default=3600)
+    parser.add_argument("--min-observations", type=int, default=50)
     args = parser.parse_args()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
@@ -40,28 +42,30 @@ def main() -> None:
     if ts_col not in panel.columns:
         raise SystemExit(f"Column '{ts_col}' not found in panel.")
 
-    # Resample to hourly buckets so all nodes (1-min real + hourly fixture)
-    # land on a common grid.  Exclude fixture nodes: synthetic data is
+    # Resample to a configurable bucket so all nodes land on a common grid.
+    # Exclude fixture nodes: synthetic data is
     # meaningless for Granger causality and inflates node count with
     # near-perfectly correlated artificial series.
-    _HOUR = 3600  # seconds
+    if args.bucket_seconds <= 0:
+        raise SystemExit("--bucket-seconds must be positive.")
     sub = (
         panel
         .filter(pl.col("node_id").is_in(node_ids))
         .filter(pl.col("tier_actual") != "fixture_non_empirical")
         .select(["node_id", ts_col, args.feature_col])
         .with_columns(
-            ((pl.col(ts_col) / _HOUR).floor().cast(pl.Int64) * _HOUR).alias("hour_bucket")
+            ((pl.col(ts_col) / args.bucket_seconds).floor().cast(pl.Int64) * args.bucket_seconds)
+            .alias("time_bucket")
         )
-        .group_by(["node_id", "hour_bucket"])
+        .group_by(["node_id", "time_bucket"])
         .agg(pl.col(args.feature_col).mean().alias(args.feature_col))
-        .sort("hour_bucket")
+        .sort("time_bucket")
     )
 
     pivot = (
         sub
-        .pivot(values=args.feature_col, index="hour_bucket", on="node_id")
-        .sort("hour_bucket")
+        .pivot(values=args.feature_col, index="time_bucket", on="node_id")
+        .sort("time_bucket")
     )
 
     # Keep only nodes with at least 10% non-null coverage OR ≥ 48 hours of data.
@@ -90,7 +94,7 @@ def main() -> None:
     # overlapping active trading window (important for delisted tokens).
     # Do NOT forward-fill: propagating a stale price for a delisted asset
     # would contaminate the VAR.
-    pivot = pivot.select(["hour_bucket"] + node_cols).drop_nulls()
+    pivot = pivot.select(["time_bucket"] + node_cols).drop_nulls()
 
     data_mat = pivot.select(node_cols).to_numpy()
 
@@ -116,15 +120,25 @@ def main() -> None:
         logger.warning("After deduplication fewer than 2 non-collinear nodes remain for '%s'. VAR skipped.", args.event)
         return
 
-    if data.shape[0] < 50:
-        logger.warning("Too few observations (%d) after alignment for '%s'. VAR skipped.", data.shape[0], args.event)
+    if data.shape[0] < args.min_observations:
+        logger.warning(
+            "Too few observations (%d) after alignment for '%s'. VAR skipped.",
+            data.shape[0],
+            args.event,
+        )
         return
 
     logger.info("Fitting VAR on %d observations × %d nodes", *data.shape)
     var_fit = fit_var(data, node_names=node_cols, max_lags=args.max_lags)
 
-    granger = granger_causality_table(var_fit)
-    fevd = fevd_spillover_table(var_fit, horizon=args.fevd_horizon)
+    granger = granger_causality_table(var_fit).with_columns(
+        pl.lit(args.feature_col).alias("feature_col"),
+        pl.lit(args.bucket_seconds).alias("bucket_seconds"),
+    )
+    fevd = fevd_spillover_table(var_fit, horizon=args.fevd_horizon).with_columns(
+        pl.lit(args.feature_col).alias("feature_col"),
+        pl.lit(args.bucket_seconds).alias("bucket_seconds"),
+    )
 
     out_dir = results_root() / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)

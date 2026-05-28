@@ -216,9 +216,11 @@ def main() -> None:
     placebo_df = pl.DataFrame(placebo_rows)
 
     real_path = tables_dir / "table_preliminary_real_node_summary.csv"
+    canonical_real_path = tables_dir / "table_real_only_results_summary.csv"
     mt_path = tables_dir / "table_multiple_testing_summary.csv"
     placebo_path = tables_dir / "table_placebo_summary.csv"
     real_df.write_csv(real_path)
+    real_df.write_csv(canonical_real_path)
     mt_df.write_csv(mt_path)
     placebo_df.write_csv(placebo_path)
 

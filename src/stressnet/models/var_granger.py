@@ -167,7 +167,7 @@ def fevd_spillover_table(var_fit: dict, horizon: int = 10) -> pl.DataFrame:
                     "causing_node": causing,
                     "fevd_share": float(shares[i, j]),
                     "horizon": horizon,
-                    "method": "var_abscoef_fallback",
+                    "method": "var_coeff_fallback",
                 })
         return pl.DataFrame(rows)
 

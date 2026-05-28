@@ -133,6 +133,16 @@ def main() -> None:
     fevd.write_csv(out_dir / f"table_var_spillovers_{args.event}.csv")
     logger.info("Wrote VAR results to %s", out_dir)
 
+    spillover_df = pl.read_csv(out_dir / f"table_var_spillovers_{args.event}.csv")
+    if "method" in spillover_df.columns:
+        fallback_rows = spillover_df.filter(pl.col("method") == "var_coeff_fallback").height
+        if fallback_rows > 0:
+            logger.warning(
+                "%d / %d VAR spillover rows use coefficient fallback (FEVD failed). "
+                "These rows are labelled 'var_coeff_fallback' in the method column.",
+                fallback_rows, spillover_df.height,
+            )
+
     # Report with multiple-testing correction
     sig_p05 = granger.filter(pl.col("significant_p05")) if "significant_p05" in granger.columns else granger.filter(pl.col("significant"))
     sig_fdr  = granger.filter(pl.col("significant_fdr"))      if "significant_fdr"      in granger.columns else sig_p05

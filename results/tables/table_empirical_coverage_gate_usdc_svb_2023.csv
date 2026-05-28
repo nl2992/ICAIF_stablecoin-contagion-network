@@ -1,0 +1,2 @@
+event_id,n_nodes_total,n_nodes_real,n_nodes_fixture,n_var_eligible_nodes,real_layers,passes,reason
+usdc_svb_2023,11,7,4,4,CEX;DEX;mint_burn;onchain_flow,true,ok

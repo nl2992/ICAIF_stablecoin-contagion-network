@@ -1,0 +1,11 @@
+event_id,method,real_pairs,raw_significant_pairs,fdr_significant_pairs,bonferroni_significant_pairs
+usdc_svb_2023,leadlag,6,6,6,6
+usdc_svb_2023,transfer_entropy,6,4,4,4
+terra_luna_2022,leadlag,2,2,2,2
+terra_luna_2022,transfer_entropy,2,2,2,2
+usdt_curve_2023,leadlag,0,0,0,0
+usdt_curve_2023,transfer_entropy,0,0,0,0
+ftx_2022,leadlag,2,2,2,2
+ftx_2022,transfer_entropy,2,2,2,2
+busd_2023,leadlag,6,6,6,6
+busd_2023,transfer_entropy,6,4,4,4

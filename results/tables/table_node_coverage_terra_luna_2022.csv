@@ -1,0 +1,5 @@
+event_id,node_id,layer,tier_nominal,tier_actual,rows_available,artefact_count,stages,sources,missing
+terra_luna_2022,usdt_binance,CEX,A,B,89280,2,bronze;silver,real_Binance_tier_B;silver_reconstruction_from_books,false
+terra_luna_2022,ust_binance,CEX,B,B,34660,2,bronze;silver,real_Binance_tier_B;silver_reconstruction_from_books,false
+terra_luna_2022,curve_3pool,DEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_pool_states,false
+terra_luna_2022,curve_ust_wormhole,DEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_pool_states,false

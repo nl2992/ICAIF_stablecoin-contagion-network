@@ -1,8 +1,8 @@
 event_id,node_id,layer,tier_nominal,tier_actual,rows_available,artefact_count,stages,sources,missing
-usdc_svb_2023,usdc_binance,CEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_books,false
-usdc_svb_2023,usdc_coinbase,CEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_books,false
+usdc_svb_2023,usdc_binance,CEX,A,B,27120,2,bronze;silver,real_Binance_tier_B;silver_reconstruction_from_books,false
+usdc_svb_2023,usdc_coinbase,CEX,A,B,37434,2,bronze;silver,real_Coinbase_tier_B;silver_reconstruction_from_books,false
 usdc_svb_2023,usdc_kraken,CEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_books,false
-usdc_svb_2023,usdt_binance,CEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_books,false
+usdc_svb_2023,usdt_binance,CEX,A,B,27120,2,bronze;silver,real_Binance_tier_B;silver_reconstruction_from_books,false
 usdc_svb_2023,usdt_kraken,CEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_books,false
 usdc_svb_2023,curve_3pool,DEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_pool_states,false
 usdc_svb_2023,uniswap_usdc_usdt_005,DEX,A,fixture_non_empirical,1728,2,bronze;silver,deterministic_pipeline_fixture;silver_reconstruction_from_pool_states,false

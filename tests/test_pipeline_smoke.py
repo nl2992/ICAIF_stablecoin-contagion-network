@@ -120,6 +120,8 @@ class TestSilverReconstruct:
         assert "depth_10bps_bid_usd" in result.columns
         assert "reserve_imbalance" in result.columns
         assert "exchange_inflow_1h" in result.columns
+        assert "microstructure_quality" in result.columns
+        assert "is_executable_bookwalk" in result.columns
 
     def test_standardize_sorts_by_wall_clock_utc(self):
         recon = _import_script("02_reconstruct_silver")
@@ -145,6 +147,47 @@ class TestSilverReconstruct:
         df = pl.DataFrame({"mid_price": [1.0, 0.99]})
         with pytest.raises(ValueError, match="wall_clock_utc"):
             recon._standardize(df, node)
+
+    def test_bookticker_is_marked_as_bbo_proxy_not_bookwalk(self):
+        from stressnet.reconstruct.silver import books_from_book_ticker
+
+        df = pl.DataFrame({
+            "wall_clock_utc": [
+                datetime(2023, 3, 10, 8, 0, 0, tzinfo=timezone.utc),
+            ],
+            "best_bid_price": [0.9998],
+            "best_bid_qty": [1000.0],
+            "best_ask_price": [1.0002],
+            "best_ask_qty": [900.0],
+        })
+
+        result = books_from_book_ticker(df)
+
+        assert result["microstructure_quality"][0] == "bbo_proxy"
+        assert result["depth_source"][0] == "best_level_bbo_proxy"
+        assert result["executable_price_source"][0] == "best_level_bbo_proxy"
+        assert result["is_executable_bookwalk"][0] is False
+
+    def test_coverage_diagnostics_detect_sequence_gap(self):
+        recon = _import_script("02_reconstruct_silver")
+
+        df = pl.DataFrame({
+            "wall_clock_utc": [
+                datetime(2023, 3, 10, 8, 0, 0, tzinfo=timezone.utc),
+                datetime(2023, 3, 10, 8, 1, 0, tzinfo=timezone.utc),
+                datetime(2023, 3, 10, 8, 2, 0, tzinfo=timezone.utc),
+            ],
+            "source_sequence": [1, 2, 5],
+        })
+        diagnostics = recon._coverage_diagnostics(
+            df,
+            "2023-03-10T08:00:00Z",
+            "2023-03-10T08:02:00Z",
+        )
+
+        assert diagnostics["coverage_pct"] == 100.0
+        assert diagnostics["sequence_gap_count"] == 1
+        assert diagnostics["gap_rate"] == 0.5
 
 
 # ---------------------------------------------------------------------------

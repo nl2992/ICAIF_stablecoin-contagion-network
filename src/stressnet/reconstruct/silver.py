@@ -53,6 +53,10 @@ def books_from_klines(df: pl.DataFrame) -> pl.DataFrame:
         orderbook_imbalance=pl.lit(None, dtype=pl.Float64),
         executable_price_10k_buy=pl.lit(None, dtype=pl.Float64),
         executable_price_10k_sell=pl.lit(None, dtype=pl.Float64),
+        depth_source=pl.lit("unavailable_ohlcv"),
+        executable_price_source=pl.lit("unavailable_ohlcv"),
+        microstructure_quality=pl.lit("ohlcv_proxy"),
+        is_executable_bookwalk=pl.lit(False),
     )
     # Drop raw OHLCV columns that are not part of the silver schema
     drop = [c for c in ["open", "high", "low", "close", "vwap"] if c in result.columns]
@@ -62,9 +66,10 @@ def books_from_klines(df: pl.DataFrame) -> pl.DataFrame:
 def books_from_book_ticker(df: pl.DataFrame) -> pl.DataFrame:
     """Convert bookTicker BBO bronze to silver book features.
 
-    Tier A: mid and spread are exact. Depth proxied from best-level quantities.
+    Tier B/BBO: mid and spread use real best bid/ask quotes, but this is not a
+    full Level-2 reconstruction. Depth is proxied from best-level quantities.
     Imbalance = (bid_qty - ask_qty) / (bid_qty + ask_qty) at best level.
-    Executable price = mid ± half-spread (best-level approximation; not VWAP).
+    Executable prices are best-level approximations, not $10k book-walk VWAPs.
     """
     result = df.with_columns(
         mid_price=((pl.col("best_bid_price") + pl.col("best_ask_price")) / 2.0),
@@ -95,6 +100,10 @@ def books_from_book_ticker(df: pl.DataFrame) -> pl.DataFrame:
             (pl.col("best_bid_price") + pl.col("best_ask_price")) / 2.0
             - (pl.col("best_ask_price") - pl.col("best_bid_price")) / 2.0
         ),
+        depth_source=pl.lit("best_level_bbo_proxy"),
+        executable_price_source=pl.lit("best_level_bbo_proxy"),
+        microstructure_quality=pl.lit("bbo_proxy"),
+        is_executable_bookwalk=pl.lit(False),
     ).drop(["best_bid_price", "best_bid_qty", "best_ask_price", "best_ask_qty"])
     return result
 
@@ -125,6 +134,15 @@ def pool_from_curve_events(df: pl.DataFrame) -> pl.DataFrame:
         result = result.with_columns(
             (pl.col("reserve_imbalance").abs() * 100.0).alias("pool_slippage_10k")
         )
+    for col, value in {
+        "depth_source": "not_applicable_pool",
+        "executable_price_source": "pool_slippage_proxy",
+        "microstructure_quality": "dex_pool_proxy",
+    }.items():
+        if col not in result.columns:
+            result = result.with_columns(pl.lit(value).alias(col))
+    if "is_executable_bookwalk" not in result.columns:
+        result = result.with_columns(pl.lit(False).alias("is_executable_bookwalk"))
     return result
 
 
@@ -152,6 +170,15 @@ def flows_from_transfers(df: pl.DataFrame) -> pl.DataFrame:
             result = result.with_columns(pl.lit(None, dtype=pl.Float64).alias(col))
     if "basis_vs_usd" not in result.columns:
         result = result.with_columns(pl.lit(None, dtype=pl.Float64).alias("basis_vs_usd"))
+    for col, value in {
+        "depth_source": "not_applicable_flow",
+        "executable_price_source": "not_applicable_flow",
+        "microstructure_quality": "flow_aggregate",
+    }.items():
+        if col not in result.columns:
+            result = result.with_columns(pl.lit(value).alias(col))
+    if "is_executable_bookwalk" not in result.columns:
+        result = result.with_columns(pl.lit(False).alias("is_executable_bookwalk"))
     return result
 
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from statistics import median
 
 import polars as pl
 
@@ -88,6 +89,17 @@ def _standardize(df: pl.DataFrame, node: Node) -> pl.DataFrame:
     for col, dtype in required_nulls.items():
         if col not in result.columns:
             result = result.with_columns(pl.lit(None, dtype=dtype).alias(col))
+
+    required_quality = {
+        "depth_source": "precomputed_or_unknown",
+        "executable_price_source": "precomputed_or_unknown",
+        "microstructure_quality": "precomputed_or_unknown",
+    }
+    for col, value in required_quality.items():
+        if col not in result.columns:
+            result = result.with_columns(pl.lit(value).alias(col))
+    if "is_executable_bookwalk" not in result.columns:
+        result = result.with_columns(pl.lit(False).alias("is_executable_bookwalk"))
     return result
 
 
@@ -100,6 +112,59 @@ def _actual_tier_from_manifest(event_id: str, path: Path, fallback: str) -> str:
     if match.height == 0:
         return fallback
     return match["source_tier_actual"][0]
+
+
+def _coverage_diagnostics(
+    df: pl.DataFrame,
+    start_utc: str,
+    end_utc: str,
+) -> dict[str, float | int | None]:
+    """Compute simple manifest diagnostics from a silver node state table."""
+    diagnostics: dict[str, float | int | None] = {
+        "coverage_pct": None,
+        "sequence_gap_count": None,
+        "gap_rate": None,
+        "resync_count": None,
+        "clock_offset_ms": None,
+    }
+    if df.height == 0 or "wall_clock_utc" not in df.columns:
+        diagnostics["coverage_pct"] = 0.0
+        return diagnostics
+
+    times = (
+        df.select(pl.col("wall_clock_utc").cast(pl.Datetime("us", "UTC")))
+        .sort("wall_clock_utc")["wall_clock_utc"]
+        .to_list()
+    )
+    deltas = [
+        (right - left).total_seconds()
+        for left, right in zip(times, times[1:])
+        if (right - left).total_seconds() > 0
+    ]
+    if deltas:
+        cadence = max(1.0, float(median(deltas)))
+        window_seconds = max(0.0, (parse_iso_utc(end_utc) - parse_iso_utc(start_utc)).total_seconds())
+        expected_rows = max(1.0, window_seconds / cadence + 1.0)
+        diagnostics["coverage_pct"] = min(100.0, 100.0 * df.height / expected_rows)
+
+    if "sequence_gap_flag" in df.columns:
+        gaps = int(df["sequence_gap_flag"].fill_null(False).sum())
+        diagnostics["sequence_gap_count"] = gaps
+        diagnostics["gap_rate"] = gaps / max(df.height, 1)
+    elif "source_sequence" in df.columns and df.height > 1:
+        seq = [value for value in df["source_sequence"].to_list() if value is not None]
+        if len(seq) > 1:
+            gaps = sum(1 for left, right in zip(seq, seq[1:]) if int(right) - int(left) > 1)
+            diagnostics["sequence_gap_count"] = gaps
+            diagnostics["gap_rate"] = gaps / max(len(seq) - 1, 1)
+
+    if "resync_flag" in df.columns:
+        diagnostics["resync_count"] = int(df["resync_flag"].fill_null(False).sum())
+    if "clock_offset_ms" in df.columns:
+        values = [abs(float(value)) for value in df["clock_offset_ms"].drop_nulls().to_list()]
+        if values:
+            diagnostics["clock_offset_ms"] = max(values)
+    return diagnostics
 
 
 # ---------------------------------------------------------------------------
@@ -144,6 +209,7 @@ def main() -> None:
         silver.write_parquet(out_path)
 
         actual_tier = _actual_tier_from_manifest(args.event, in_path, node.tier)
+        diagnostics = _coverage_diagnostics(silver, start_str, end_str)
         write_manifest_row(
             event_id=args.event,
             node_id=node.id,
@@ -158,6 +224,7 @@ def main() -> None:
             layer=node.layer,
             file_stage="silver",
             url_or_query=str(in_path),
+            **diagnostics,
         )
         logger.info(
             "Silver %-35s  rows=%d  tier=%s",

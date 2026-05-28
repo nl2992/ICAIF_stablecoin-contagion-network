@@ -28,7 +28,7 @@ A market node is a stablecoin–venue pair that participates in secondary market
 - `orderbook_imbalance`: (bid_depth − ask_depth) / (bid_depth + ask_depth)
 - `signed_trade_imbalance_1m`: net buyer volume minus seller volume, 1-minute window
 - `cancellation_proxy`: price-level removal rate (true cancellations on Coinbase; proxy elsewhere)
-- `executable_price_10k`: VWAP book-walk price for $10k notional
+- `executable_price_10k`: VWAP book-walk price for $10k notional when L2 depth is available; otherwise explicitly flagged as proxy/null by `executable_price_source`
 - `basis_vs_usd`: log deviation from $1.00 peg
 
 ## Layer 2: Pool nodes

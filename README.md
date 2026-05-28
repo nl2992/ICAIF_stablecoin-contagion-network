@@ -133,6 +133,13 @@ least one `A_A_directional_microstructure` edge. This is deliberate: Tier-B
 proxy data can support contextual or suggestive language, but not execution-grade
 CEX/DEX microstructure claims.
 
+Silver and gold panels carry explicit quality flags such as
+`microstructure_quality`, `depth_source`, `executable_price_source`, and
+`is_executable_bookwalk` so BBO/candle proxies cannot be mistaken for true
+Level-2 book-walk evidence. Consolidated coverage tables also include
+`coverage_pct`, sequence-gap, resync, and clock-offset diagnostics when
+available.
+
 Use:
 
 ```bash

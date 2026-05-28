@@ -35,6 +35,10 @@ GOLD_COLUMNS = [
     "orderbook_imbalance",
     "executable_price_10k_buy",
     "executable_price_10k_sell",
+    "depth_source",
+    "executable_price_source",
+    "microstructure_quality",
+    "is_executable_bookwalk",
     "basis_vs_usd",
     "basis_bps",
     "reserve_imbalance",
@@ -83,6 +87,16 @@ def _add_missing_columns(df: pl.DataFrame) -> pl.DataFrame:
     for col in numeric_cols:
         if col not in df.columns:
             df = df.with_columns(pl.lit(None, dtype=pl.Float64).alias(col))
+    text_defaults = {
+        "depth_source": "unknown",
+        "executable_price_source": "unknown",
+        "microstructure_quality": "unknown",
+    }
+    for col, value in text_defaults.items():
+        if col not in df.columns:
+            df = df.with_columns(pl.lit(value).alias(col))
+    if "is_executable_bookwalk" not in df.columns:
+        df = df.with_columns(pl.lit(False).alias("is_executable_bookwalk"))
     return df
 
 

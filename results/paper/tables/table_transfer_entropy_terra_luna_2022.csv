@@ -1,0 +1,3 @@
+node_i,node_j,te_i_to_j,p_value,significant_p05,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+ust_binance,usdt_binance,0.016899583833956927,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,ust_binance,0.01624427602650419,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

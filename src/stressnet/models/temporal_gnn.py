@@ -77,10 +77,15 @@ def build_tgn(
 
 
 def train_tgn_stub(
-    snapshots: list,
-    label_col: str = "label_downstream_gt10bps_1m",
+    model: Any = None,
+    dataset_path: Any = None,
+    event_id: str = "",
+    architecture: str = "TGN",
     epochs: int = 100,
     lr: float = 1e-3,
+    batch_size: int = 200,
+    baseline_auc: float | None = None,
+    output_dir: Any = None,
 ) -> dict[str, Any]:
     """Training scaffold for the TGN.
 

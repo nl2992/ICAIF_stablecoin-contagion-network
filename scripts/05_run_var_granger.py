@@ -133,10 +133,18 @@ def main() -> None:
     fevd.write_csv(out_dir / f"table_var_spillovers_{args.event}.csv")
     logger.info("Wrote VAR results to %s", out_dir)
 
-    sig = granger.filter(pl.col("significant"))
-    logger.info("Significant Granger edges: %d / %d", len(sig), len(granger))
-    if len(sig) > 0:
-        print(sig.sort("f_stat", descending=True).head(10))
+    # Report with multiple-testing correction
+    sig_p05 = granger.filter(pl.col("significant_p05")) if "significant_p05" in granger.columns else granger.filter(pl.col("significant"))
+    sig_fdr  = granger.filter(pl.col("significant_fdr"))      if "significant_fdr"      in granger.columns else sig_p05
+    sig_bonf = granger.filter(pl.col("significant_bonferroni")) if "significant_bonferroni" in granger.columns else pl.DataFrame()
+    logger.info(
+        "Significant Granger edges  p<0.05=%d  FDR=%d  Bonferroni=%d  / %d",
+        len(sig_p05), len(sig_fdr), len(sig_bonf), len(granger),
+    )
+    if len(sig_fdr) > 0:
+        print(sig_fdr.sort("f_stat", descending=True).head(10))
+    elif len(sig_p05) > 0:
+        print(sig_p05.sort("f_stat", descending=True).head(10))
 
 
 if __name__ == "__main__":

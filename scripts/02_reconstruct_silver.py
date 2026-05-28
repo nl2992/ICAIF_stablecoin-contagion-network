@@ -1,4 +1,10 @@
-"""Reconstruct standardized silver node states from bronze artefacts."""
+"""Reconstruct standardized silver node states from bronze artefacts.
+
+Calls stressnet.reconstruct.silver.standardize_bronze() to detect the bronze
+format (klines, bookTicker, pool_events, flows, fixture) and apply the
+appropriate feature transform.  Then fills any remaining standard columns with
+null so that the gold panel builder always sees a consistent schema.
+"""
 
 from __future__ import annotations
 
@@ -7,9 +13,9 @@ from pathlib import Path
 
 import polars as pl
 
-from stressnet.config import bronze_root, load_events, silver_root
-from stressnet.config import manifests_root
+from stressnet.config import bronze_root, load_events, manifests_root, silver_root
 from stressnet.graph.nodes import Node, nodes_for_event
+from stressnet.reconstruct.silver import standardize_bronze
 from stressnet.utils.logging import get_logger
 from stressnet.utils.manifest import build_node_coverage_table, write_manifest_row
 from stressnet.utils.time import parse_iso_utc
@@ -17,16 +23,21 @@ from stressnet.utils.time import parse_iso_utc
 logger = get_logger(__name__)
 
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
 def _event_bounds(event_id: str) -> tuple[str, str]:
     cfg = load_events()[event_id]
     return f"{cfg['analysis_window_utc'][0]}T00:00:00Z", f"{cfg['analysis_window_utc'][1]}T23:59:59Z"
 
 
 def _bronze_input(event_id: str, node: Node) -> tuple[Path, str] | None:
+    """Find the bronze parquet for this node; return (path, kind) or None."""
     candidates = [
-        (bronze_root() / event_id / f"{node.id}_books.parquet", "books"),
+        (bronze_root() / event_id / f"{node.id}_books.parquet",       "books"),
         (bronze_root() / event_id / f"{node.id}_pool_events.parquet", "pool_states"),
-        (bronze_root() / event_id / f"{node.id}_flows.parquet", "flows"),
+        (bronze_root() / event_id / f"{node.id}_flows.parquet",       "flows"),
     ]
     for path, kind in candidates:
         if path.exists():
@@ -34,7 +45,7 @@ def _bronze_input(event_id: str, node: Node) -> tuple[Path, str] | None:
     return None
 
 
-def _silver_name(node: Node, kind: str) -> str:
+def _silver_name(node: Node) -> str:
     if node.layer == "CEX":
         return f"{node.id}_books.parquet"
     if node.layer == "DEX":
@@ -43,31 +54,40 @@ def _silver_name(node: Node, kind: str) -> str:
 
 
 def _standardize(df: pl.DataFrame, node: Node) -> pl.DataFrame:
+    """Apply silver transforms then fill missing standard columns with NULL.
+
+    1. Validates wall_clock_utc presence.
+    2. Calls standardize_bronze() to detect format and apply transforms.
+    3. Ensures all standard silver columns exist (null-fills if absent).
+    4. Sorts by wall_clock_utc.
+    """
     if "wall_clock_utc" not in df.columns:
         raise ValueError(f"Bronze data for {node.id} lacks wall_clock_utc")
-    result = df.sort("wall_clock_utc")
 
-    required_defaults = {
-        "mid_price": None,
-        "spread_bps": None,
-        "depth_10bps_bid_usd": None,
-        "depth_10bps_ask_usd": None,
-        "orderbook_imbalance": None,
-        "executable_price_10k_buy": None,
-        "executable_price_10k_sell": None,
-        "basis_vs_usd": None,
-        "reserve_imbalance": None,
-        "implied_pool_price": None,
-        "pool_slippage_10k": None,
-        "exchange_inflow_1h": None,
-        "exchange_outflow_1h": None,
-        "exchange_netflow_1h": None,
-        "mint_burn_net_1h": None,
-        "gas_base_fee_gwei": None,
+    result = standardize_bronze(df)
+    result = result.sort("wall_clock_utc")
+
+    required_nulls = {
+        "mid_price":                  pl.Float64,
+        "spread_bps":                 pl.Float64,
+        "depth_10bps_bid_usd":        pl.Float64,
+        "depth_10bps_ask_usd":        pl.Float64,
+        "orderbook_imbalance":        pl.Float64,
+        "executable_price_10k_buy":   pl.Float64,
+        "executable_price_10k_sell":  pl.Float64,
+        "basis_vs_usd":               pl.Float64,
+        "reserve_imbalance":          pl.Float64,
+        "implied_pool_price":         pl.Float64,
+        "pool_slippage_10k":          pl.Float64,
+        "exchange_inflow_1h":         pl.Float64,
+        "exchange_outflow_1h":        pl.Float64,
+        "exchange_netflow_1h":        pl.Float64,
+        "mint_burn_net_1h":           pl.Float64,
+        "gas_base_fee_gwei":          pl.Float64,
     }
-    for col, default in required_defaults.items():
+    for col, dtype in required_nulls.items():
         if col not in result.columns:
-            result = result.with_columns(pl.lit(default, dtype=pl.Float64).alias(col))
+            result = result.with_columns(pl.lit(None, dtype=dtype).alias(col))
     return result
 
 
@@ -82,10 +102,14 @@ def _actual_tier_from_manifest(event_id: str, path: Path, fallback: str) -> str:
     return match["source_tier_actual"][0]
 
 
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Reconstruct silver data for one event.")
-    parser.add_argument("--event", required=True, help="Event ID from configs/events.yaml")
-    parser.add_argument("--nodes", nargs="+", default=None)
+    parser.add_argument("--event",  required=True)
+    parser.add_argument("--nodes",  nargs="+", default=None)
     args = parser.parse_args()
 
     events = load_events()
@@ -95,7 +119,7 @@ def main() -> None:
     nodes = nodes_for_event(args.event)
     if args.nodes:
         requested = set(args.nodes)
-        nodes = [node for node in nodes if node.id in requested]
+        nodes = [n for n in nodes if n.id in requested]
 
     out_dir = silver_root() / args.event
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -108,9 +132,17 @@ def main() -> None:
             logger.warning("No bronze input found for %s; skipping.", node.id)
             continue
         in_path, kind = located
-        silver = _standardize(pl.read_parquet(in_path), node)
-        out_path = out_dir / _silver_name(node, kind)
+
+        try:
+            bronze_df = pl.read_parquet(in_path)
+            silver = _standardize(bronze_df, node)
+        except Exception as exc:
+            logger.error("Silver reconstruction failed for %s: %s", node.id, exc)
+            continue
+
+        out_path = out_dir / _silver_name(node)
         silver.write_parquet(out_path)
+
         actual_tier = _actual_tier_from_manifest(args.event, in_path, node.tier)
         write_manifest_row(
             event_id=args.event,
@@ -122,12 +154,15 @@ def main() -> None:
             end_utc=end_str,
             file_path=out_path,
             row_count=silver.height,
-            notes=f"Standardized silver output from {in_path}.",
+            notes=f"Standardized silver output from {in_path.name}.",
             layer=node.layer,
             file_stage="silver",
             url_or_query=str(in_path),
         )
-        logger.info("Wrote silver %s (%d rows)", out_path, silver.height)
+        logger.info(
+            "Silver %-35s  rows=%d  tier=%s",
+            node.id, silver.height, actual_tier,
+        )
         wrote += 1
 
     if wrote == 0:

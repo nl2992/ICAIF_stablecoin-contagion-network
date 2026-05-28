@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
 
 setup:
 	pip install -r requirements.txt
@@ -47,6 +47,9 @@ maps: eventmaps
 
 leadlag:
 	python scripts/04_run_leadlag.py --event $(EVENT)
+
+hy:
+	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT)
 
 var:
 	python scripts/05_run_var_granger.py --event $(EVENT)
@@ -104,6 +107,7 @@ empirical:
 	python scripts/00d_check_empirical_coverage.py --event $(EVENT) --require-layers CEX DEX
 	python scripts/03b_make_event_maps.py --event $(EVENT)
 	python scripts/04_run_leadlag.py --event $(EVENT) --paper-mode
+	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT) --paper-mode
 	python scripts/05_run_var_granger.py --event $(EVENT)
 	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode --window-size 168 --step-size 24
 	python scripts/06_run_hawkes.py --event $(EVENT) || true

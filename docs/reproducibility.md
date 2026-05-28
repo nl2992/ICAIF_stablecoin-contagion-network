@@ -91,9 +91,10 @@ The following scripts accept `--paper-mode`, which filters the node set to real
 
 | Script | `--paper-mode` effect |
 |--------|----------------------|
-| `04_run_leadlag.py` | Restrict to non-fixture nodes |
+| `04_run_leadlag.py` | Restrict to non-fixture nodes; use explicit grid/staleness alignment |
+| `04b_run_hayashi_yoshida.py` | Asynchronous robustness without forcing exact timestamp matches |
 | `05b_run_tvp_var.py` | Restrict + hourly resample + auto-scale window |
-| `07_run_transfer_entropy.py` | Restrict to non-fixture nodes |
+| `07_run_transfer_entropy.py` | Restrict to non-fixture nodes; use explicit grid/staleness alignment |
 | `12_run_event_study.py` | Restrict to non-fixture nodes |
 
 ## Manifests

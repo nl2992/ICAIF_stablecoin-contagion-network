@@ -18,11 +18,13 @@ Notes
 
 import argparse
 
+import numpy as np
 import polars as pl
 
 from stressnet.config import gold_root, load_events, results_root
 from stressnet.graph.nodes import nodes_for_event
 from stressnet.models.event_study import compute_event_study_table
+from stressnet.models.leadlag import fdr_correct
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -86,6 +88,18 @@ def main() -> None:
         logger.warning("Event study produced no results for '%s'.", args.event)
         return
 
+    # BH-FDR correction across nodes (#30: multiple-testing discipline)
+    if "p_value" in sum_df.columns and sum_df.height > 1:
+        p_arr = sum_df["p_value"].fill_nan(1.0).fill_null(1.0).to_numpy()
+        reject_fdr, adj_p_fdr = fdr_correct(p_arr, alpha=0.05)
+        p_bonf = np.minimum(p_arr * len(p_arr), 1.0)
+        sum_df = sum_df.with_columns([
+            pl.Series("p_value_fdr",        adj_p_fdr.tolist()),
+            pl.Series("significant_fdr",    reject_fdr.tolist()),
+            pl.Series("p_bonferroni",       p_bonf.tolist()),
+            pl.Series("significant_bonferroni", (p_bonf < 0.05).tolist()),
+        ])
+
     # Attach event_id
     ts_df  = ts_df.with_columns(pl.lit(args.event).alias("event_id"))
     sum_df = sum_df.with_columns(pl.lit(args.event).alias("event_id"))
@@ -102,14 +116,20 @@ def main() -> None:
     logger.info("Wrote %s (%d rows)", ts_path.name,  ts_df.height)
     logger.info("Wrote %s (%d rows)", sum_path.name, sum_df.height)
 
-    sig = sum_df.filter(pl.col("significant_p05"))
-    logger.info("Significant AB (p<0.05): %d / %d nodes", len(sig), len(sum_df))
+    sig_p05  = sum_df.filter(pl.col("significant_p05"))
+    sig_fdr  = sum_df.filter(pl.col("significant_fdr"))  if "significant_fdr"  in sum_df.columns else sig_p05
+    sig_bonf = sum_df.filter(pl.col("significant_bonferroni")) if "significant_bonferroni" in sum_df.columns else pl.DataFrame()
+    logger.info(
+        "Significant AB (p<0.05): %d / %d nodes  FDR: %d  Bonferroni: %d",
+        len(sig_p05), len(sum_df), len(sig_fdr), len(sig_bonf),
+    )
 
     print("\n=== Event-study summary ===")
-    print(sum_df.sort("transmission_rank").select([
-        "node_id", "has_baseline", "estimation_mean", "estimation_std",
-        "cab_event", "p_value", "significant_p05", "n_pre_obs", "transmission_rank",
-    ]))
+    display_cols = ["node_id", "has_baseline", "estimation_mean", "estimation_std",
+                    "cab_event", "p_value", "significant_p05", "n_pre_obs", "transmission_rank"]
+    if "significant_fdr" in sum_df.columns:
+        display_cols.insert(display_cols.index("significant_p05") + 1, "significant_fdr")
+    print(sum_df.sort("transmission_rank").select(display_cols))
 
 
 if __name__ == "__main__":

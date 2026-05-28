@@ -1,0 +1,7 @@
+node_i,node_j,te_i_to_j,p_value,significant_p05,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+usdc_binance,usdc_coinbase,0.0666451007861315,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,usdc_coinbase,0.0666451007861315,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_coinbase,usdc_binance,0.04372355221789026,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_coinbase,usdt_binance,0.04372355221789026,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_binance,usdt_binance,0.0,1.0,false,1.0,false,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,usdc_binance,0.0,1.0,false,1.0,false,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

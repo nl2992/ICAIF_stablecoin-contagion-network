@@ -6,6 +6,7 @@ import numpy as np
 import polars as pl
 from scipy import stats
 
+from stressnet.features.synchronization import synchronized_feature_pivot
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -128,6 +129,8 @@ def compute_leadlag_table(
     block_size: int = 300,
     n_reps: int = 1000,
     ts_col: str = "event_time_seconds",
+    grid_seconds: int = 60,
+    max_staleness_seconds: int | None = None,
     fdr_alpha: float = 0.05,
 ) -> pl.DataFrame:
     """Compute pairwise lead-lag statistics with BH-FDR correction.
@@ -139,11 +142,13 @@ def compute_leadlag_table(
     results = []
     rng = np.random.default_rng(42)
     needed_nodes = sorted({node for pair in node_pairs for node in pair})
-    pivot = (
-        panel.filter(pl.col("node_id").is_in(needed_nodes))
-        .select([ts_col, "node_id", feature_col])
-        .pivot(values=feature_col, index=ts_col, on="node_id")
-        .sort(ts_col)
+    pivot = synchronized_feature_pivot(
+        panel,
+        node_ids=needed_nodes,
+        feature_col=feature_col,
+        grid_seconds=grid_seconds,
+        max_staleness_seconds=max_staleness_seconds,
+        ts_col=ts_col,
     )
 
     for node_i, node_j in node_pairs:
@@ -167,7 +172,10 @@ def compute_leadlag_table(
         results.append({
             "node_i": node_i,
             "node_j": node_j,
+            "feature_col": feature_col,
+            "grid_seconds": grid_seconds,
             "peak_lag_steps": peak_lag,
+            "peak_lag_seconds": peak_lag * grid_seconds,
             "peak_corr": peak_corr,
             "p_value": p_val,
             "significant_p01": p_val < 0.01,
@@ -176,15 +184,20 @@ def compute_leadlag_table(
     if not results:
         return pl.DataFrame(schema={
             "node_i": pl.String, "node_j": pl.String,
-            "peak_lag_steps": pl.Int64, "peak_corr": pl.Float64,
+            "feature_col": pl.String, "grid_seconds": pl.Int64,
+            "peak_lag_steps": pl.Int64, "peak_lag_seconds": pl.Int64, "peak_corr": pl.Float64,
             "p_value": pl.Float64, "significant_p01": pl.Boolean,
             "p_value_fdr": pl.Float64, "significant_fdr": pl.Boolean,
+            "p_bonferroni": pl.Float64, "significant_bonferroni": pl.Boolean,
         })
 
     df = pl.DataFrame(results)
     p_arr = df["p_value"].to_numpy()
     reject, adj_p = fdr_correct(p_arr, alpha=fdr_alpha)
+    p_bonferroni = np.minimum(p_arr * len(df), 1.0)
     return df.with_columns(
         pl.Series("p_value_fdr", adj_p),
         pl.Series("significant_fdr", reject),
+        pl.Series("p_bonferroni", p_bonferroni),
+        pl.Series("significant_bonferroni", p_bonferroni < fdr_alpha),
     )

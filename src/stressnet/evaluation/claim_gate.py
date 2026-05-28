@@ -20,9 +20,28 @@ EDGE_COLUMN_CANDIDATES = [
     ("source", "target"),
     ("source_node", "target_node"),
 ]
+_CLAIM_SENTENCES = {
+    "A_A_directional_microstructure": "We find directional microstructure transmission from {i} to {j}.",
+    "A_B_suggestive_directional":     "We find suggestive timing evidence of stress propagation from {i} to {j}.",
+    "B_B_context_only":               "We document contextual co-movement between {i} and {j} (Tier B proxy data).",
+    "fixture_disallowed":             "Not claimable: fixture data.",
+    "C_taxonomy_only":                "Not claimable: taxonomy context only.",
+    "diagnostic_only":                "Not claimable: diagnostic fallback output.",
+}
+
+_CLAIM_LANGUAGE = {
+    "A_A_directional_microstructure": "directional",
+    "A_B_suggestive_directional":     "suggestive",
+    "B_B_context_only":               "context-only",
+    "fixture_disallowed":             "not claimable (fixture)",
+    "C_taxonomy_only":                "not claimable (taxonomy)",
+    "diagnostic_only":                "not claimable (diagnostic)",
+}
+
 RESULT_TABLE_PREFIXES = (
     "table_leadlag_tests",
     "table_transfer_entropy",
+    "table_hayashi_yoshida",
     "table_granger",
     "table_var_spillovers",
     "table_tvp_var_summary",
@@ -44,6 +63,7 @@ class ClaimDecision:
     claim_allowed: bool
     claim_level: str
     claim_reason: str
+    claim_sentence: str
 
 
 def tier_rank(tier: str | None) -> int:
@@ -66,73 +86,87 @@ def decide_claim(tier_i: str | None, tier_j: str | None) -> ClaimDecision:
     uses_fixture = left == FIXTURE or right == FIXTURE
 
     if uses_fixture:
+        _level = "fixture_disallowed"
         return ClaimDecision(
             left,
             right,
             edge_tier,
             uses_fixture=True,
             claim_allowed=False,
-            claim_level="fixture_disallowed",
+            claim_level=_level,
             claim_reason="At least one endpoint is deterministic fixture data.",
+            claim_sentence=_CLAIM_SENTENCES[_level],
         )
     if left == MISSING or right == MISSING:
+        _level = "C_taxonomy_only"
         return ClaimDecision(
             left,
             right,
             edge_tier,
             uses_fixture=False,
             claim_allowed=False,
-            claim_level="C_taxonomy_only",
+            claim_level=_level,
             claim_reason="At least one endpoint is missing from provenance coverage.",
+            claim_sentence=_CLAIM_SENTENCES[_level],
         )
     if left == "C" or right == "C":
+        _level = "C_taxonomy_only"
         return ClaimDecision(
             left,
             right,
             edge_tier,
             uses_fixture=False,
             claim_allowed=False,
-            claim_level="C_taxonomy_only",
+            claim_level=_level,
             claim_reason="Tier C endpoint supports taxonomy or context only.",
+            claim_sentence=_CLAIM_SENTENCES[_level],
         )
     if left == "A" and right == "A":
+        _level = "A_A_directional_microstructure"
         return ClaimDecision(
             left,
             right,
             edge_tier,
             uses_fixture=False,
             claim_allowed=True,
-            claim_level="A_A_directional_microstructure",
+            claim_level=_level,
             claim_reason="Both endpoints have Tier A provenance.",
+            claim_sentence=_CLAIM_SENTENCES[_level],
         )
     if {left, right} == {"A", "B"}:
+        _level = "A_B_suggestive_directional"
         return ClaimDecision(
             left,
             right,
             edge_tier,
             uses_fixture=False,
             claim_allowed=True,
-            claim_level="A_B_suggestive_directional",
+            claim_level=_level,
             claim_reason="Edge is capped by the Tier B endpoint.",
+            claim_sentence=_CLAIM_SENTENCES[_level],
         )
     if left == "B" and right == "B":
+        _level = "B_B_context_only"
         return ClaimDecision(
             left,
             right,
             edge_tier,
             uses_fixture=False,
             claim_allowed=True,
-            claim_level="B_B_context_only",
+            claim_level=_level,
             claim_reason="Both endpoints are Tier B, so use contextual language.",
+            claim_sentence=_CLAIM_SENTENCES[_level],
         )
+    _level = "C_taxonomy_only"
     return ClaimDecision(
         left,
         right,
         edge_tier,
         uses_fixture=False,
         claim_allowed=False,
-        claim_level="C_taxonomy_only",
+        claim_level=_level,
         claim_reason="Endpoint provenance tier is not paper-claimable.",
+        claim_sentence=_CLAIM_SENTENCES[_level],
     )
 
 
@@ -157,12 +191,19 @@ def load_tiers_from_coverage(tables_dir: Path) -> dict[str, dict[str, str]]:
     if not {"event_id", "node_id", tier_col}.issubset(coverage.columns):
         return tiers
 
+    coverage_pct_col = "coverage_pct" if "coverage_pct" in coverage.columns else None
     for row in coverage.iter_rows(named=True):
         event_id = row.get("event_id")
         node_id = row.get("node_id")
         if not event_id or not node_id or node_id == "__event_panel__":
             continue
-        tiers.setdefault(str(event_id), {})[str(node_id)] = str(row.get(tier_col) or MISSING)
+        tier = str(row.get(tier_col) or MISSING)
+        # Apply coverage-percentage downgrade: < 50% coverage → downgrade A→B
+        if coverage_pct_col:
+            pct = row.get(coverage_pct_col)
+            if pct is not None and float(pct) < 50.0 and tier == "A":
+                tier = "B"  # downgrade due to < 50% coverage
+        tiers.setdefault(str(event_id), {})[str(node_id)] = tier
     return tiers
 
 
@@ -254,14 +295,32 @@ def annotate_edge_table(
         source = str(row.get(source_col))
         target = str(row.get(target_col))
         decision = decide_claim(event_tiers.get(source, MISSING), event_tiers.get(target, MISSING))
+        claim_allowed = decision.claim_allowed
+        claim_level = decision.claim_level
+        claim_reason = decision.claim_reason
+        claim_sentence = decision.claim_sentence
 
+        if str(row.get("method", "")) in {"var_coeff_fallback", "var_abscoef_fallback"}:
+            claim_allowed = False
+            claim_level = "diagnostic_only"
+            claim_reason = "VAR spillover used coefficient fallback after FEVD failed."
+            claim_sentence = _CLAIM_SENTENCES[claim_level]
+
+        # Note: __event_panel__ tier is intentionally excluded from edge annotation;
+        # only individual node tiers matter.
         row["tier_i_actual"] = decision.tier_i_actual
         row["tier_j_actual"] = decision.tier_j_actual
         row["edge_tier_actual"] = decision.edge_tier_actual
         row["uses_fixture"] = decision.uses_fixture
-        row["claim_allowed"] = decision.claim_allowed
-        row["claim_level"] = decision.claim_level
-        row["claim_reason"] = decision.claim_reason
+        row["claim_allowed"] = claim_allowed
+        row["claim_level"] = claim_level
+        row["claim_reason"] = claim_reason
+        row["claim_language"] = _CLAIM_LANGUAGE.get(claim_level, "unknown")
+        row["claim_sentence"] = (
+            claim_sentence
+            .replace("{i}", str(row.get(source_col, "node_i")))
+            .replace("{j}", str(row.get(target_col, "node_j")))
+        )
         annotated.append(row)
     return pl.DataFrame(annotated)
 

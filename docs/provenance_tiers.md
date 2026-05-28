@@ -32,6 +32,7 @@ Sufficient for price/liquidity context but insufficient for precise microstructu
 
 **Examples:**
 - Binance Vision spot aggTrades and klines (1m OHLCV)
+- Binance Vision `bookTicker` best bid/ask and best-level quantities (BBO, not full L2)
 - Coinbase REST candles
 - The Graph Uniswap v3 subgraph pool statistics
 - Coin Metrics exchange flow metrics (pre-aggregated netflows)
@@ -79,6 +80,11 @@ A Tier-A source is downgraded in the following circumstances:
 2. **Sequence gaps:** Update sequence numbers show unexplained jumps.
 3. **Resync periods:** A book resync was triggered (data quality flag is set).
 4. **Incomplete coverage:** Source covers < 50% of the event analysis window.
+
+The manifest records `coverage_pct`, `sequence_gap_count`, `gap_rate`,
+`resync_count`, and `clock_offset_ms` when those diagnostics are available.
+The consolidated node-coverage table applies the Tier-A downgrade rule
+automatically before paper gates read provenance.
 
 Downgraded nodes remain in the panel but carry a `tier_actual` field distinct from
 `tier_nominal`, and their edges are labelled accordingly.

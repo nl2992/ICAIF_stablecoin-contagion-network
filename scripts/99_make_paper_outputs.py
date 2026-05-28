@@ -28,6 +28,7 @@ _EVENTS = ["usdc_svb_2023", "terra_luna_2022", "usdt_curve_2023", "ftx_2022", "b
 # is_edge_table=False → no claim columns; read from results/tables even in strict mode
 _TABLE_SPECS: list[tuple[str, str, bool]] = [
     ("table_leadlag_tests",       "table_leadlag_tests_{event}.csv",       True),
+    ("table_hayashi_yoshida",     "table_hayashi_yoshida_{event}.csv",     True),
     ("table_var_spillovers",      "table_var_spillovers_{event}.csv",       True),
     ("table_hawkes_params",       "table_hawkes_params_{event}.csv",        True),
     ("table_transfer_entropy",    "table_transfer_entropy_{event}.csv",     True),
@@ -482,6 +483,51 @@ def write_paper_summary_table(tables_dir: Path, out_dir: Path, strict: bool) -> 
     return summary
 
 
+def write_empirical_coverage_table(out_dir: Path) -> None:
+    """Write a paper-facing coverage table with fixture rows clearly excluded."""
+    coverage_path = results_root() / "tables" / "table_node_coverage.csv"
+    if not coverage_path.exists():
+        logger.warning("table_node_coverage.csv not found; skipping empirical coverage table.")
+        return
+    coverage = pl.read_csv(coverage_path)
+    tier_col = "tier_actual" if "tier_actual" in coverage.columns else "source_tier_actual"
+    if tier_col not in coverage.columns:
+        logger.warning("Coverage table lacks tier column; skipping empirical coverage table.")
+        return
+    empirical = coverage.with_columns(
+        (~pl.col(tier_col).is_in(["fixture_non_empirical", "missing"])).alias("empirical_node")
+    )
+    out_path = out_dir / "table_node_coverage_empirical.csv"
+    empirical.write_csv(out_path)
+    logger.info("Wrote %s", out_path.name)
+
+
+def write_claim_language_summary(tables_dir: Path, out_dir: Path) -> None:
+    """Summarise claim-language levels across claim-gated paper edge tables."""
+    rows = []
+    for path in sorted(tables_dir.glob("table_*.csv")):
+        if path.name.startswith("table_claim_gate"):
+            continue
+        try:
+            df = pl.read_csv(path)
+        except Exception:
+            continue
+        if "claim_level" not in df.columns:
+            continue
+        for level in df["claim_level"].drop_nulls().unique().to_list():
+            rows.append(
+                {
+                    "table": path.name,
+                    "claim_level": level,
+                    "n_rows": df.filter(pl.col("claim_level") == level).height,
+                }
+            )
+    if rows:
+        out_path = out_dir / "table_claim_language_summary.csv"
+        pl.DataFrame(rows).sort(["claim_level", "table"]).write_csv(out_path)
+        logger.info("Wrote %s", out_path.name)
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -527,6 +573,8 @@ def main() -> None:
 
     # Cross-event summary
     write_paper_summary_table(tables_dir, out_dir, args.strict)
+    write_empirical_coverage_table(out_dir)
+    write_claim_language_summary(tables_dir, out_dir)
 
     # Figures
     plot_auc_by_event(out_dir, figures_dir)

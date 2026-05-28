@@ -27,11 +27,15 @@ timestamp within an event analysis window.
 | `tier_actual` | str | Effective tier after downgrade checks |
 | `mid_price` | float | (best_bid + best_ask) / 2; null if unavailable |
 | `spread_bps` | float | (best_ask - best_bid) / mid × 10,000 |
-| `depth_10bps_bid_usd` | float | Cumulative bid depth within 10 bps |
-| `depth_10bps_ask_usd` | float | Cumulative ask depth within 10 bps |
+| `depth_10bps_bid_usd` | float | Cumulative bid depth within 10 bps when L2 exists; proxy/null otherwise |
+| `depth_10bps_ask_usd` | float | Cumulative ask depth within 10 bps when L2 exists; proxy/null otherwise |
 | `orderbook_imbalance` | float | (bid - ask depth) / (bid + ask depth) |
-| `executable_price_10k_buy` | float | Book-walk VWAP for $10k buy order |
-| `executable_price_10k_sell` | float | Book-walk VWAP for $10k sell order |
+| `executable_price_10k_buy` | float | Book-walk VWAP for $10k buy order when L2 exists; proxy/null otherwise |
+| `executable_price_10k_sell` | float | Book-walk VWAP for $10k sell order when L2 exists; proxy/null otherwise |
+| `depth_source` | str | Depth provenance, e.g. `l2_bookwalk`, `best_level_bbo_proxy`, `unavailable_ohlcv` |
+| `executable_price_source` | str | Executable-price provenance, e.g. `l2_bookwalk`, `best_level_bbo_proxy`, `pool_slippage_proxy` |
+| `microstructure_quality` | str | Operational feature-quality label such as `bbo_proxy`, `ohlcv_proxy`, `dex_pool_proxy` |
+| `is_executable_bookwalk` | bool | True only when executable prices are computed from depth-level book-walk reconstruction |
 | `basis_vs_usd` | float | log(mid) - 0; deviation from $1.00 peg in log points |
 | `reserve_imbalance` | float | DEX pool reserve skew; null for non-pool nodes |
 | `implied_pool_price` | float | DEX marginal price; null for non-pool nodes |
@@ -44,22 +48,17 @@ timestamp within an event analysis window.
 | `label_basis_gt50bps` | bool | \|basis_vs_usd\| > 50 bps |
 | `label_downstream_gt10bps_1m` | bool | Will any downstream node exceed 10 bps within 1 min? |
 
-## Coverage (MVP: USDC/SVB 2023)
+## Coverage
 
-| Node | Tier | Rows | Date range | Source |
-|---|---|---|---|---|
-| usdc_coinbase | A | TBD | 2023-03-08 to 2023-03-20 | Coinbase WS Level2 |
-| usdc_binance | A | TBD | 2023-03-08 to 2023-03-20 | Binance Vision |
-| usdt_binance | A | TBD | 2023-03-08 to 2023-03-20 | Binance Vision |
-| usdt_kraken | A | TBD | 2023-03-08 to 2023-03-20 | Kraken WS |
-| curve_3pool | A | TBD | 2023-03-08 to 2023-03-20 | Etherscan on-chain logs |
-| uniswap_usdc_usdt_005 | A | TBD | 2023-03-08 to 2023-03-20 | The Graph / Etherscan |
-| eth_usdc_exchange_flows | B | TBD | 2023-03-08 to 2023-03-20 | Coin Metrics / Dune |
-| eth_usdt_exchange_flows | B | TBD | 2023-03-08 to 2023-03-20 | Coin Metrics / Dune |
+Coverage is generated from `data/manifests/manifest_*.csv` into
+`results/tables/table_node_coverage.csv`. The table records actual tier, row
+counts, source names, coverage percentage when available, sequence-gap counts,
+resync counts, and clock-offset diagnostics. Nominal Tier-A rows are downgraded
+when coverage is weak or sequence diagnostics fail.
 
 ## Data collection
 
-All raw data is fetched by `scripts/01_fetch_raw_data.py` and saved with source hashes
+All raw data is fetched by `scripts/01_ingest_raw_data.py` and saved with source hashes
 in `data/manifests/`. No raw data is committed to git.
 
 Reconstruction steps:
@@ -76,5 +75,6 @@ See `docs/limitations.md` for full details. Key issues:
 
 ## Reproducibility
 
-Run `make windows && make panel EVENT=usdc_svb_2023` to regenerate the MVP panel.
+Run `make mvp EVENT=usdc_svb_2023` to regenerate the fixture-safe MVP panel, or
+`make empirical EVENT=usdc_svb_2023` to run the no-fixture empirical path.
 All intermediate artefacts are deterministic given fixed API responses.

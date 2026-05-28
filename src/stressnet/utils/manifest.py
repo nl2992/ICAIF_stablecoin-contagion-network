@@ -28,11 +28,33 @@ MANIFEST_COLUMNS = [
     "created_utc",
     "downloaded_at_utc",
     "notes",
+    "coverage_pct",
+    "sequence_gap_count",
+    "gap_rate",
+    "resync_count",
+    "clock_offset_ms",
 ]
 
 _MANIFEST_DTYPES = {
-    **{col: pl.Utf8 for col in MANIFEST_COLUMNS if col != "row_count"},
+    **{
+        col: pl.Utf8
+        for col in MANIFEST_COLUMNS
+        if col
+        not in {
+            "row_count",
+            "coverage_pct",
+            "sequence_gap_count",
+            "gap_rate",
+            "resync_count",
+            "clock_offset_ms",
+        }
+    },
     "row_count": pl.Int64,
+    "coverage_pct": pl.Float64,
+    "sequence_gap_count": pl.Int64,
+    "gap_rate": pl.Float64,
+    "resync_count": pl.Int64,
+    "clock_offset_ms": pl.Float64,
 }
 
 
@@ -61,6 +83,11 @@ def append_manifest_row(
     row_count: int,
     url_or_query: str | None,
     notes: str = "",
+    coverage_pct: float | None = None,
+    sequence_gap_count: int | None = None,
+    gap_rate: float | None = None,
+    resync_count: int | None = None,
+    clock_offset_ms: float | None = None,
 ) -> None:
     """Append one provenance row using a stable, audit-friendly schema."""
     now = datetime.now(timezone.utc).isoformat()
@@ -81,6 +108,11 @@ def append_manifest_row(
         "created_utc": now,
         "downloaded_at_utc": now,
         "notes": notes,
+        "coverage_pct": coverage_pct,
+        "sequence_gap_count": sequence_gap_count,
+        "gap_rate": gap_rate,
+        "resync_count": resync_count,
+        "clock_offset_ms": clock_offset_ms,
     }
 
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -114,6 +146,11 @@ def write_manifest_row(
     layer: str = "",
     file_stage: str = "",
     url_or_query: str | None = None,
+    coverage_pct: float | None = None,
+    sequence_gap_count: int | None = None,
+    gap_rate: float | None = None,
+    resync_count: int | None = None,
+    clock_offset_ms: float | None = None,
 ) -> Path:
     """Append one artefact provenance row to the per-event manifest."""
     manifest_path = manifests_root() / f"manifest_{event_id}.csv"
@@ -132,8 +169,38 @@ def write_manifest_row(
         row_count=row_count,
         url_or_query=url_or_query,
         notes=notes,
+        coverage_pct=coverage_pct,
+        sequence_gap_count=sequence_gap_count,
+        gap_rate=gap_rate,
+        resync_count=resync_count,
+        clock_offset_ms=clock_offset_ms,
     )
     return manifest_path
+
+
+def _normalise_manifest_frame(frame: pl.DataFrame) -> pl.DataFrame:
+    """Backfill optional manifest diagnostics for old manifest files."""
+    for col in MANIFEST_COLUMNS:
+        if col not in frame.columns:
+            frame = frame.with_columns(pl.lit(None, dtype=_MANIFEST_DTYPES[col]).alias(col))
+    return frame.select(MANIFEST_COLUMNS).with_columns(
+        [pl.col(col).cast(dtype, strict=False) for col, dtype in _MANIFEST_DTYPES.items()]
+    )
+
+
+def _coverage_downgraded_tier(row: dict[str, Any]) -> str:
+    """Downgrade nominally strong tiers when coverage diagnostics are weak."""
+    tier = str(row.get("source_tier_actual") or "")
+    if tier in {"fixture_non_empirical", "missing", "mixed", "C"}:
+        return tier
+    coverage_pct = row.get("coverage_pct")
+    gap_rate = row.get("gap_rate")
+    if tier == "A":
+        if coverage_pct is not None and coverage_pct < 50.0:
+            return "B"
+        if gap_rate is not None and gap_rate > 0.01:
+            return "B"
+    return tier
 
 
 def build_node_coverage_table() -> Path | None:
@@ -142,7 +209,7 @@ def build_node_coverage_table() -> Path | None:
     if not manifest_paths:
         return None
 
-    frames = [pl.read_csv(path) for path in manifest_paths]
+    frames = [_normalise_manifest_frame(pl.read_csv(path)) for path in manifest_paths]
     manifest = pl.concat(frames, how="diagonal")
     coverage = (
         manifest.group_by(["event_id", "node_id"])
@@ -154,9 +221,20 @@ def build_node_coverage_table() -> Path | None:
             pl.col("start_utc").min().alias("start_utc"),
             pl.col("end_utc").max().alias("end_utc"),
             pl.col("file_path").n_unique().alias("artefact_count"),
+            pl.col("coverage_pct").drop_nulls().last().alias("coverage_pct"),
+            pl.col("sequence_gap_count").fill_null(0).sum().alias("sequence_gap_count"),
+            pl.col("gap_rate").drop_nulls().max().alias("gap_rate"),
+            pl.col("resync_count").fill_null(0).sum().alias("resync_count"),
+            pl.col("clock_offset_ms").drop_nulls().max().alias("clock_offset_ms"),
         )
         .sort(["event_id", "node_id"])
     )
+    if coverage.height:
+        coverage = coverage.with_columns(
+            pl.struct(["source_tier_actual", "coverage_pct", "gap_rate"])
+            .map_elements(_coverage_downgraded_tier, return_dtype=pl.Utf8)
+            .alias("source_tier_actual")
+        )
     out_path = results_root() / "tables" / "table_node_coverage.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     coverage.write_csv(out_path)

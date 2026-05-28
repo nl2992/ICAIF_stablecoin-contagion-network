@@ -1,0 +1,3 @@
+event_id,split,n_rows,n_nodes,label_prevalence
+ftx_2022,train,61560,6,0.7457277452891488
+ftx_2022,test,25920,2,0.6155478395061729

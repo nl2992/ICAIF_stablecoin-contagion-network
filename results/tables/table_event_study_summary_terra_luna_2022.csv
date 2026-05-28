@@ -1,0 +1,3 @@
+node_id,has_baseline,estimation_mean,estimation_std,cab_event,p_value,significant_p05,first_deviation_ts,n_pre_obs,n_event_obs,transmission_rank,event_id
+usdt_binance,true,0.00012132182214778148,0.00014214586072509467,84655.9276970585,0.0,true,8280.0,10080,10080,2,terra_luna_2022
+ust_binance,true,-0.00025494969031653714,0.0009477085607007829,-3304383.6088157836,0.0,true,0.0,10080,7250,1,terra_luna_2022

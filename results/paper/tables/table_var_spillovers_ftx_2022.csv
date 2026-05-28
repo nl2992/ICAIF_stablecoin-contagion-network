@@ -1,0 +1,5 @@
+caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+busd_binance,busd_binance,0.0018997171871736659,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,usdt_binance,0.9981002828128266,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,busd_binance,0.0011328118257401233,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,usdt_binance,0.9988671881742601,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

@@ -1,0 +1,7 @@
+caused_node,causing_node,fevd_share_mean,fevd_share_max,fevd_share_std,n_windows,method,event_id
+usdt_binance,usdc_coinbase,0.3535903877470856,0.5110059369207085,0.10420568099620939,5,tvp_var_rolling,usdc_svb_2023
+usdc_binance,usdc_coinbase,0.35359038774708557,0.5110059369207084,0.10420568099620944,5,tvp_var_rolling,usdc_svb_2023
+usdc_binance,usdt_binance,0.32320480612631247,0.377247064860051,0.05210284049807803,5,tvp_var_rolling,usdc_svb_2023
+usdt_binance,usdc_binance,0.32320480612631225,0.3772470648600505,0.052102840498077806,5,tvp_var_rolling,usdc_svb_2023
+usdc_coinbase,usdt_binance,0.18616860923961454,0.28829001607875465,0.12138451474614673,5,tvp_var_rolling,usdc_svb_2023
+usdc_coinbase,usdc_binance,0.18616860923961434,0.2882900160787547,0.12138451474614702,5,tvp_var_rolling,usdc_svb_2023

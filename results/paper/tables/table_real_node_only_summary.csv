@@ -1,0 +1,6 @@
+event,ll_real_pairs,ll_sig,te_real_pairs,te_sig_fdr,var_pairs,var_sig
+usdc_svb_2023,6,6,6,4,2,2
+terra_luna_2022,2,1,2,2,2,1
+usdt_curve_2023,0,0,0,0,0,skipped
+ftx_2022,2,2,2,2,2,2
+busd_2023,6,6,6,4,2,1

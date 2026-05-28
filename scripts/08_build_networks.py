@@ -38,13 +38,35 @@ def main() -> None:
     parser.add_argument("--event", required=True)
     parser.add_argument("--weight-threshold", type=float, default=0.0)
     parser.add_argument("--p-threshold", type=float, default=0.05)
+    parser.add_argument(
+        "--edge-source",
+        choices=["auto", "hawkes", "var", "te"],
+        default="auto",
+        help=(
+            "Which edge table to use. 'auto' picks the best available "
+            "(Hawkes > VAR > TE); 'te' forces the transfer-entropy table."
+        ),
+    )
     args = parser.parse_args()
 
     tables_dir = results_root() / "tables"
     figures_dir = results_root() / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    edge_df = load_best_edge_table(args.event, tables_dir)
+    if args.edge_source == "auto":
+        edge_df = load_best_edge_table(args.event, tables_dir)
+    else:
+        _name_map = {
+            "hawkes": f"table_hawkes_params_{args.event}.csv",
+            "var":    f"table_var_spillovers_{args.event}.csv",
+            "te":     f"table_transfer_entropy_{args.event}.csv",
+        }
+        path = tables_dir / _name_map[args.edge_source]
+        if not path.exists():
+            raise SystemExit(f"Edge table not found: {path}")
+        logger.info("Using edge table: %s", path.name)
+        edge_df = pl.read_csv(path)
+
     if edge_df is None:
         raise SystemExit("No edge table found. Run scripts 05, 06, or 07 first.")
 

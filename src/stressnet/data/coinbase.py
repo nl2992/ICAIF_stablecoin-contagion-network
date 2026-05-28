@@ -113,11 +113,12 @@ def ingest_coinbase_range(
         return None, "fixture_non_empirical"
 
     # Build DataFrame: [[time_unix, low, high, open, close, volume], ...]
+    # Coinbase candle timestamps are Unix seconds; multiply by 1e6 for Polars us-precision
     df = pl.DataFrame(
         {
-            "wall_clock_utc": pl.Series(
-                [c[0] for c in candles], dtype=pl.Int64
-            ).cast(pl.Datetime("us")).dt.replace_time_zone("UTC"),
+            "wall_clock_utc": (
+                pl.Series([c[0] for c in candles], dtype=pl.Int64) * 1_000_000
+            ).cast(pl.Datetime("us", "UTC")),
             "low":    pl.Series([float(c[1]) for c in candles]),
             "high":   pl.Series([float(c[2]) for c in candles]),
             "open":   pl.Series([float(c[3]) for c in candles]),

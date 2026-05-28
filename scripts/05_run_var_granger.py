@@ -40,18 +40,73 @@ def main() -> None:
     if ts_col not in panel.columns:
         raise SystemExit(f"Column '{ts_col}' not found in panel.")
 
-    # Build (T, N) matrix: align all nodes on event_time grid
-    pivot = (
+    # Resample to hourly buckets so all nodes (1-min real + hourly fixture)
+    # land on a common grid.  Fixture-only nodes with all-null features are
+    # dropped automatically when we filter to columns with sufficient coverage.
+    _HOUR = 3600  # seconds
+    sub = (
         panel
         .filter(pl.col("node_id").is_in(node_ids))
         .select(["node_id", ts_col, args.feature_col])
-        .pivot(values=args.feature_col, index=ts_col, on="node_id")
-        .sort(ts_col)
+        .with_columns(
+            ((pl.col(ts_col) / _HOUR).floor().cast(pl.Int64) * _HOUR).alias("hour_bucket")
+        )
+        .group_by(["node_id", "hour_bucket"])
+        .agg(pl.col(args.feature_col).mean().alias(args.feature_col))
+        .sort("hour_bucket")
+    )
+
+    pivot = (
+        sub
+        .pivot(values=args.feature_col, index="hour_bucket", on="node_id")
+        .sort("hour_bucket")
+    )
+
+    # Keep only nodes with enough non-null coverage (≥50% of rows)
+    n_rows = pivot.height
+    node_cols = [
+        c for c in pivot.columns
+        if c != "hour_bucket"
+        and c in node_ids
+        and pivot[c].null_count() < n_rows * 0.5
+    ]
+
+    if len(node_cols) < 2:
+        raise SystemExit(
+            f"Fewer than 2 nodes have sufficient '{args.feature_col}' coverage "
+            f"after hourly resampling.  Try a different --feature-col."
+        )
+
+    # Forward-fill sparse columns then drop any remaining incomplete rows
+    pivot = (
+        pivot
+        .select(["hour_bucket"] + node_cols)
+        .with_columns([pl.col(c).forward_fill() for c in node_cols])
         .drop_nulls()
     )
 
-    node_cols = [c for c in pivot.columns if c != ts_col and c in node_ids]
-    data = pivot.select(node_cols).to_numpy()
+    data_mat = pivot.select(node_cols).to_numpy()
+
+    # Remove near-perfectly correlated duplicates (|r| > 0.9999) to avoid
+    # singular covariance matrix in the VAR. Keep the first occurrence.
+    corr = np.corrcoef(data_mat.T)
+    keep_mask = np.ones(len(node_cols), dtype=bool)
+    for i in range(len(node_cols)):
+        if not keep_mask[i]:
+            continue
+        for j in range(i + 1, len(node_cols)):
+            if keep_mask[j] and abs(corr[i, j]) > 0.9999:
+                logger.warning(
+                    "Dropping near-duplicate node '%s' (|r|=%.6f with '%s')",
+                    node_cols[j], corr[i, j], node_cols[i],
+                )
+                keep_mask[j] = False
+
+    node_cols = [c for c, k in zip(node_cols, keep_mask) if k]
+    data = data_mat[:, keep_mask]
+
+    if len(node_cols) < 2:
+        raise SystemExit("After deduplication fewer than 2 non-collinear nodes remain.")
 
     if data.shape[0] < 50:
         raise SystemExit(f"Too few observations after alignment: {data.shape[0]}")

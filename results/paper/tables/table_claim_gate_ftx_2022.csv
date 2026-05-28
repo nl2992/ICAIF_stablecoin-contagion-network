@@ -1,0 +1,7 @@
+table,event_id,status,rows,blocked_rows,fixture_or_missing_rows,claimable_rows
+table_granger_ftx_2022.csv,ftx_2022,annotated,6,0,0,6
+table_leadlag_tests_ftx_2022.csv,ftx_2022,annotated,6,0,0,6
+table_transfer_entropy_ftx_2022.csv,ftx_2022,annotated,6,0,0,6
+table_tvp_var_spillovers_ftx_2022.csv,ftx_2022,annotated,207,0,0,207
+table_tvp_var_summary_ftx_2022.csv,ftx_2022,annotated,6,0,0,6
+table_var_spillovers_ftx_2022.csv,ftx_2022,annotated,9,0,0,9

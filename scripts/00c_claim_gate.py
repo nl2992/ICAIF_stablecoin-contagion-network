@@ -136,6 +136,27 @@ def main() -> None:
             f"Paper outputs blocked."
         )
 
+    if strict_mode:
+        # Check for at least one A/A edge in the primary event (usdc_svb_2023)
+        # as a headline claim gate. A/A = claim_level == "A_A_directional_microstructure"
+        aa_found = False
+        for path in paper_dir.glob("*.csv"):
+            if not path.name.startswith("table_claim_gate"):
+                try:
+                    df = pl.read_csv(path)
+                    if "claim_level" in df.columns:
+                        if df.filter(pl.col("claim_level") == "A_A_directional_microstructure").height > 0:
+                            aa_found = True
+                            break
+                except Exception:
+                    pass
+        if not aa_found:
+            raise SystemExit(
+                "--strict: no A/A directional microstructure edges found in paper tables. "
+                "Headline microstructure claims require at least one A/A edge; "
+                "upgrade data sources to Tier A or build diagnostic paper outputs without --strict."
+            )
+
 
 if __name__ == "__main__":
     main()

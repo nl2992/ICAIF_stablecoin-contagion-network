@@ -49,6 +49,10 @@ def main() -> None:
 
     if not node_ids:
         raise SystemExit("No matching nodes found in panel.")
+    if args.paper_mode and len(node_ids) < 3:
+        raise SystemExit(
+            f"--paper-mode requires at least 3 real nodes for lead-lag; found {len(node_ids)}."
+        )
 
     node_pairs = list(itertools.permutations(node_ids, 2))
     logger.info("Computing lead-lag for %d node pairs", len(node_pairs))

@@ -68,7 +68,7 @@ def _try_real_cex(node: Node, start_date: date, end_date: date,
     if node.venue == "Binance":
         from stressnet.data.binance import ingest_binance_range
         for symbol in symbols:
-            # Priority: bookTicker (Tier A) → klines/1m (Tier B)
+            # Priority: bookTicker (Tier B BBO) → klines/1m (Tier B candles)
             for data_type in ("bookTicker", "klines/1m"):
                 try:
                     path, tier = ingest_binance_range(

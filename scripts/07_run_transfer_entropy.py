@@ -47,6 +47,11 @@ def main() -> None:
     else:
         node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
 
+    if args.paper_mode and len(node_ids) < 3:
+        raise SystemExit(
+            f"--paper-mode requires at least 3 real nodes for transfer entropy; found {len(node_ids)}."
+        )
+
     node_pairs = list(itertools.permutations(node_ids, 2))
 
     logger.info("Estimating TE for %d node pairs", len(node_pairs))

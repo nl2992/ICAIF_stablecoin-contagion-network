@@ -29,11 +29,33 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import polars as pl
+
 from stressnet.config import gold_root, results_root
 from stressnet.models.temporal_gnn import build_tgn, train_tgn_stub
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+def _write_deferred_status(event_id: str, reason: str, architecture: str) -> None:
+    out_dir = results_root() / "tables"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"table_gnn_metrics_{event_id}.csv"
+    pl.DataFrame(
+        [
+            {
+                "event_id": event_id,
+                "model": architecture,
+                "status": "deferred",
+                "reason": reason,
+                "AUROC": None,
+                "AUPRC": None,
+                "passes_gnn_gate": False,
+            }
+        ]
+    ).write_csv(out_path)
+    logger.info("Wrote deferred GNN status: %s", out_path)
 
 
 def main() -> None:
@@ -63,15 +85,21 @@ def main() -> None:
             "GNN deferred: temporal graph dataset not yet built (run 09b first). "
             "Expected: %s", pred_path
         )
+        _write_deferred_status(args.event, "prediction_dataset_missing", args.architecture)
         raise SystemExit(0)
 
     # Check non-graph baselines exist first
     baseline_table = results_root() / "tables" / f"table_prediction_metrics_{args.event}.csv"
     if not baseline_table.exists():
-        raise SystemExit(
-            f"Non-graph baselines not found: {baseline_table}.\n"
-            f"Run: python scripts/09_run_prediction.py --event {args.event}"
+        reason = "non_graph_baselines_missing"
+        _write_deferred_status(args.event, reason, args.architecture)
+        logger.info(
+            "GNN deferred: non-graph baselines not found: %s. "
+            "Run: python scripts/09_run_prediction.py --event %s",
+            baseline_table,
+            args.event,
         )
+        raise SystemExit(0)
 
     logger.info("Loading prediction dataset from %s", pred_path)
 
@@ -81,11 +109,8 @@ def main() -> None:
     # Using placeholder dims until that dataset is available.
     model = build_tgn(node_feat_dim=16, edge_feat_dim=8)
     if model is None:
-        raise SystemExit(
-            "PyTorch / torch-geometric not installed.\n"
-            "Install with: pip install torch torch-geometric torch-geometric-temporal\n"
-            "Then re-run this script."
-        )
+        _write_deferred_status(args.event, "torch_or_pyg_missing", args.architecture)
+        raise SystemExit(0)
 
     # Delegate to model stub — raises NotImplementedError until implemented
     try:
@@ -101,13 +126,14 @@ def main() -> None:
             output_dir=results_root(),
         )
     except NotImplementedError as exc:
-        logger.error(
-            "GNN training stub not yet implemented: %s\n"
+        logger.warning(
+            "GNN training deferred: %s\n"
             "Validate non-graph baselines first (script 09), then implement "
             "src/stressnet/models/temporal_gnn.py.",
             exc,
         )
-        raise SystemExit(1) from exc
+        _write_deferred_status(args.event, "training_not_implemented", args.architecture)
+        raise SystemExit(0) from exc
 
 
 if __name__ == "__main__":

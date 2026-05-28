@@ -125,6 +125,25 @@ See `Makefile` for per-step targets (`leadlag`, `var`, `hawkes`, `te`, `network`
 > must be reproduced using real data; see `docs/reproducibility.md` and
 > `docs/provenance_tiers.md`.
 
+## Current empirical status
+
+The repo is pipeline-complete but evidence-incomplete. The strict paper gate
+currently blocks headline microstructure claims unless paper tables contain at
+least one `A_A_directional_microstructure` edge. This is deliberate: Tier-B
+proxy data can support contextual or suggestive language, but not execution-grade
+CEX/DEX microstructure claims.
+
+Use:
+
+```bash
+make coveragegate EVENT=usdc_svb_2023
+python scripts/00c_claim_gate.py --all-events --strict
+```
+
+The first command checks that an event has enough real nodes for modelling. The
+second command writes claim-filtered paper tables and fails if fixture, missing,
+or non-headline-grade evidence would leak into strict paper outputs.
+
 ## Repository structure
 
 ```

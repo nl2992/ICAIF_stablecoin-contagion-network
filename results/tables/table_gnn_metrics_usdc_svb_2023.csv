@@ -1,0 +1,2 @@
+event_id,model,status,reason,AUROC,AUPRC,passes_gnn_gate
+usdc_svb_2023,TGN,deferred,torch_or_pyg_missing,,,false

@@ -12,11 +12,11 @@ reported with real-node-only filters.
 
 | Event | Total nodes | Real nodes | Fixture nodes | Paper claim tier |
 | --- | ---: | ---: | ---: | --- |
-| USDC/SVB 2023 | 11 | 3 | 8 | real-node preliminary, fixture contaminated |
-| Terra/LUNA 2022 | 4 | 2 | 2 | real-node preliminary, fixture contaminated |
-| USDT/Curve 2023 | 8 | 1 | 7 | insufficient real coverage |
-| FTX 2022 | 6 | 2 | 4 | real-node preliminary, fixture contaminated |
-| BUSD 2023 | 4 | 3 | 1 | real-node preliminary, fixture contaminated |
+| USDC/SVB 2023 | 11 | 3 | 8 | pipeline validation only |
+| Terra/LUNA 2022 | 4 | 2 | 2 | mixed evidence |
+| USDT/Curve 2023 | 8 | 1 | 7 | pipeline validation only |
+| FTX 2022 | 6 | 2 | 4 | pipeline validation only |
+| BUSD 2023 | 4 | 3 | 1 | mixed evidence |
 
 ## Directed-Dependence Summary
 
@@ -30,9 +30,11 @@ reported with real-node-only filters.
 
 Interpretation: the all-node outputs are directionally promising but are not
 paper-ready because fixtures remain in the panels. Real-node-only counts are
-nonzero for four events. USDT/Curve currently has only one real node and should
-not be used for VAR, Granger, or network-prediction claims until coverage is
-repaired.
+nonzero for four events. Events classified as `mixed_evidence` can support only
+carefully qualified preliminary statements. Events classified as
+`pipeline_validation_only` should not support empirical claims. USDT/Curve
+currently has only one real node and should not be used for VAR, Granger, or
+network-prediction claims until coverage is repaired.
 
 ## Placebo Gate
 

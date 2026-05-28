@@ -227,4 +227,6 @@ def compute_te_table(
         pl.Series("significant_block_fdr",  reject_block_fdr),
         pl.Series("p_bonferroni",           p_bonferroni),
         pl.Series("significant_bonferroni", sig_bonferroni),
+        # Estimator label so paper tables are unambiguous (#26)
+        pl.lit("binned_discrete").alias("te_estimator"),
     )

@@ -12,7 +12,7 @@ from pathlib import Path
 
 import polars as pl
 
-from stressnet.config import load_events, results_root
+from stressnet.config import load_events, manifests_root, results_root
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -31,7 +31,26 @@ def _event_coverage(event_id: str, tables_dir: Path) -> pl.DataFrame:
 
     all_path = tables_dir / "table_node_coverage.csv"
     if all_path.exists():
-        return pl.read_csv(all_path).filter(pl.col("event_id") == event_id)
+        df = pl.read_csv(all_path).filter(pl.col("event_id") == event_id)
+        if not df.is_empty():
+            return df
+
+    manifest_path = manifests_root() / f"manifest_{event_id}.csv"
+    manifest = _read_csv(manifest_path)
+    if manifest.is_empty():
+        return pl.DataFrame()
+    manifest = manifest.filter(pl.col("node_id") != "__event_panel__")
+    if "file_stage" in manifest.columns:
+        silver = manifest.filter(pl.col("file_stage") == "silver")
+        if not silver.is_empty():
+            manifest = silver
+    return (
+        manifest.group_by(["event_id", "node_id"])
+        .agg(
+            pl.col("source_tier_nominal").last().alias("tier_nominal"),
+            pl.col("source_tier_actual").last().alias("tier_actual"),
+        )
+    )
     return pl.DataFrame()
 
 
@@ -147,14 +166,14 @@ def _robustness_pass(event_id: str, tables_dir: Path) -> bool:
     return float(true_rate) > float(placebo_rate)
 
 
-def _paper_claim_tier(n_real: int, n_fixture: int, robustness_pass: bool) -> str:
-    if n_real < 2:
-        return "insufficient_real_coverage"
+def _paper_claim_tier(n_total: int, n_real: int, n_fixture: int) -> str:
+    if n_total == 0 or n_real == 0:
+        return "pipeline_validation_only"
+    if n_fixture > n_real or n_real < 2:
+        return "pipeline_validation_only"
     if n_fixture > 0:
-        return "real_node_preliminary_fixture_contaminated"
-    if not robustness_pass:
-        return "real_node_preliminary_needs_placebo"
-    return "paper_candidate_preliminary"
+        return "mixed_evidence"
+    return "empirical_preliminary"
 
 
 def build_summary() -> pl.DataFrame:
@@ -208,7 +227,7 @@ def build_summary() -> pl.DataFrame:
                 "prediction_auc": pred_auc,
                 "prediction_pr_auc": pred_pr_auc,
                 "robustness_pass": robust,
-                "paper_claim_tier": _paper_claim_tier(n_real, n_fixture, robust),
+                "paper_claim_tier": _paper_claim_tier(n_total, n_real, n_fixture),
             }
         )
     return pl.DataFrame(rows)

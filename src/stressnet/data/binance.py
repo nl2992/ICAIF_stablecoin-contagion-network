@@ -1,7 +1,7 @@
 """Binance data ingestion: Vision archive downloads and WebSocket depth streams.
 
 Data-type priority for CEX node reconstruction (highest → lowest quality):
-1. bookTicker  — best bid/ask at ~ms frequency (Tier A: real-time BBO)
+1. bookTicker  — best bid/ask at ~ms frequency (Tier B: real-time BBO, not full L2)
 2. klines/1m   — 1-minute OHLCV candles (Tier B: aggregate, spread proxy only)
 
 Both are freely available at data.binance.vision with no API key.
@@ -211,8 +211,8 @@ def ingest_binance_range(
        (e.g. USDCUSDT started trading 2023-03-11 and has only monthly archives).
 
     Returns:
-        (parquet_path, tier_actual) where tier='A' for bookTicker,
-        'B' for klines, or (None, 'fixture_non_empirical') if nothing found.
+        (parquet_path, tier_actual) where tier='B' for bookTicker (BBO only,
+        not full L2) and klines, or (None, 'fixture_non_empirical') if nothing found.
     """
     cache_daily   = out_dir / "_raw_cache" / symbol / data_type.replace("/", "_") / "daily"
     cache_monthly = out_dir / "_raw_cache" / symbol / data_type.replace("/", "_") / "monthly"
@@ -271,7 +271,8 @@ def ingest_binance_range(
         logger.warning("No rows in date range %s–%s for %s %s", start_date, end_date, symbol, data_type)
         return None, "fixture_non_empirical"
 
-    tier = "A" if data_type == "bookTicker" else "B"
+    # BBO is not full L2 — Tier B until depth reconstruction implemented
+    tier = "B"
 
     out_dir.mkdir(parents=True, exist_ok=True)
     safe_type = data_type.replace("/", "_")

@@ -10,7 +10,7 @@ import polars as pl
 
 from stressnet.config import gold_root, results_root
 from stressnet.graph.nodes import nodes_for_event
-from stressnet.models.hawkes import define_stress_events, fit_hawkes, hawkes_results_table
+from stressnet.models.hawkes import define_stress_events, fit_hawkes, hawkes_bootstrap_ci, hawkes_results_table
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -21,6 +21,8 @@ def main() -> None:
     parser.add_argument("--event", required=True)
     parser.add_argument("--threshold-bps", type=float, default=10.0)
     parser.add_argument("--decay", type=float, default=1.0)
+    parser.add_argument("--n-bootstraps", type=int, default=100,
+                        help="Number of bootstrap replicates for branching-ratio CIs (default: 100).")
     args = parser.parse_args()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
@@ -40,7 +42,8 @@ def main() -> None:
         logger.warning("Very few events; Hawkes estimates will be unreliable.")
 
     fit = fit_hawkes(events, decay=args.decay)
-    table = hawkes_results_table(fit)
+    ci = hawkes_bootstrap_ci(events, fit, n_bootstraps=args.n_bootstraps)
+    table = hawkes_results_table(fit, ci=ci)
 
     out_dir = results_root() / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -50,6 +53,12 @@ def main() -> None:
 
     contagious = table.filter(pl.col("contagious"))
     logger.info("Contagious edges (n_ij > 0.1): %d / %d", len(contagious), len(table))
+    if "ci_excludes_zero" in table.columns:
+        ci_confirmed = table.filter(pl.col("ci_excludes_zero") == True)
+        logger.info(
+            "CI-confirmed contagious edges (ci_lower > 0): %d / %d",
+            len(ci_confirmed), len(table),
+        )
     if len(contagious) > 0:
         print(contagious.sort("branching_ratio_ij", descending=True).head(10))
 

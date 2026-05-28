@@ -5,7 +5,7 @@ deterministic fixtures only on failure (or when --no-fixture is NOT passed
 and real data is genuinely unavailable).
 
 Real data sources (no API key unless noted):
-  CEX  Binance   : Binance Vision bookTicker (Tier A) → klines/1m (Tier B)
+  CEX  Binance   : Binance Vision bookTicker (Tier B: BBO only) → klines/1m (Tier B)
   CEX  Coinbase  : Coinbase Exchange public REST candles (Tier B)
   CEX  Kraken    : Kraken public REST OHLC (Tier B)
   DEX  Curve     : Etherscan getLogs + event decode (Tier B, needs ETHERSCAN_API_KEY)
@@ -340,6 +340,8 @@ def main() -> None:
     out_dir = bronze_root() / args.event
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    real_node_count = 0  # tracks nodes with non-fixture data
+
     for node in nodes:
         path: Path | None = None
         kind: str = "books"
@@ -375,6 +377,9 @@ def main() -> None:
             kind = kind_fix
             tier = "fixture_non_empirical"
 
+        if tier != "fixture_non_empirical":
+            real_node_count += 1
+
         write_manifest_row(
             event_id=args.event,
             node_id=node.id,
@@ -404,6 +409,13 @@ def main() -> None:
         logger.info(
             "Bronze %-35s  %-25s  tier=%-24s  rows=%d",
             node.id, f"{kind}.parquet", tier, pl.read_parquet(path).height,
+        )
+
+    if real_node_count < 2:
+        logger.warning(
+            "[WARNING] Only %d real nodes ingested for %s; minimum recommended is 2 for VAR "
+            "and 3 for TE/lead-lag. Consider running without --no-fixture or adding data sources.",
+            real_node_count, args.event,
         )
 
     coverage_path = build_node_coverage_table()

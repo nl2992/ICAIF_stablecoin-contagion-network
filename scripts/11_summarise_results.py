@@ -115,6 +115,23 @@ def _best_prediction(event_id: str, tables_dir: Path) -> tuple[float | None, flo
     return float(best["AUROC"]), float(best["AUPRC"])
 
 
+def _write_prediction_all_events(tables_dir: Path) -> None:
+    frames = []
+    for event_id in load_events().keys():
+        path = tables_dir / f"table_prediction_metrics_{event_id}.csv"
+        df = _read_csv(path)
+        if df.is_empty():
+            continue
+        if "event_id" not in df.columns:
+            df = df.with_columns(pl.lit(event_id).alias("event_id"))
+        frames.append(df)
+    if not frames:
+        return
+    pl.concat(frames, how="diagonal").write_csv(
+        tables_dir / "table_prediction_metrics_all_events.csv"
+    )
+
+
 def _robustness_pass(event_id: str, tables_dir: Path) -> bool:
     path = tables_dir / "table_placebo_summary.csv"
     if not path.exists():
@@ -203,6 +220,7 @@ def main() -> None:
     summary = build_summary()
     out_path = out_dir / "table_preliminary_results_summary.csv"
     summary.write_csv(out_path)
+    _write_prediction_all_events(out_dir)
     logger.info("Wrote %s", out_path)
     print(summary)
 

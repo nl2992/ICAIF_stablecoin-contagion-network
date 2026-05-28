@@ -7,11 +7,14 @@ nodes:
       asset: USDC
       venue: Coinbase
       layer: CEX
-      symbols: ["USDC-USD", "USDC-USDT"]
+      symbols: ["USDT-USD", "USDC-USD", "USDC-USDT"]
       provenance_best: "real_l2"
       tier: A
       events_covered: [usdc_svb_2023]
-      notes: "Primary Tier-A node. Coinbase WS Level2 available."
+      notes: >
+        Primary USDC/Coinbase node. Coinbase Exchange does not offer a USDC-USD
+        spot pair (USDC redeems at par); USDT-USD candles used as a stress proxy
+        (USDT premium on Coinbase is inversely correlated with USDC stress).
 
     - id: usdc_binance
       asset: USDC
@@ -37,21 +40,26 @@ nodes:
       asset: USDT
       venue: Kraken
       layer: CEX
-      symbols: ["USDT/USD", "USDC/USD"]
+      symbols: ["USDTUSD", "USDCUSD"]
       provenance_best: "real_l2"
       tier: A
       events_covered: [usdc_svb_2023, usdt_curve_2023]
-      notes: "Kraken WS book snapshots and updates. Useful for USDT/USD premium."
+      notes: >
+        Kraken USDT/USD. Kraken public REST OHLC API (no auth required).
+        Note: free tier does not retain historical data older than ~90 days;
+        for events before that window, falls back to fixture.
 
     - id: usdc_kraken
       asset: USDC
       venue: Kraken
       layer: CEX
-      symbols: ["USDC/USD", "USDC/USDT"]
+      symbols: ["USDCUSD", "USDTUSD"]
       provenance_best: "real_l2"
       tier: A
       events_covered: [usdc_svb_2023]
-      notes: "Secondary CEX check on USDC/SVB propagation."
+      notes: >
+        Kraken USDC/USD. Secondary CEX check on USDC/SVB propagation.
+        Pair code: USDCUSD (Kraken normalizes to USDCUSD internally).
 
     - id: busd_binance
       asset: BUSD
@@ -107,10 +115,11 @@ nodes:
       assets: ["USDC", "USDT"]
       fee_tier: 500
       factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984"
+      pool_address: "0x3416cF6C708Da44DB2624D63ea0AAef7113527C6"
       provenance_best: "dex_pool_onchain"
       tier: A
       events_covered: [usdc_svb_2023, usdt_curve_2023]
-      notes: "Low-fee stable pool. sqrtPriceX96 and tick from Swap events."
+      notes: "Low-fee stable pool. sqrtPriceX96 and tick from Swap events via The Graph."
 
     - id: curve_crvusd_usdt
       venue: Curve

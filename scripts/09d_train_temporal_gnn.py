@@ -56,13 +56,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Require the prediction dataset
+    # Require the prediction dataset (temporal graph dataset built by script 09b)
     pred_path = gold_root() / f"dataset_prediction_{args.event}.parquet"
     if not pred_path.exists():
-        raise SystemExit(
-            f"Prediction dataset not found: {pred_path}.\n"
-            f"Run: python scripts/09b_make_prediction_dataset.py --event {args.event}"
+        logger.info(
+            "GNN deferred: temporal graph dataset not yet built (run 09b first). "
+            "Expected: %s", pred_path
         )
+        raise SystemExit(0)
 
     # Check non-graph baselines exist first
     baseline_table = results_root() / "tables" / f"table_prediction_metrics_{args.event}.csv"
@@ -75,7 +76,10 @@ def main() -> None:
     logger.info("Loading prediction dataset from %s", pred_path)
 
     # Build model (returns None if PyTorch/PyG unavailable)
-    model = build_tgn()
+    # TODO: node_feat_dim and edge_feat_dim should come from the prediction
+    # dataset once the temporal graph dataset is implemented (script 09b).
+    # Using placeholder dims until that dataset is available.
+    model = build_tgn(node_feat_dim=16, edge_feat_dim=8)
     if model is None:
         raise SystemExit(
             "PyTorch / torch-geometric not installed.\n"

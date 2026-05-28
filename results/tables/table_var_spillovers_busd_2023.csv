@@ -1,5 +1,5 @@
-caused_node,causing_node,fevd_share,horizon,method
-busd_binance,busd_binance,0.12921590527873564,10,fevd
-busd_binance,usdc_binance,0.8707840947212643,10,fevd
-usdc_binance,busd_binance,0.08083498857767567,10,fevd
-usdc_binance,usdc_binance,0.9191650114223244,10,fevd
+caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed
+busd_binance,busd_binance,0.12921590527873564,10,fevd,B,B,B,true
+busd_binance,usdc_binance,0.8707840947212643,10,fevd,B,B,B,true
+usdc_binance,busd_binance,0.08083498857767567,10,fevd,B,B,B,true
+usdc_binance,usdc_binance,0.9191650114223244,10,fevd,B,B,B,true

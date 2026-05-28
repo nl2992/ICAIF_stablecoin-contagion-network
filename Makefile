@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness summary paper mvp usdc all
+.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness summary paper empirical mvp usdc all
 
 setup:
 	pip install -r requirements.txt
@@ -11,6 +11,7 @@ test:
 
 EVENT ?= usdc_svb_2023
 GRID ?= 60
+INGEST_FLAGS ?=
 
 windows:
 	python scripts/00_make_event_windows.py
@@ -21,8 +22,11 @@ coverage:
 audit:
 	python scripts/00b_audit_provenance.py --event $(EVENT)
 
+claimgate:
+	python scripts/00c_claim_gate.py --event $(EVENT)
+
 ingest:
-	python scripts/01_ingest_raw_data.py --event $(EVENT)
+	python scripts/01_ingest_raw_data.py --event $(EVENT) $(INGEST_FLAGS)
 
 reconstruct:
 	python scripts/02_reconstruct_silver.py --event $(EVENT)
@@ -71,7 +75,23 @@ summary:
 	python scripts/11_summarise_results.py
 
 paper:
+	python scripts/00c_claim_gate.py --paper --require-real
 	python scripts/99_make_paper_outputs.py
+
+# run an empirical paper-claim pipeline for one event. This target disables
+# fixture fallback and gates result edges by endpoint provenance before paper use.
+empirical:
+	python scripts/00_make_event_windows.py
+	python scripts/01_ingest_raw_data.py --event $(EVENT) --no-fixture
+	python scripts/02_reconstruct_silver.py --event $(EVENT)
+	python scripts/03_build_feature_panel.py --event $(EVENT) --grid $(GRID)
+	python scripts/00c_claim_gate.py --event $(EVENT)
+	python scripts/04_run_leadlag.py --event $(EVENT)
+	python scripts/05_run_var_granger.py --event $(EVENT)
+	python scripts/07_run_transfer_entropy.py --event $(EVENT)
+	python scripts/08_build_networks.py --event $(EVENT)
+	python scripts/10_run_robustness.py --event $(EVENT)
+	python scripts/00c_claim_gate.py --event $(EVENT) --require-real
 
 # run empirical-control pipeline for one event. Hawkes is optional until its
 # dependency is installed and configured.

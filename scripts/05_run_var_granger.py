@@ -41,12 +41,14 @@ def main() -> None:
         raise SystemExit(f"Column '{ts_col}' not found in panel.")
 
     # Resample to hourly buckets so all nodes (1-min real + hourly fixture)
-    # land on a common grid.  Fixture-only nodes with all-null features are
-    # dropped automatically when we filter to columns with sufficient coverage.
+    # land on a common grid.  Exclude fixture nodes: synthetic data is
+    # meaningless for Granger causality and inflates node count with
+    # near-perfectly correlated artificial series.
     _HOUR = 3600  # seconds
     sub = (
         panel
         .filter(pl.col("node_id").is_in(node_ids))
+        .filter(pl.col("tier_actual") != "fixture_non_empirical")
         .select(["node_id", ts_col, args.feature_col])
         .with_columns(
             ((pl.col(ts_col) / _HOUR).floor().cast(pl.Int64) * _HOUR).alias("hour_bucket")
@@ -62,28 +64,33 @@ def main() -> None:
         .sort("hour_bucket")
     )
 
-    # Keep only nodes with enough non-null coverage (≥50% of rows)
+    # Keep only nodes with at least 10% non-null coverage OR ≥ 48 hours of data.
+    # A low threshold lets in short-window nodes (e.g. UST delisted mid-crisis)
+    # while still excluding all-fixture null columns.
     n_rows = pivot.height
+    _MIN_ROWS = 48  # at least 48 h of real data
     node_cols = [
         c for c in pivot.columns
         if c != "hour_bucket"
         and c in node_ids
-        and pivot[c].null_count() < n_rows * 0.5
+        and (pivot[c].drop_nulls().len() >= _MIN_ROWS
+             or pivot[c].null_count() < n_rows * 0.9)
     ]
 
     if len(node_cols) < 2:
-        raise SystemExit(
-            f"Fewer than 2 nodes have sufficient '{args.feature_col}' coverage "
-            f"after hourly resampling.  Try a different --feature-col."
+        logger.warning(
+            "Fewer than 2 real nodes have sufficient '%s' coverage for event '%s'. "
+            "VAR/Granger skipped (need ≥2 non-fixture nodes). "
+            "Try --feature-col with another column, or add real data for this event.",
+            args.feature_col, args.event,
         )
+        return
 
-    # Forward-fill sparse columns then drop any remaining incomplete rows
-    pivot = (
-        pivot
-        .select(["hour_bucket"] + node_cols)
-        .with_columns([pl.col(c).forward_fill() for c in node_cols])
-        .drop_nulls()
-    )
+    # Drop rows where ANY retained node is null — this naturally clips to the
+    # overlapping active trading window (important for delisted tokens).
+    # Do NOT forward-fill: propagating a stale price for a delisted asset
+    # would contaminate the VAR.
+    pivot = pivot.select(["hour_bucket"] + node_cols).drop_nulls()
 
     data_mat = pivot.select(node_cols).to_numpy()
 
@@ -106,10 +113,12 @@ def main() -> None:
     data = data_mat[:, keep_mask]
 
     if len(node_cols) < 2:
-        raise SystemExit("After deduplication fewer than 2 non-collinear nodes remain.")
+        logger.warning("After deduplication fewer than 2 non-collinear nodes remain for '%s'. VAR skipped.", args.event)
+        return
 
     if data.shape[0] < 50:
-        raise SystemExit(f"Too few observations after alignment: {data.shape[0]}")
+        logger.warning("Too few observations (%d) after alignment for '%s'. VAR skipped.", data.shape[0], args.event)
+        return
 
     logger.info("Fitting VAR on %d observations × %d nodes", *data.shape)
     var_fit = fit_var(data, node_names=node_cols, max_lags=args.max_lags)

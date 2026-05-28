@@ -35,6 +35,7 @@ def run_grid_robustness(
             .with_columns(((pl.col(ts_col) // grid) * grid).alias("_grid_ts"))
             .group_by(["event_id", "node_id", "_grid_ts"])
             .last()
+            .drop(ts_col)           # remove original before renaming bucket
             .rename({"_grid_ts": ts_col})
             .sort(["node_id", ts_col])
         )
@@ -55,7 +56,7 @@ def subsample_without_dominant(
 
 def subsample_cex_only(
     panel: pl.DataFrame,
-    layer_col: str = "node_layer",
+    layer_col: str = "layer",
 ) -> pl.DataFrame:
     """Return panel with only CEX nodes for robustness check."""
     return panel.filter(pl.col(layer_col) == "CEX")

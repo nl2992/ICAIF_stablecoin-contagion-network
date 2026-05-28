@@ -1,0 +1,3 @@
+causing_node,caused_node,f_stat,p_value,significant
+usdc_binance,busd_binance,4.659111986615254,0.004392742629750633,true
+busd_binance,usdc_binance,1.7888465585685258,0.1544551929073719,false

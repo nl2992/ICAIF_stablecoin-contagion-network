@@ -175,11 +175,20 @@ def main() -> None:
     if "placebo" not in skip:
         logger.info("Placebo window check...")
         try:
+            from datetime import datetime, timezone
             events_cfg = load_events()
-            placebo_windows = build_placebo_windows(events_cfg.get(args.event, {}))
+            ev_cfg = events_cfg.get(args.event, {})
+            aw = ev_cfg.get("analysis_window_utc", [])
+            if len(aw) == 2:
+                _fmt = "%Y-%m-%d"
+                ev_start = datetime.strptime(aw[0], _fmt).replace(tzinfo=timezone.utc)
+                ev_end   = datetime.strptime(aw[1], _fmt).replace(tzinfo=timezone.utc)
+                placebo_windows = build_placebo_windows(ev_start, ev_end)
+            else:
+                placebo_windows = []
             if placebo_windows:
                 placebo_panel = tag_placebo_rows(panel, placebo_windows)
-                placebo_sub = placebo_panel.filter(pl.col("is_placebo") == True)
+                placebo_sub = placebo_panel.filter(pl.col("placebo_id").is_not_null())
                 if placebo_sub.height > 20:
                     pl_pairs = [
                         p for p in node_pairs

@@ -1,0 +1,13 @@
+node_i,node_j,te_i_to_j,p_value,significant_p05,p_value_fdr,significant_fdr
+curve_3pool,usdc_binance,0.39545334898214,0.0,true,0.0,true
+curve_3pool,usdt_binance,0.39545334898214,0.0,true,0.0,true
+usdc_binance,curve_3pool,0.3258876592762945,0.0,true,0.0,true
+usdt_binance,curve_3pool,0.3258876592762945,0.0,true,0.0,true
+busd_binance,curve_3pool,0.04294349601336511,1.0,false,1.0,false
+busd_binance,usdc_binance,0.03963917154438601,0.0,true,0.0,true
+busd_binance,usdt_binance,0.03963917154438601,0.0,true,0.0,true
+curve_3pool,busd_binance,0.023799931451147525,0.0,true,0.0,true
+usdc_binance,busd_binance,0.011670578222928628,0.0,true,0.0,true
+usdt_binance,busd_binance,0.011670578222928628,0.0,true,0.0,true
+usdc_binance,usdt_binance,0.0,1.0,false,1.0,false
+usdt_binance,usdc_binance,0.0,1.0,false,1.0,false

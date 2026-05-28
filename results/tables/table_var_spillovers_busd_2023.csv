@@ -1,0 +1,5 @@
+caused_node,causing_node,fevd_share,horizon,method
+busd_binance,busd_binance,0.12921590527873564,10,fevd
+busd_binance,usdc_binance,0.8707840947212643,10,fevd
+usdc_binance,busd_binance,0.08083498857767567,10,fevd
+usdc_binance,usdc_binance,0.9191650114223244,10,fevd

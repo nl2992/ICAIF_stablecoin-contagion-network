@@ -1,0 +1,7 @@
+node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+usdc_binance,usdt_binance,0,0.9999999999999998,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_binance,busd_binance,58,0.8472830463264689,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,usdc_binance,0,0.9999999999999998,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,busd_binance,58,0.8472830463264689,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,usdc_binance,-58,0.8472830463264689,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,usdt_binance,-58,0.8472830463264689,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

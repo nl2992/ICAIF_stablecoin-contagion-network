@@ -1,13 +1,13 @@
-node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr
-usdt_binance,ust_binance,5,-0.251350774291623,0.001,true,0.004,true
-usdt_binance,curve_3pool,-59,0.32142766987021404,0.351,false,0.45359999999999995,false
-usdt_binance,curve_ust_wormhole,-59,0.32142766987021404,0.378,false,0.45359999999999995,false
-ust_binance,usdt_binance,-5,-0.251350774291623,0.01,false,0.03,true
-ust_binance,curve_3pool,-60,-0.2985470543642913,0.34,false,0.45359999999999995,false
-ust_binance,curve_ust_wormhole,-60,-0.2985470543642913,0.376,false,0.45359999999999995,false
-curve_3pool,usdt_binance,59,0.32142766987021404,0.255,false,0.45359999999999995,false
-curve_3pool,ust_binance,60,-0.2985470543642913,0.481,false,0.5247272727272727,false
-curve_3pool,curve_ust_wormhole,0,1.0,0.0,true,0.0,true
-curve_ust_wormhole,usdt_binance,59,0.32142766987021404,0.242,false,0.45359999999999995,false
-curve_ust_wormhole,ust_binance,60,-0.2985470543642913,0.54,false,0.54,false
-curve_ust_wormhole,curve_3pool,0,1.0,0.0,true,0.0,true
+node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+usdt_binance,ust_binance,5,-0.251350774291623,0.001,true,0.004,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_3pool,-59,0.32142766987021404,0.351,false,0.45359999999999995,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,curve_ust_wormhole,-59,0.32142766987021404,0.378,false,0.45359999999999995,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+ust_binance,usdt_binance,-5,-0.251350774291623,0.01,false,0.03,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,curve_3pool,-60,-0.2985470543642913,0.34,false,0.45359999999999995,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+ust_binance,curve_ust_wormhole,-60,-0.2985470543642913,0.376,false,0.45359999999999995,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdt_binance,59,0.32142766987021404,0.255,false,0.45359999999999995,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,ust_binance,60,-0.2985470543642913,0.481,false,0.5247272727272727,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,curve_ust_wormhole,0,1.0,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_ust_wormhole,usdt_binance,59,0.32142766987021404,0.242,false,0.45359999999999995,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_ust_wormhole,ust_binance,60,-0.2985470543642913,0.54,false,0.54,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_ust_wormhole,curve_3pool,0,1.0,0.0,true,0.0,true,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.

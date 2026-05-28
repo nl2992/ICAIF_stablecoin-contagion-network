@@ -1,31 +1,31 @@
-node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr
-usdt_binance,busd_binance,60,-0.4528405507372991,0.0,true,0.0,true
-usdt_binance,curve_3pool,17,-0.34067064959960186,0.299,false,1.0,false
-usdt_binance,eth_usdc_exchange_flows,22,-0.5283983072629955,1.0,false,1.0,false
-usdt_binance,eth_usdt_exchange_flows,23,-0.5254768992446267,1.0,false,1.0,false
-usdt_binance,eth_bridge_flows,28,-0.621220037528043,1.0,false,1.0,false
-busd_binance,usdt_binance,-60,-0.4528405507372991,0.0,true,0.0,true
-busd_binance,curve_3pool,60,-0.22965790272119072,0.557,false,1.0,false
-busd_binance,eth_usdc_exchange_flows,-56,NaN,0.0,true,0.0,true
-busd_binance,eth_usdt_exchange_flows,-56,NaN,0.0,true,0.0,true
-busd_binance,eth_bridge_flows,-56,NaN,0.0,true,0.0,true
-curve_3pool,usdt_binance,-17,-0.3406706495996018,0.12,false,0.6,false
-curve_3pool,busd_binance,-60,-0.22965790272119072,0.29,false,1.0,false
-curve_3pool,eth_usdc_exchange_flows,2,0.9957192205477989,1.0,false,1.0,false
-curve_3pool,eth_usdt_exchange_flows,3,0.9957030101819728,1.0,false,1.0,false
-curve_3pool,eth_bridge_flows,6,0.9956726726961767,1.0,false,1.0,false
-eth_usdc_exchange_flows,usdt_binance,-22,-0.5283983072629955,1.0,false,1.0,false
-eth_usdc_exchange_flows,busd_binance,46,NaN,1.0,false,1.0,false
-eth_usdc_exchange_flows,curve_3pool,-2,0.995719220547799,1.0,false,1.0,false
-eth_usdc_exchange_flows,eth_usdt_exchange_flows,1,1.0,1.0,false,1.0,false
-eth_usdc_exchange_flows,eth_bridge_flows,4,1.0,1.0,false,1.0,false
-eth_usdt_exchange_flows,usdt_binance,-23,-0.5254768992446267,1.0,false,1.0,false
-eth_usdt_exchange_flows,busd_binance,46,NaN,1.0,false,1.0,false
-eth_usdt_exchange_flows,curve_3pool,-3,0.9957030101819727,1.0,false,1.0,false
-eth_usdt_exchange_flows,eth_usdc_exchange_flows,-1,1.0,1.0,false,1.0,false
-eth_usdt_exchange_flows,eth_bridge_flows,3,1.0,1.0,false,1.0,false
-eth_bridge_flows,usdt_binance,-28,-0.621220037528043,1.0,false,1.0,false
-eth_bridge_flows,busd_binance,46,NaN,1.0,false,1.0,false
-eth_bridge_flows,curve_3pool,-6,0.9956726726961767,1.0,false,1.0,false
-eth_bridge_flows,eth_usdc_exchange_flows,-4,1.0,1.0,false,1.0,false
-eth_bridge_flows,eth_usdt_exchange_flows,-3,1.0,1.0,false,1.0,false
+node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+usdt_binance,busd_binance,60,-0.4528405507372991,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_3pool,17,-0.34067064959960186,0.299,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,eth_usdc_exchange_flows,22,-0.5283983072629955,1.0,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,eth_usdt_exchange_flows,23,-0.5254768992446267,1.0,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+usdt_binance,eth_bridge_flows,28,-0.621220037528043,1.0,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+busd_binance,usdt_binance,-60,-0.4528405507372991,0.0,true,0.0,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,curve_3pool,60,-0.22965790272119072,0.557,false,1.0,false,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+busd_binance,eth_usdc_exchange_flows,-56,NaN,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+busd_binance,eth_usdt_exchange_flows,-56,NaN,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+busd_binance,eth_bridge_flows,-56,NaN,0.0,true,0.0,true,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,usdt_binance,-17,-0.3406706495996018,0.12,false,0.6,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,busd_binance,-60,-0.22965790272119072,0.29,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,eth_usdc_exchange_flows,2,0.9957192205477989,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,eth_usdt_exchange_flows,3,0.9957030101819728,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+curve_3pool,eth_bridge_flows,6,0.9956726726961767,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,usdt_binance,-22,-0.5283983072629955,1.0,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,busd_binance,46,NaN,1.0,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,curve_3pool,-2,0.995719220547799,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,eth_usdt_exchange_flows,1,1.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdc_exchange_flows,eth_bridge_flows,4,1.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,usdt_binance,-23,-0.5254768992446267,1.0,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,busd_binance,46,NaN,1.0,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,curve_3pool,-3,0.9957030101819727,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,eth_usdc_exchange_flows,-1,1.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_usdt_exchange_flows,eth_bridge_flows,3,1.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,usdt_binance,-28,-0.621220037528043,1.0,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,busd_binance,46,NaN,1.0,false,1.0,false,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,curve_3pool,-6,0.9956726726961767,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,eth_usdc_exchange_flows,-4,1.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
+eth_bridge_flows,eth_usdt_exchange_flows,-3,1.0,1.0,false,1.0,false,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.

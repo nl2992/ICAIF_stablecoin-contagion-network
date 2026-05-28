@@ -108,7 +108,7 @@ def _node_features(event_id: str, node: Node, df: pl.DataFrame, shock_onset) -> 
                 .alias("basis_vs_usd")
             )
 
-    return df.with_columns(
+    df = df.with_columns(
         pl.lit(event_id).alias("event_id"),
         pl.lit(node.id).alias("node_id"),
         pl.lit(node.layer).alias("layer"),
@@ -120,6 +120,22 @@ def _node_features(event_id: str, node: Node, df: pl.DataFrame, shock_onset) -> 
             "event_time_seconds"
         ),
     )
+    # Add event_phase label based on event_time_seconds (T=0 = shock onset)
+    # pre < 0  ≤  onset < 6h  ≤  panic < 72h  ≤  recovery < 168h  ≤  post
+    _h = 3600
+    df = df.with_columns(
+        pl.when(pl.col("event_time_seconds") < 0)
+        .then(pl.lit("pre"))
+        .when(pl.col("event_time_seconds") < 6 * _h)
+        .then(pl.lit("onset"))
+        .when(pl.col("event_time_seconds") < 72 * _h)
+        .then(pl.lit("panic"))
+        .when(pl.col("event_time_seconds") < 168 * _h)
+        .then(pl.lit("recovery"))
+        .otherwise(pl.lit("post"))
+        .alias("event_phase")
+    )
+    return df
 
 
 def _add_downstream_labels(panel: pl.DataFrame, grid_seconds: int = 60) -> pl.DataFrame:

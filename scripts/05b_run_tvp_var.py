@@ -36,6 +36,8 @@ def main() -> None:
     parser.add_argument("--forgetting-factor", type=float, default=0.99)
     parser.add_argument("--max-lags", type=int, default=5)
     parser.add_argument("--fevd-horizon", type=int, default=10)
+    parser.add_argument("--paper-mode", action="store_true",
+                        help="Restrict to real (non-fixture) nodes only.")
     args = parser.parse_args()
 
     events = load_events()
@@ -48,32 +50,94 @@ def main() -> None:
 
     panel = pl.read_parquet(panel_path)
     nodes = nodes_for_event(args.event)
-    node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
 
-    if not node_ids:
-        raise SystemExit("No configured nodes found in panel.")
+    if args.paper_mode:
+        real_node_ids = (
+            panel.filter(pl.col("tier_actual") != "fixture_non_empirical")
+            ["node_id"].unique().to_list()
+        )
+        node_ids = [n.id for n in nodes if n.id in real_node_ids]
+        logger.info("--paper-mode: restricting to %d real nodes", len(node_ids))
+    else:
+        node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
+
+    if len(node_ids) < 2:
+        logger.warning(
+            "Fewer than 2 nodes for event '%s'%s — skipping TVP-VAR.",
+            args.event,
+            " in paper-mode" if args.paper_mode else "",
+        )
+        return
 
     feature_col = args.feature_col
     ts_col = "event_time_seconds"
 
-    # Build (T, N) matrix from pivot
+    # Build (T, N) matrix from pivot — hourly grid to align mixed-resolution series
+    _HOUR = 3600
+    sub = (
+        panel
+        .filter(pl.col("node_id").is_in(node_ids))
+        .filter(pl.col("tier_actual") != "fixture_non_empirical")
+        .select(["node_id", ts_col, feature_col])
+        .with_columns(
+            ((pl.col(ts_col) // _HOUR) * _HOUR).alias("hour_bucket")
+        )
+        .group_by(["node_id", "hour_bucket"])
+        .agg(pl.col(feature_col).mean().alias(feature_col))
+    )
+
     pivot = (
-        panel.filter(pl.col("node_id").is_in(node_ids))
-        .select([ts_col, "node_id", feature_col])
-        .pivot(values=feature_col, index=ts_col, on="node_id")
-        .sort(ts_col)
+        sub
+        .pivot(values=feature_col, index="hour_bucket", on="node_id")
+        .sort("hour_bucket")
     )
 
     available_nodes = [n for n in node_ids if n in pivot.columns]
     if len(available_nodes) < 2:
-        raise SystemExit("Need at least 2 nodes with non-null data for TVP-VAR.")
+        logger.warning(
+            "Need at least 2 nodes with data after resampling for event '%s' — skipping.",
+            args.event,
+        )
+        return
 
-    timestamps = pivot[ts_col].to_numpy().astype(float)
-    data = pivot.select(available_nodes).to_numpy().astype(float)
+    # Drop nodes with fewer than MIN_ROWS of data
+    _MIN_ROWS = 48  # at least 48 hourly obs
+    available_nodes = [
+        c for c in available_nodes
+        if pivot[c].drop_nulls().len() >= _MIN_ROWS
+    ]
+    if len(available_nodes) < 2:
+        logger.warning(
+            "Fewer than 2 nodes with >= %d hourly observations for event '%s' — skipping.",
+            _MIN_ROWS, args.event,
+        )
+        return
+
+    # Restrict to rows where ALL selected nodes have data (overlap period)
+    overlap = pivot.select(["hour_bucket"] + available_nodes).drop_nulls()
+    if overlap.height < _MIN_ROWS:
+        logger.warning(
+            "Overlap period only %d hours for event '%s' — need >= %d. Skipping TVP-VAR.",
+            overlap.height, args.event, _MIN_ROWS,
+        )
+        return
+
+    # Auto-scale window size if larger than overlap period
+    effective_window = min(args.window_size, overlap.height // 2)
+    effective_step   = min(args.step_size, effective_window // 4)
+    if effective_window != args.window_size:
+        logger.info(
+            "Auto-scaled window %d→%d, step %d→%d to fit %d-row overlap.",
+            args.window_size, effective_window, args.step_size, effective_step, overlap.height,
+        )
+
+    timestamps = overlap["hour_bucket"].to_numpy().astype(float)
+    data = overlap.select(available_nodes).to_numpy().astype(float)
 
     logger.info(
-        "TVP-VAR (%s): %d nodes × %d timesteps",
+        "TVP-VAR (%s): %d nodes × %d overlap timesteps (window=%d, step=%d)",
         args.window_type, len(available_nodes), len(timestamps),
+        effective_window, effective_step,
     )
 
     tvp_df = run_tvp_var(
@@ -81,8 +145,8 @@ def main() -> None:
         node_names=available_nodes,
         timestamps=timestamps,
         window_type=args.window_type,
-        window_size=args.window_size,
-        step_size=args.step_size,
+        window_size=effective_window,
+        step_size=effective_step,
         forgetting_factor=args.forgetting_factor,
         max_lags=args.max_lags,
         fevd_horizon=args.fevd_horizon,

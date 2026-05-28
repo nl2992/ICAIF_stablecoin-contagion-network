@@ -1,0 +1,2 @@
+node_id,has_baseline,estimation_mean,estimation_std,cab_event,p_value,significant_p05,first_deviation_ts,n_pre_obs,n_event_obs,transmission_rank,event_id
+usdt_binance,true,-0.0001316028806283081,0.00025189524567447856,48395.13970134099,0.0,true,11220.0,7200,10080,1,usdt_curve_2023

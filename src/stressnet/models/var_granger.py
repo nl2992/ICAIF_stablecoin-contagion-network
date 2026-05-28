@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
+from stressnet.models.leadlag import fdr_correct
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -84,7 +85,13 @@ def granger_causality_table(
 ) -> pl.DataFrame:
     """Compute pairwise Granger causality test results from a fitted VAR.
 
-    Returns a DataFrame with columns: causing_node, caused_node, f_stat, p_value, significant.
+    Columns returned:
+        causing_node, caused_node, f_stat, p_value,
+        significant_p05      (unadjusted Bonferroni-like threshold for reporting)
+        p_value_fdr          (BH-FDR adjusted p-value)
+        significant_fdr      (FDR < significance_level)
+        p_bonferroni         (Bonferroni adjusted p-value)
+        significant_bonferroni
     """
     results = var_fit["results"]
     names = var_fit["node_names"]
@@ -100,21 +107,38 @@ def granger_causality_table(
                     "caused_node": caused,
                     "f_stat": float(test.test_statistic),
                     "p_value": float(test.pvalue),
-                    "significant": float(test.pvalue) < significance_level,
                 })
             except Exception as exc:
                 logger.debug("Granger test failed for %s→%s: %s", causing, caused, exc)
+
+    _empty_schema = {
+        "causing_node": pl.String, "caused_node": pl.String,
+        "f_stat": pl.Float64, "p_value": pl.Float64,
+        "significant_p05": pl.Boolean,
+        "p_value_fdr": pl.Float64, "significant_fdr": pl.Boolean,
+        "p_bonferroni": pl.Float64, "significant_bonferroni": pl.Boolean,
+    }
     if not rows:
-        return pl.DataFrame(
-            schema={
-                "causing_node": pl.String,
-                "caused_node": pl.String,
-                "f_stat": pl.Float64,
-                "p_value": pl.Float64,
-                "significant": pl.Boolean,
-            }
-        )
-    return pl.DataFrame(rows)
+        return pl.DataFrame(schema=_empty_schema)
+
+    df = pl.DataFrame(rows)
+    n_tests = len(df)
+    p_arr = df["p_value"].to_numpy()
+
+    # BH-FDR
+    reject_fdr, adj_p_fdr = fdr_correct(p_arr, alpha=significance_level)
+
+    # Bonferroni
+    p_bonf = np.minimum(p_arr * n_tests, 1.0)
+    sig_bonf = p_bonf < significance_level
+
+    return df.with_columns(
+        (pl.col("p_value") < significance_level).alias("significant_p05"),
+        pl.Series("p_value_fdr",          adj_p_fdr),
+        pl.Series("significant_fdr",      reject_fdr),
+        pl.Series("p_bonferroni",         p_bonf),
+        pl.Series("significant_bonferroni", sig_bonf),
+    )
 
 
 def fevd_spillover_table(var_fit: dict, horizon: int = 10) -> pl.DataFrame:

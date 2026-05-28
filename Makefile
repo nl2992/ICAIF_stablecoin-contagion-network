@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps combine maps leadlag var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper empirical empirical_all paper_gate mvp usdc all
+.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps combine maps leadlag var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
 
 setup:
 	pip install -r requirements.txt
@@ -80,17 +80,19 @@ summary:
 	python scripts/11c_summarise_robustness.py
 	python scripts/11_summarise_results.py
 
+# Diagnostic paper build (reads results/tables, no claim enforcement)
 paper:
 	python scripts/99_make_paper_outputs.py
 
-# paper_gate: annotate ALL events, write claim-gated tables to results/paper/tables/
-# Fails (exit 1) if any paper-path table contains fixture-derived edges.
+# Claim-gated paper build: annotate all events, strict-exit on fixture,
+# then assemble final paper outputs exclusively from results/paper/tables/.
 paper_gate:
 	python scripts/00c_claim_gate.py --all-events --strict
-	python scripts/99_make_paper_outputs.py
+	python scripts/99_make_paper_outputs.py --strict
 
-# run an empirical paper-claim pipeline for one event. This target disables
-# fixture fallback and gates result edges by endpoint provenance before paper use.
+# run an empirical paper-claim pipeline for one event.
+# Disables fixture fallback; gates result edges by provenance; uses --paper-mode
+# for all analysis scripts so only real nodes enter the model.
 empirical:
 	python scripts/00_make_event_windows.py
 	python scripts/01_ingest_raw_data.py --event $(EVENT) --no-fixture
@@ -108,22 +110,26 @@ empirical:
 	python scripts/12_run_event_study.py --event $(EVENT) --paper-mode
 	python scripts/00c_claim_gate.py --event $(EVENT)
 
+# Run all 5 events empirically then assemble claim-gated paper outputs.
 empirical_all:
 	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
 		$(MAKE) empirical EVENT=$$event GRID=$(GRID); \
 	done
 	$(MAKE) paper_gate
 
-# run empirical-control pipeline for one event. Hawkes is optional until its
-# dependency is installed and configured.
+# MVP demo: fixture-allowed, single event, no claim gate (for orchestration testing only)
 mvp: windows ingest reconstruct panel eventmaps leadlag var te network
 
 usdc:
 	$(MAKE) mvp EVENT=usdc_svb_2023
 
-# run all events sequentially
-all:
+# demo_all: run mvp (fixture-allowed) for all events + diagnostic paper build.
+# WARNING: outputs may contain fixture-derived edges; do NOT use for paper claims.
+demo_all:
 	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
 		$(MAKE) mvp EVENT=$$event; \
 	done
 	$(MAKE) paper
+
+# all: canonical paper-safe target. Runs empirical_all (real data only).
+all: empirical_all

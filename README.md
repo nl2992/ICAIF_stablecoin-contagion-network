@@ -127,18 +127,25 @@ See `Makefile` for per-step targets (`leadlag`, `var`, `hawkes`, `te`, `network`
 
 ## Current empirical status
 
-The repo is pipeline-complete but evidence-incomplete. The strict paper gate
-currently blocks headline microstructure claims unless paper tables contain at
-least one `A_A_directional_microstructure` edge. This is deliberate: Tier-B
-proxy data can support contextual or suggestive language, but not execution-grade
-CEX/DEX microstructure claims.
+**See [`DATA_INVENTORY.md`](DATA_INVENTORY.md) for the full, verified inventory of what data is real, what is Tier B proxy, and what is fixture.**
 
-Silver and gold panels carry explicit quality flags such as
-`microstructure_quality`, `depth_source`, `executable_price_source`, and
-`is_executable_bookwalk` so BBO/candle proxies cannot be mistaken for true
-Level-2 book-walk evidence. Consolidated coverage tables also include
-`coverage_pct`, sequence-gap, resync, and clock-offset diagnostics when
-available.
+The repo is pipeline-complete but evidence-incomplete. Verified provenance as of 2026-05-29:
+
+| Tier | Nodes | Events |
+|---|---|---|
+| **A (real)** | `usdc_mint_burn` | usdc_svb_2023 only |
+| **B (real proxy)** | `curve_3pool`, `curve_ust_wormhole`, `curve_crvusd_usdt`, all Binance nodes, `usdc_coinbase`, CoinMetrics flows | All 5 events |
+| **fixture** | `usdc_kraken`, `usdt_kraken`, `uniswap_usdc_usdt_005`, `eth_bridge_flows`, `usdt_mint_burn`, `tron_usdt_exchange_flows` | Various |
+
+The strict paper gate blocks headline microstructure claims unless at least one
+`A_A_directional_microstructure` edge is present. No such edge currently exists.
+All 881 result rows are B/B ("contextual co-movement"), which is valid for
+publication but not sufficient for execution-grade microstructure claims.
+
+Key pending actions to unlock A/A:
+1. Set `ETHERSCAN_API_KEY` and re-run `scripts/01_fetch_raw_data.py` → unlocks `usdt_mint_burn` as real Tier A
+2. Fix Curve `ingest_curve_pool_events` to return `'A'` for `usdc_net_sold_1h` (raw on-chain flow) → `usdc_mint_burn` ↔ `curve_3pool` becomes A/A for usdc_svb_2023
+3. Fix decimal scaling in `curve_crvusd_usdt` (`reserve_imbalance ~ 1e9` is a raw-token normalizer bug)
 
 Use:
 
@@ -146,10 +153,6 @@ Use:
 make coveragegate EVENT=usdc_svb_2023
 python scripts/00c_claim_gate.py --all-events --strict
 ```
-
-The first command checks that an event has enough real nodes for modelling. The
-second command writes claim-filtered paper tables and fails if fixture, missing,
-or non-headline-grade evidence would leak into strict paper outputs.
 
 ## Repository structure
 

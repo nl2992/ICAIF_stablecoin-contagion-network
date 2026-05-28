@@ -119,6 +119,10 @@ def ingest_uniswap_pool_swaps(
 
         # amount0 = USDC (token0), amount1 = USDT (token1)
         # Both have 6 decimals; positive = in, negative = out
+        # TODO: verify against a raw sample whether The Graph already normalises
+        # amounts. If so, remove the /1e6 division to avoid double-scaling.
+        # USDC decimals=6, USDT decimals=6. If raw amounts are already in decimal
+        # units (confirmed by The Graph schema), this division must be removed.
         try:
             amt0 = float(swap.get("amount0", 0)) / 1e6
         except (ValueError, TypeError):

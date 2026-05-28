@@ -2,9 +2,19 @@
 
 Fetches TokenExchange / AddLiquidity / RemoveLiquidity events from Etherscan
 and decodes key fields via minimal ABI parsing (no web3.py dependency).
-Tier A: events are directly on-chain; reserve reconstruction is approximate
-(Tier B) because we cannot cheaply call get_balances() at historical blocks
-without a full archive node.
+
+Tier assignment:
+  - ``usdc_net_sold_1h``: Tier A — direct hourly sum from on-chain TokenExchange logs.
+  - ``reserve_imbalance``, ``implied_pool_price``: Tier B — derived proxy.
+    The normaliser is hardcoded per pool and the price formula is approximate
+    (true balances require an archive-RPC call to get_balances()).
+
+Pool-type notes:
+  - Classic 3pool and meta-pools: amounts in events use the token's *native*
+    decimals (e.g. 6 for USDC/USDT, 18 for DAI/UST/3CRV).
+  - StableSwap-ng pools (e.g. crvUSD/USDT): amounts are emitted in a uniform
+    18-decimal internal representation.  The ``ng_scaled`` flag in
+    ``_POOL_CONFIGS`` controls which normaliser to apply.
 """
 
 from __future__ import annotations
@@ -21,8 +31,14 @@ from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+# ---------------------------------------------------------------------------
+# Contract addresses
+# ---------------------------------------------------------------------------
+
 # Curve 3pool (DAI/USDC/USDT) on Ethereum
-CURVE_3POOL_ADDRESS = "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"
+CURVE_3POOL_ADDRESS    = "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"
+CURVE_UST_WORMHOLE     = "0xCEAF7747579696A2F0bb206a14210e3c9e6fB269"
+CURVE_CRVUSD_USDT      = "0x390f3595bCa2Df7d23783dFd126427CCeb997BF4"
 
 # Event topic0 hashes
 TOPIC_TOKEN_EXCHANGE = "0x8b3e96f2b889fa771c53c981b40daf005f63f637f1869f707052d15a3dd97140"
@@ -32,6 +48,76 @@ TOPIC_REMOVE_LIQUIDITY_IMBALANCE = "0x2b5508378d7e19e0d5fa338419034731416c4f5b21
 
 # Token index → (symbol, decimals) for Curve 3pool
 _3POOL_TOKENS = {0: ("DAI", 18), 1: ("USDC", 6), 2: ("USDT", 6)}
+
+# ---------------------------------------------------------------------------
+# Per-pool configuration
+# ---------------------------------------------------------------------------
+
+class PoolConfig:
+    """Static config for one Curve pool."""
+
+    __slots__ = (
+        "tokens",           # {idx: (symbol, native_decimals)}
+        "stablecoin_symbol",  # symbol to track as stress indicator
+        "pool_size_usd",    # approximate TVL at time of events (normaliser)
+        "ng_scaled",        # True → amounts in events are 18-dec internal units
+    )
+
+    def __init__(
+        self,
+        tokens: dict[int, tuple[str, int]],
+        stablecoin_symbol: str,
+        pool_size_usd: float,
+        ng_scaled: bool = False,
+    ) -> None:
+        self.tokens           = tokens
+        self.stablecoin_symbol = stablecoin_symbol
+        self.pool_size_usd    = pool_size_usd
+        self.ng_scaled        = ng_scaled
+
+    def normalize_amount(self, token_idx: int, raw_amount: int) -> float:
+        """Return human-scale token amount given a raw ABI uint256."""
+        if self.ng_scaled:
+            # StableSwap-ng emits amounts in 18-dec internal units
+            return raw_amount / 1e18
+        _, dec = self.tokens.get(token_idx, ("UNK", 18))
+        return raw_amount / (10 ** dec)
+
+
+_POOL_CONFIGS: dict[str, PoolConfig] = {
+    CURVE_3POOL_ADDRESS.lower(): PoolConfig(
+        tokens           = {0: ("DAI", 18), 1: ("USDC", 6), 2: ("USDT", 6)},
+        stablecoin_symbol = "USDC",
+        pool_size_usd    = 500_000_000,   # 3pool peak TVL ~$3B; use conservative 500M
+        ng_scaled        = False,
+    ),
+    CURVE_UST_WORMHOLE.lower(): PoolConfig(
+        tokens           = {0: ("UST", 18), 1: ("3CRV", 18)},
+        stablecoin_symbol = "UST",
+        pool_size_usd    = 500_000_000,   # was large before Terra collapse
+        ng_scaled        = False,
+    ),
+    CURVE_CRVUSD_USDT.lower(): PoolConfig(
+        # StableSwap-ng pool: amounts in events are 18-dec internally.
+        # Native decimals only matter for symbol lookup, not normalisation.
+        tokens           = {0: ("crvUSD", 18), 1: ("USDT", 6)},
+        stablecoin_symbol = "USDT",
+        pool_size_usd    = 30_000_000,    # ~$30M TVL in June 2023
+        ng_scaled        = True,
+    ),
+}
+
+def _get_pool_config(contract_address: str) -> PoolConfig:
+    """Return PoolConfig for *contract_address*, falling back to 3pool defaults."""
+    cfg = _POOL_CONFIGS.get(contract_address.lower())
+    if cfg is None:
+        logger.warning(
+            "No pool config for %s; using 3pool defaults.  "
+            "Add an entry to _POOL_CONFIGS in curve.py for correct behaviour.",
+            contract_address,
+        )
+        cfg = _POOL_CONFIGS[CURVE_3POOL_ADDRESS.lower()]
+    return cfg
 
 
 # ---------------------------------------------------------------------------
@@ -67,50 +153,81 @@ def _decode_int128(data_hex: str, slot: int) -> int | None:
         return None
 
 
-def decode_token_exchange(data_hex: str) -> dict[str, Any]:
+def decode_token_exchange(
+    data_hex: str,
+    pool_cfg: "PoolConfig | None" = None,
+) -> dict[str, Any]:
     """Decode Curve TokenExchange event data field.
 
-    ABI layout (non-indexed): int128 sold_id | uint256 tokens_sold |
-                               int128 bought_id | uint256 tokens_bought
+    ABI layout (non-indexed): int128/uint256 sold_id | uint256 tokens_sold |
+                               int128/uint256 bought_id | uint256 tokens_bought
+
+    Args:
+        data_hex:  The ABI-encoded ``data`` field from the Etherscan log.
+        pool_cfg:  Per-pool config controlling token map and decimal handling.
+                   Falls back to the classic 3pool mapping when ``None``.
     """
-    sold_id     = _decode_int128(data_hex, 0)
-    tokens_sold = _decode_uint256(data_hex, 1)
-    bought_id   = _decode_int128(data_hex, 2)
+    if pool_cfg is None:
+        # Backward-compatible fallback — uses 3pool token map
+        pool_cfg = _POOL_CONFIGS[CURVE_3POOL_ADDRESS.lower()]
+
+    sold_id       = _decode_int128(data_hex, 0)
+    tokens_sold   = _decode_uint256(data_hex, 1)
+    bought_id     = _decode_int128(data_hex, 2)
     tokens_bought = _decode_uint256(data_hex, 3)
     if sold_id is None or tokens_sold is None:
         return {}
-    _, sold_dec    = _3POOL_TOKENS.get(sold_id,   ("UNK", 18))
-    _, bought_dec  = _3POOL_TOKENS.get(bought_id, ("UNK", 18))
+
+    sold_sym,  _ = pool_cfg.tokens.get(sold_id,   ("UNK", 18))
+    bought_sym, _ = pool_cfg.tokens.get(bought_id, ("UNK", 18))
+
     return {
-        "sold_id":          sold_id,
-        "sold_symbol":      _3POOL_TOKENS.get(sold_id, ("UNK",))[0],
-        "tokens_sold_raw":  tokens_sold,
-        "tokens_sold":      tokens_sold / (10 ** sold_dec),
-        "bought_id":        bought_id,
-        "bought_symbol":    _3POOL_TOKENS.get(bought_id, ("UNK",))[0],
+        "sold_id":           sold_id,
+        "sold_symbol":       sold_sym,
+        "tokens_sold_raw":   tokens_sold,
+        "tokens_sold":       pool_cfg.normalize_amount(sold_id, tokens_sold),
+        "bought_id":         bought_id,
+        "bought_symbol":     bought_sym,
         "tokens_bought_raw": tokens_bought,
-        "tokens_bought":    (tokens_bought or 0) / (10 ** bought_dec),
+        "tokens_bought":     pool_cfg.normalize_amount(bought_id, tokens_bought or 0),
     }
 
 
-def decode_add_liquidity(data_hex: str) -> dict[str, Any]:
-    """Decode AddLiquidity event data: uint256[3] token_amounts | uint256[3] fees | ..."""
-    amounts = [_decode_uint256(data_hex, i) for i in range(3)]
-    decimals = [18, 6, 6]  # DAI, USDC, USDT
-    amounts_norm = [
-        (a or 0) / (10 ** d) for a, d in zip(amounts, decimals)
-    ]
-    return {"dai_in": amounts_norm[0], "usdc_in": amounts_norm[1], "usdt_in": amounts_norm[2]}
+def decode_add_liquidity(
+    data_hex: str,
+    pool_cfg: "PoolConfig | None" = None,
+) -> dict[str, Any]:
+    """Decode AddLiquidity event data: uint256[N] token_amounts | ..."""
+    if pool_cfg is None:
+        pool_cfg = _POOL_CONFIGS[CURVE_3POOL_ADDRESS.lower()]
+    n_tokens = len(pool_cfg.tokens)
+    amounts_raw = [_decode_uint256(data_hex, i) for i in range(n_tokens)]
+    result: dict[str, float] = {}
+    for idx, raw in enumerate(amounts_raw):
+        sym = pool_cfg.tokens.get(idx, ("tok" + str(idx), 18))[0].lower()
+        result[f"{sym}_in"] = pool_cfg.normalize_amount(idx, raw or 0)
+    # Keep legacy keys for 3pool callers
+    if "usdc_in" not in result and "usdc" not in [v[0].lower() for v in pool_cfg.tokens.values()]:
+        result["usdc_in"] = 0.0
+    return result
 
 
-def decode_remove_liquidity(data_hex: str) -> dict[str, Any]:
+def decode_remove_liquidity(
+    data_hex: str,
+    pool_cfg: "PoolConfig | None" = None,
+) -> dict[str, Any]:
     """Decode RemoveLiquidity event data."""
-    amounts = [_decode_uint256(data_hex, i) for i in range(3)]
-    decimals = [18, 6, 6]
-    amounts_norm = [
-        (a or 0) / (10 ** d) for a, d in zip(amounts, decimals)
-    ]
-    return {"dai_out": amounts_norm[0], "usdc_out": amounts_norm[1], "usdt_out": amounts_norm[2]}
+    if pool_cfg is None:
+        pool_cfg = _POOL_CONFIGS[CURVE_3POOL_ADDRESS.lower()]
+    n_tokens = len(pool_cfg.tokens)
+    amounts_raw = [_decode_uint256(data_hex, i) for i in range(n_tokens)]
+    result: dict[str, float] = {}
+    for idx, raw in enumerate(amounts_raw):
+        sym = pool_cfg.tokens.get(idx, ("tok" + str(idx), 18))[0].lower()
+        result[f"{sym}_out"] = pool_cfg.normalize_amount(idx, raw or 0)
+    if "usdc_out" not in result and "usdc" not in [v[0].lower() for v in pool_cfg.tokens.values()]:
+        result["usdc_out"] = 0.0
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -170,15 +287,26 @@ def ingest_curve_pool_events(
 ) -> tuple[Path | None, str]:
     """Download all Curve pool events and write a bronze pool-events parquet.
 
-    Decodes TokenExchange events to compute running USDC net-sold proxy.
-    Tier is 'A' for the raw events; 'B' for derived reserve estimates.
+    Decodes TokenExchange events to compute a running stablecoin net-sold proxy.
+
+    Tier assignment of the output columns:
+      - ``usdc_net_sold_1h`` : **Tier A** — direct hourly sum from on-chain logs.
+      - ``reserve_imbalance``, ``implied_pool_price`` : **Tier B** — derived proxy
+        (hardcoded pool-size normaliser; not a true reserve-ratio).
+
+    The *node-level* tier returned here is ``'A'`` because the primary feature
+    (``usdc_net_sold_1h``) is execution-grade on-chain data.  Claims using the
+    derived features must be downgraded to B at the edge-claim level.
 
     Returns:
-        (parquet_path, 'B') on success, (None, 'fixture_non_empirical') on failure.
+        (parquet_path, 'A') on success, (None, 'fixture_non_empirical') on failure.
     """
     if not os.environ.get("ETHERSCAN_API_KEY"):
         logger.info("ETHERSCAN_API_KEY not set; skipping Curve ingest for %s", node_id)
         return None, "fixture_non_empirical"
+
+    pool_cfg = _get_pool_config(contract_address)
+    stablecoin_sym = pool_cfg.stablecoin_symbol
 
     topic_map = {
         "TokenExchange":  TOPIC_TOKEN_EXCHANGE,
@@ -207,7 +335,7 @@ def ingest_curve_pool_events(
     )
 
     rows = []
-    usdc_net_sold_cumsum = 0.0  # running proxy: positive = USDC pressure on pool
+    stable_net_sold_cumsum = 0.0  # running proxy: +  = stablecoin into pool
 
     for log in all_logs:
         block_ts_hex = log.get("timeStamp", "0x0")
@@ -215,29 +343,31 @@ def ingest_curve_pool_events(
         data_hex  = log.get("data", "0x")
         evt_type  = log.get("_event_type", "")
 
-        usdc_delta = 0.0
+        stable_delta = 0.0
         if evt_type == "TokenExchange":
-            decoded = decode_token_exchange(data_hex)
+            decoded = decode_token_exchange(data_hex, pool_cfg)
             if decoded:
-                if decoded.get("sold_symbol") == "USDC":
-                    usdc_delta = decoded.get("tokens_sold", 0.0)   # USDC into pool → +
-                elif decoded.get("bought_symbol") == "USDC":
-                    usdc_delta = -decoded.get("tokens_bought", 0.0)  # USDC out → -
+                if decoded.get("sold_symbol") == stablecoin_sym:
+                    stable_delta = decoded.get("tokens_sold", 0.0)   # stable into pool → +
+                elif decoded.get("bought_symbol") == stablecoin_sym:
+                    stable_delta = -decoded.get("tokens_bought", 0.0)  # stable out → -
         elif evt_type == "AddLiquidity":
-            decoded = decode_add_liquidity(data_hex)
-            usdc_delta = decoded.get("usdc_in", 0.0)
+            decoded = decode_add_liquidity(data_hex, pool_cfg)
+            sym_key = f"{stablecoin_sym.lower()}_in"
+            stable_delta = decoded.get(sym_key, 0.0)
         elif evt_type == "RemoveLiquidity":
-            decoded = decode_remove_liquidity(data_hex)
-            usdc_delta = -decoded.get("usdc_out", 0.0)
+            decoded = decode_remove_liquidity(data_hex, pool_cfg)
+            sym_key = f"{stablecoin_sym.lower()}_out"
+            stable_delta = -decoded.get(sym_key, 0.0)
 
-        usdc_net_sold_cumsum += usdc_delta
+        stable_net_sold_cumsum += stable_delta
 
         rows.append({
             "block_ts":          block_ts,
             "wall_clock_utc":    datetime.fromtimestamp(block_ts, tz=timezone.utc) if block_ts else None,
             "event_type":        evt_type,
-            "usdc_net_sold":     usdc_delta,        # per-event USDC flow
-            "usdc_net_sold_cum": usdc_net_sold_cumsum,  # running total
+            "usdc_net_sold":     stable_delta,          # per-event stablecoin flow (legacy col name)
+            "usdc_net_sold_cum": stable_net_sold_cumsum,  # running total (legacy col name)
         })
 
     # Build DataFrame and resample to 1-hour windows to get reserve pressure proxy
@@ -260,13 +390,13 @@ def ingest_curve_pool_events(
         .sort("wall_clock_utc")
     )
 
-    # Compute reserve_imbalance proxy: cumulative USDC sold / reference pool size
-    # Use 3pool typical size ~$500M as normaliser (approximate, Tier B claim)
-    _POOL_SIZE_NORMALISER = 500_000_000.0
+    # Compute reserve_imbalance proxy: cumulative stablecoin sold / pool size
+    # Pool size is per-pool estimate; this is an approximation (Tier B derived feature).
+    pool_size = pool_cfg.pool_size_usd
     df_agg = df_agg.with_columns(
-        (pl.col("usdc_net_sold_cum") / _POOL_SIZE_NORMALISER).alias("reserve_imbalance"),
+        (pl.col("usdc_net_sold_cum") / pool_size).alias("reserve_imbalance"),
         (
-            pl.col("usdc_net_sold_cum") / _POOL_SIZE_NORMALISER
+            pl.col("usdc_net_sold_cum") / pool_size
         ).map_elements(lambda x: 1.0 / (1.0 + abs(x)) if x is not None else None,
                        return_dtype=pl.Float64)
         .alias("implied_pool_price"),
@@ -276,9 +406,10 @@ def ingest_curve_pool_events(
     out_path = out_dir / f"{node_id}_pool_events.parquet"
     df_agg.write_parquet(out_path)
     logger.info(
-        "Wrote %d hourly Curve pool state rows for %s → %s (Tier B proxy)",
+        "Wrote %d hourly Curve pool state rows for %s → %s "
+        "(Tier A: usdc_net_sold_1h; Tier B proxy: reserve_imbalance, implied_pool_price)",
         df_agg.height, node_id, out_path.name,
     )
-    return out_path, "B"
+    return out_path, "A"
 
 

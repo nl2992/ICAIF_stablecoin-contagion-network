@@ -129,25 +129,26 @@ See `Makefile` for per-step targets (`leadlag`, `var`, `hawkes`, `te`, `network`
 
 **See [`DATA_INVENTORY.md`](DATA_INVENTORY.md) for the full, verified inventory of what data is real, what is Tier B proxy, and what is fixture.**
 
-The repo is pipeline-complete but evidence-incomplete. Verified provenance as of 2026-05-29:
+The repo is pipeline-complete. Verified provenance as of 2026-05-29:
 
 | Tier | Nodes | Events |
 |---|---|---|
-| **A (real)** | `usdc_mint_burn` | usdc_svb_2023 only |
-| **B (real proxy)** | `curve_3pool`, `curve_ust_wormhole`, `curve_crvusd_usdt`, all Binance nodes, `usdc_coinbase`, CoinMetrics flows | All 5 events |
+| **A (real)** | `usdc_mint_burn`, all `curve_*` pool nodes | usdc_svb_2023; all 5 events for Curve |
+| **B (real proxy)** | all Binance nodes, `usdc_coinbase`, CoinMetrics flows | All 5 events |
 | **fixture** | `usdc_kraken`, `usdt_kraken`, `uniswap_usdc_usdt_005`, `eth_bridge_flows`, `usdt_mint_burn`, `tron_usdt_exchange_flows` | Various |
 
-The strict paper gate blocks headline microstructure claims unless at least one
-`A_A_directional_microstructure` edge is present. No such edge currently exists.
-All 881 result rows are B/B ("contextual co-movement"), which is valid for
-publication but not sufficient for execution-grade microstructure claims.
+**A/A edges are confirmed in 3 of 5 events:**
 
-Key pending actions to unlock A/A:
-1. Set `ETHERSCAN_API_KEY` and re-run `scripts/01_fetch_raw_data.py` → unlocks `usdt_mint_burn` as real Tier A
-2. Fix Curve `ingest_curve_pool_events` to return `'A'` for `usdc_net_sold_1h` (raw on-chain flow) → `usdc_mint_burn` ↔ `curve_3pool` becomes A/A for usdc_svb_2023
-3. Fix decimal scaling in `curve_crvusd_usdt` (`reserve_imbalance ~ 1e9` is a raw-token normalizer bug)
+| A/A pair | Event |
+|---|---|
+| `usdc_mint_burn` ↔ `curve_3pool` | usdc_svb_2023 |
+| `curve_3pool` ↔ `curve_ust_wormhole` | terra_luna_2022 |
+| `curve_3pool` ↔ `curve_crvusd_usdt` | usdt_curve_2023 |
 
-Use:
+All A/A pairs use `usdc_net_sold_1h` (direct hourly sum from on-chain `TokenExchange` logs).
+Claims using derived features (`reserve_imbalance`, `implied_pool_price`) are A/B, not A/A.
+
+For ftx_2022 and busd_2023, A/B directional evidence is available (curve_3pool A + Binance B nodes).
 
 ```bash
 make coveragegate EVENT=usdc_svb_2023

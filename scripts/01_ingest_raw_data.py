@@ -339,10 +339,11 @@ def main() -> None:
         # ---- fallback to fixture ----
         if path is None:
             if args.no_fixture:
-                logger.error(
-                    "No real data for %s and --no-fixture is set; aborting.", node.id
+                logger.warning(
+                    "No real data for %s and --no-fixture is set; skipping node "
+                    "(will appear as missing in panel).", node.id
                 )
-                raise SystemExit(f"Real data unavailable for {node.id} and --no-fixture set.")
+                continue  # skip this node entirely — no fixture written
 
             if tier != "fixture_non_empirical":
                 logger.info("Real ingest returned no data for %s; using fixture.", node.id)

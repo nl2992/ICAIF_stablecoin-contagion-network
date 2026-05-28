@@ -25,6 +25,8 @@ RESULT_TABLE_PREFIXES = (
     "table_transfer_entropy",
     "table_granger",
     "table_var_spillovers",
+    "table_tvp_var_summary",
+    "table_tvp_var_spillovers",
     "table_tvp_var_edges",
     "table_hawkes_params",
     "table_edges",

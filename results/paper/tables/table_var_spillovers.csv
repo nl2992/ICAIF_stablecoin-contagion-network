@@ -1,18 +1,18 @@
-caused_node,causing_node,fevd_share,horizon,method,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
-usdc_coinbase,usdc_coinbase,0.04702292207585725,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_coinbase,usdt_binance,0.9529770779241427,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdc_coinbase,0.08951537959609601,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,0.910484620403904,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-ust_binance,ust_binance,0.024638401113310247,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-ust_binance,usdt_binance,0.9753615988866898,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,ust_binance,0.0333330596382891,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,0.9666669403617111,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,1.7689528558194396e-10,10,var_abscoef_fallback,usdt_curve_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,busd_binance,0.0018997171871736659,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,usdt_binance,0.9981002828128266,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,busd_binance,0.0011328118257401233,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,0.9988671881742601,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,busd_binance,0.12921590527873564,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,usdc_binance,0.8707840947212643,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_binance,busd_binance,0.08083498857767567,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_binance,usdc_binance,0.9191650114223244,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason,event_id
+usdc_coinbase,usdc_coinbase,0.04702292207585725,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdc_coinbase,usdt_binance,0.9529770779241427,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdt_binance,usdc_coinbase,0.08951537959609601,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdt_binance,usdt_binance,0.910484620403904,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+ust_binance,ust_binance,0.024638401113310247,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+ust_binance,usdt_binance,0.9753615988866898,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,ust_binance,0.0333330596382891,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,usdt_binance,0.9666669403617111,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,usdt_binance,1.7689528558194396e-10,10,var_abscoef_fallback,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+busd_binance,busd_binance,0.0018997171871736659,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+busd_binance,usdt_binance,0.9981002828128266,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+usdt_binance,busd_binance,0.0011328118257401233,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+usdt_binance,usdt_binance,0.9988671881742601,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+busd_binance,busd_binance,0.12921590527873564,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+busd_binance,usdc_binance,0.8707840947212643,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+usdc_binance,busd_binance,0.08083498857767567,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+usdc_binance,usdc_binance,0.9191650114223244,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023

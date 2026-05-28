@@ -41,7 +41,11 @@ _3POOL_TOKENS = {0: ("DAI", 18), 1: ("USDC", 6), 2: ("USDT", 6)}
 def _decode_uint256(data_hex: str, slot: int) -> int | None:
     """Read a uint256 from ABI-encoded data at 32-byte slot `slot` (0-indexed)."""
     try:
-        raw = bytes.fromhex(data_hex.lstrip("0x"))
+        # Use [2:] to strip exactly the "0x" prefix — lstrip("0x") would
+        # incorrectly strip all leading '0' and 'x' chars, corrupting the
+        # ABI-encoded data (e.g. int128(1) starts with 62 leading zeros).
+        hex_str = data_hex[2:] if data_hex.startswith("0x") else data_hex
+        raw = bytes.fromhex(hex_str)
         start = slot * 32
         if len(raw) < start + 32:
             return None
@@ -53,7 +57,8 @@ def _decode_uint256(data_hex: str, slot: int) -> int | None:
 def _decode_int128(data_hex: str, slot: int) -> int | None:
     """Read a signed int128 from ABI-encoded data at 32-byte slot `slot`."""
     try:
-        raw = bytes.fromhex(data_hex.lstrip("0x"))
+        hex_str = data_hex[2:] if data_hex.startswith("0x") else data_hex
+        raw = bytes.fromhex(hex_str)
         start = slot * 32
         if len(raw) < start + 32:
             return None

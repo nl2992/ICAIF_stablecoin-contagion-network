@@ -170,6 +170,17 @@ def main() -> None:
 
     logger.info("Wrote %s (%d rows)", per_window_path.name, tvp_df.height)
     logger.info("Wrote %s (%d rows)", summary_path.name, summary_df.height)
+
+    spillover_df = pl.read_csv(per_window_path)
+    if "method" in spillover_df.columns:
+        fallback_rows = spillover_df.filter(pl.col("method") == "var_coeff_fallback").height
+        if fallback_rows > 0:
+            logger.warning(
+                "%d / %d VAR spillover rows use coefficient fallback (FEVD failed). "
+                "These rows are labelled 'var_coeff_fallback' in the method column.",
+                fallback_rows, spillover_df.height,
+            )
+
     print(summary_df.head(20))
 
 

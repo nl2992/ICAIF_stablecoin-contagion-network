@@ -188,6 +188,7 @@ def hawkes_results_table(
                 row["ci_lower"] = lo
                 row["ci_upper"] = hi
                 row["ci_excludes_zero"] = (not np.isnan(lo)) and lo > 0.0
+                row["contagious"] = row["contagious"] and row["ci_excludes_zero"]
             rows.append(row)
 
     if not rows:

@@ -126,3 +126,73 @@ def test_manifest_all_required_columns_present(tmp_path):
     df = pl.read_csv(manifest_path)
     for col in MANIFEST_COLUMNS:
         assert col in df.columns, f"Missing column: {col}"
+
+
+def test_manifest_records_optional_quality_diagnostics(tmp_path):
+    from stressnet.utils.manifest import append_manifest_row
+
+    manifest_path = tmp_path / "manifests" / "manifest_test.csv"
+    fake_file = tmp_path / "f.parquet"
+    fake_file.write_bytes(b"")
+
+    append_manifest_row(
+        manifest_path,
+        event_id="test_event",
+        node_id="test_node",
+        source_name="test_source",
+        source_tier_nominal="A",
+        source_tier_actual="A",
+        layer="CEX",
+        file_stage="silver",
+        file_path=fake_file,
+        start_utc="2023-03-08T00:00:00Z",
+        end_utc="2023-03-20T23:59:59Z",
+        row_count=100,
+        url_or_query="https://test.example/data",
+        coverage_pct=42.5,
+        sequence_gap_count=3,
+        gap_rate=0.03,
+        resync_count=1,
+        clock_offset_ms=120.0,
+    )
+
+    df = pl.read_csv(manifest_path)
+    assert df["coverage_pct"][0] == 42.5
+    assert df["sequence_gap_count"][0] == 3
+    assert df["gap_rate"][0] == 0.03
+    assert df["resync_count"][0] == 1
+    assert df["clock_offset_ms"][0] == 120.0
+
+
+def test_coverage_table_downgrades_tier_a_with_low_coverage(tmp_path, monkeypatch):
+    import stressnet.utils.manifest as manifest_mod
+
+    manifests = tmp_path / "manifests"
+    results = tmp_path / "results"
+    monkeypatch.setattr(manifest_mod, "manifests_root", lambda: manifests)
+    monkeypatch.setattr(manifest_mod, "results_root", lambda: results)
+
+    fake_file = tmp_path / "node.parquet"
+    fake_file.write_bytes(b"")
+    manifest_mod.append_manifest_row(
+        manifests / "manifest_test_event.csv",
+        event_id="test_event",
+        node_id="tier_a_node",
+        source_name="test_source",
+        source_tier_nominal="A",
+        source_tier_actual="A",
+        layer="CEX",
+        file_stage="silver",
+        file_path=fake_file,
+        start_utc="2023-03-08T00:00:00Z",
+        end_utc="2023-03-20T23:59:59Z",
+        row_count=10,
+        url_or_query="https://test.example/data",
+        coverage_pct=49.0,
+    )
+
+    out = manifest_mod.build_node_coverage_table()
+    assert out == results / "tables" / "table_node_coverage.csv"
+    coverage = pl.read_csv(out)
+    assert coverage["source_tier_actual"][0] == "B"
+    assert coverage["coverage_pct"][0] == 49.0

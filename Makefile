@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps combine maps leadlag var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
 
 setup:
 	pip install -r requirements.txt
@@ -18,6 +18,9 @@ windows:
 
 coverage:
 	python scripts/00_make_event_windows.py --coverage-audit
+
+coveragegate:
+	python scripts/00d_check_empirical_coverage.py --event $(EVENT) --require-layers CEX DEX
 
 audit:
 	python scripts/00b_audit_provenance.py --event $(EVENT)
@@ -44,6 +47,9 @@ maps: eventmaps
 
 leadlag:
 	python scripts/04_run_leadlag.py --event $(EVENT)
+
+hy:
+	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT)
 
 var:
 	python scripts/05_run_var_granger.py --event $(EVENT)
@@ -98,8 +104,10 @@ empirical:
 	python scripts/01_ingest_raw_data.py --event $(EVENT) --no-fixture
 	python scripts/02_reconstruct_silver.py --event $(EVENT)
 	python scripts/03_build_feature_panel.py --event $(EVENT) --grid $(GRID)
+	python scripts/00d_check_empirical_coverage.py --event $(EVENT) --require-layers CEX DEX
 	python scripts/03b_make_event_maps.py --event $(EVENT)
 	python scripts/04_run_leadlag.py --event $(EVENT) --paper-mode
+	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT) --paper-mode
 	python scripts/05_run_var_granger.py --event $(EVENT)
 	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode --window-size 168 --step-size 24
 	python scripts/06_run_hawkes.py --event $(EVENT) || true
@@ -114,6 +122,9 @@ empirical:
 empirical_all:
 	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
 		$(MAKE) empirical EVENT=$$event GRID=$(GRID); \
+	done
+	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
+		python scripts/09_run_prediction.py --event $$event --loeo --ablation; \
 	done
 	$(MAKE) paper_gate
 

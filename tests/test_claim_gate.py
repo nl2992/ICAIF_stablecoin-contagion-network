@@ -68,3 +68,26 @@ def test_annotate_edge_table_adds_claim_metadata(tmp_path: Path) -> None:
         "A_B_suggestive_directional",
         "fixture_disallowed",
     ]
+
+
+def test_var_fallback_rows_are_diagnostic_only(tmp_path: Path) -> None:
+    df = pl.DataFrame(
+        {
+            "event_id": ["event_a"],
+            "causing_node": ["real_a"],
+            "caused_node": ["real_b"],
+            "method": ["var_coeff_fallback"],
+        }
+    )
+    tier_map = {"event_a": {"real_a": "A", "real_b": "A"}}
+
+    out = annotate_edge_table(
+        df,
+        tier_map,
+        source_col="causing_node",
+        target_col="caused_node",
+        table_path=tmp_path / "table_var_spillovers_event_a.csv",
+    )
+
+    assert out["claim_allowed"].to_list() == [False]
+    assert out["claim_level"].to_list() == ["diagnostic_only"]

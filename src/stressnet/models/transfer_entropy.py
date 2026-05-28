@@ -6,6 +6,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import entropy as scipy_entropy
 
+from stressnet.features.synchronization import synchronized_feature_pivot
 from stressnet.models.leadlag import fdr_correct
 from stressnet.utils.logging import get_logger
 
@@ -135,6 +136,8 @@ def compute_te_table(
     n_shuffles: int = 200,
     block_size: int = 60,
     ts_col: str = "event_time_seconds",
+    grid_seconds: int = 60,
+    max_staleness_seconds: int | None = None,
     fdr_alpha: float = 0.05,
 ) -> pl.DataFrame:
     """Compute pairwise TE with both iid-shuffle and block-shuffle nulls.
@@ -153,20 +156,22 @@ def compute_te_table(
     """
     rng = np.random.default_rng(42)
     results = []
+    needed_nodes = sorted({node for pair in node_pairs for node in pair})
+    pivot = synchronized_feature_pivot(
+        panel,
+        node_ids=needed_nodes,
+        feature_col=feature_col,
+        grid_seconds=grid_seconds,
+        max_staleness_seconds=max_staleness_seconds,
+        ts_col=ts_col,
+    )
 
     for node_i, node_j in node_pairs:
-        xi = (
-            panel.filter(pl.col("node_id") == node_i)
-            .sort(ts_col)[feature_col]
-            .drop_nulls()
-            .to_numpy()
-        )
-        xj = (
-            panel.filter(pl.col("node_id") == node_j)
-            .sort(ts_col)[feature_col]
-            .drop_nulls()
-            .to_numpy()
-        )
+        if node_i not in pivot.columns or node_j not in pivot.columns:
+            continue
+        aligned = pivot.select([node_i, node_j]).drop_nulls()
+        xi = aligned[node_i].to_numpy()
+        xj = aligned[node_j].to_numpy()
         if len(xi) < 30 or len(xj) < 30:
             continue
 
@@ -180,6 +185,8 @@ def compute_te_table(
         results.append({
             "node_i": node_i,
             "node_j": node_j,
+            "feature_col": feature_col,
+            "grid_seconds": grid_seconds,
             "te_i_to_j": te_val,
             "p_value": p_iid,
             "p_value_block": p_block,
@@ -189,6 +196,7 @@ def compute_te_table(
     if not results:
         return pl.DataFrame(schema={
             "node_i": pl.String, "node_j": pl.String,
+            "feature_col": pl.String, "grid_seconds": pl.Int64,
             "te_i_to_j": pl.Float64,
             "p_value": pl.Float64, "p_value_block": pl.Float64,
             "significant_p05": pl.Boolean,
@@ -219,4 +227,6 @@ def compute_te_table(
         pl.Series("significant_block_fdr",  reject_block_fdr),
         pl.Series("p_bonferroni",           p_bonferroni),
         pl.Series("significant_bonferroni", sig_bonferroni),
+        # Estimator label so paper tables are unambiguous (#26)
+        pl.lit("binned_discrete").alias("te_estimator"),
     )

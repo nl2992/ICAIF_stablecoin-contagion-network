@@ -1,0 +1,88 @@
+# Vendor L2 configuration
+#
+# Controls which vendor is used for Tier-A CEX L2 data and the normalised
+# column names produced by the ingestion pipeline.
+#
+# Set DATA_VENDOR in .env to switch between vendors.
+# Default: tardis
+
+default_vendor: tardis
+
+vendors:
+  tardis:
+    base_url: "https://api.tardis.dev/v1"
+    replay_url: "https://api.tardis.dev/v1/data-feeds"
+    machine_url: "http://localhost:8000"          # tardis-machine local proxy
+    env_key: TARDIS_API_KEY
+    supported_data_types:
+      - incremental_book_L2          # diff-depth updates (Tier A)
+      - book_snapshot_25             # 25-level snapshots (Tier A)
+      - trades                       # aggTrades equivalent (Tier B)
+      - book_ticker                  # BBO (Tier B)
+    output_format: parquet           # csv or parquet
+    compression: zstd
+
+  kaiko:
+    base_url: "https://eu.market-api.kaiko.io/v2"
+    env_key: KAIKO_API_KEY
+    supported_data_types:
+      - full_order_book               # equivalent to incremental_book_L2
+      - market_depth                  # top-N levels
+      - trades
+    output_format: parquet
+    compression: zstd
+
+# Exchange → symbol mapping used by 01b_ingest_vendor_l2.py
+# Key: node_id  Value: vendor exchange + symbol pair
+node_symbol_map:
+  usdc_binance_l2:
+    exchange: binance
+    symbol: USDCUSDT
+    data_type: incremental_book_L2
+
+  usdt_binance_l2:
+    exchange: binance
+    symbol: USDCUSDT    # USDT is the quote currency on this pair
+    data_type: incremental_book_L2
+
+  busd_binance_l2:
+    exchange: binance
+    symbol: BUSDUSDT
+    data_type: incremental_book_L2
+
+  ust_binance_l2:
+    exchange: binance
+    symbol: USTUSDT
+    data_type: incremental_book_L2
+    notes: "Delisted; check Tardis availability before scheduling."
+
+  usdc_coinbase_l2:
+    exchange: coinbase
+    symbol: BTC-USD     # USDC-USD does not exist on Coinbase Exchange
+    data_type: book_snapshot_25
+    notes: "Coinbase does not list USDC-USD. BTC-USD spread used as stress proxy."
+
+  usdt_kraken_l2:
+    exchange: kraken
+    symbol: USDTUSD
+    data_type: incremental_book_L2
+
+  usdc_kraken_l2:
+    exchange: kraken
+    symbol: USDCUSD
+    data_type: incremental_book_L2
+
+# Bronze schema: columns written to data/bronze/vendor_l2/{exchange}_{symbol}_{date}.parquet
+bronze_schema:
+  - wall_clock_utc        # float64 — Unix timestamp (microseconds) when message was received locally
+  - exchange_ts           # float64 — exchange-assigned timestamp (microseconds)
+  - local_ts              # float64 — local ingestion timestamp (microseconds) — same as wall_clock for Tardis
+  - exchange              # str     — exchange name (e.g. "binance")
+  - symbol                # str     — normalised symbol (e.g. "USDCUSDT")
+  - update_type           # str     — "snapshot" | "delta" | "bbo"
+  - side                  # str     — "bid" | "ask"
+  - price                 # float64
+  - size                  # float64 — 0 = remove level
+  - sequence_id           # int64   — exchange update sequence number (null if not provided)
+  - raw_msg_id            # int64   — Tardis internal message row index (for gap detection)
+  - row_position          # int64   — position within this file's update batch (for bookwalk ordering)

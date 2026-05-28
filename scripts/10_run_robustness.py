@@ -39,6 +39,8 @@ def _run_leadlag(
     node_pairs: list[tuple[str, str]],
     feature_col: str,
     block_size: int = 300,
+    grid_seconds: int = 60,
+    max_staleness_seconds: int | None = None,
 ) -> pl.DataFrame:
     return compute_leadlag_table(
         panel,
@@ -46,6 +48,8 @@ def _run_leadlag(
         feature_col=feature_col,
         block_size=block_size,
         n_reps=200,  # reduced for speed in robustness sweeps
+        grid_seconds=grid_seconds,
+        max_staleness_seconds=max_staleness_seconds,
     )
 
 
@@ -70,6 +74,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run robustness checks.")
     parser.add_argument("--event", required=True)
     parser.add_argument("--feature-col", default="basis_vs_usd")
+    parser.add_argument("--grid-seconds", type=int, default=60,
+                        help="Resampling grid in seconds for lead-lag (default 60).")
+    parser.add_argument("--max-staleness-seconds", type=int, default=None,
+                        help="Forward-fill staleness cap (seconds). None = no cap.")
     parser.add_argument(
         "--skip",
         nargs="*",
@@ -97,18 +105,23 @@ def main() -> None:
 
     all_checks: list[pl.DataFrame] = []
     skip = set(args.skip)
+    grid_s = args.grid_seconds
+    staleness = args.max_staleness_seconds
 
-    # --- 1. Baseline (60s grid) ---
-    logger.info("Baseline check (60s grid)...")
-    df = _run_leadlag(panel, node_pairs, feature_col)
-    all_checks.append(_tagged(df, "baseline_60s"))
+    # --- 1. Baseline ---
+    logger.info("Baseline check (%ds grid)...", grid_s)
+    df = _run_leadlag(panel, node_pairs, feature_col,
+                      grid_seconds=grid_s, max_staleness_seconds=staleness)
+    all_checks.append(_tagged(df, f"baseline_{grid_s}s"))
 
     # --- 2. Alternative sampling grids ---
     if "grids" not in skip:
         logger.info("Grid robustness checks (1s / 5s / 60s)...")
         grid_results = run_grid_robustness(
             panel,
-            lambda p, g: _run_leadlag(p, node_pairs, feature_col),
+            lambda p, g: _run_leadlag(p, node_pairs, feature_col,
+                                      grid_seconds=g,
+                                      max_staleness_seconds=staleness),
             grids=[1, 5, 60],
         )
         for grid, df in grid_results.items():
@@ -125,7 +138,11 @@ def main() -> None:
                 and p[1] in cex_panel["node_id"].unique().to_list()
             ]
             if cex_pairs:
-                all_checks.append(_tagged(_run_leadlag(cex_panel, cex_pairs, feature_col), "cex_only"))
+                all_checks.append(_tagged(
+                    _run_leadlag(cex_panel, cex_pairs, feature_col,
+                                 grid_seconds=grid_s, max_staleness_seconds=staleness),
+                    "cex_only",
+                ))
 
         logger.info("Without Binance...")
         no_binance = subsample_without_dominant(panel, dominant_node="usdt_binance")
@@ -135,13 +152,18 @@ def main() -> None:
             and p[1] in no_binance["node_id"].unique().to_list()
         ]
         if nb_pairs:
-            all_checks.append(_tagged(_run_leadlag(no_binance, nb_pairs, feature_col), "no_binance"))
+            all_checks.append(_tagged(
+                _run_leadlag(no_binance, nb_pairs, feature_col,
+                             grid_seconds=grid_s, max_staleness_seconds=staleness),
+                "no_binance",
+            ))
 
     # --- 4. Bootstrap block-size sensitivity ---
     if "block_size" not in skip:
         for bs in (50, 300, 1800):
             logger.info("Block size = %d...", bs)
-            df = _run_leadlag(panel, node_pairs, feature_col, block_size=bs)
+            df = _run_leadlag(panel, node_pairs, feature_col, block_size=bs,
+                              grid_seconds=grid_s, max_staleness_seconds=staleness)
             all_checks.append(_tagged(df, f"block_{bs}"))
 
     # --- 5. Alternative basis thresholds ---
@@ -155,7 +177,11 @@ def main() -> None:
                 .otherwise(0.0)
                 .alias("basis_vs_usd")
             )
-            all_checks.append(_tagged(_run_leadlag(sub, node_pairs, feature_col), f"thresh_{thresh_bps}bps"))
+            all_checks.append(_tagged(
+                _run_leadlag(sub, node_pairs, feature_col,
+                             grid_seconds=grid_s, max_staleness_seconds=staleness),
+                f"thresh_{thresh_bps}bps",
+            ))
 
     # --- 6. Event-phase analysis ---
     if "phase" not in skip:
@@ -169,7 +195,11 @@ def main() -> None:
                 and p[1] in phase_panel["node_id"].unique().to_list()
             ]
             if ph_pairs:
-                all_checks.append(_tagged(_run_leadlag(phase_panel, ph_pairs, feature_col), phase_name))
+                all_checks.append(_tagged(
+                    _run_leadlag(phase_panel, ph_pairs, feature_col,
+                                 grid_seconds=grid_s, max_staleness_seconds=staleness),
+                    phase_name,
+                ))
 
     # --- 7. Placebo windows ---
     if "placebo" not in skip:
@@ -196,7 +226,11 @@ def main() -> None:
                         and p[1] in placebo_sub["node_id"].unique().to_list()
                     ]
                     if pl_pairs:
-                        all_checks.append(_tagged(_run_leadlag(placebo_sub, pl_pairs, feature_col), "placebo"))
+                        all_checks.append(_tagged(
+                            _run_leadlag(placebo_sub, pl_pairs, feature_col,
+                                         grid_seconds=grid_s, max_staleness_seconds=staleness),
+                            "placebo",
+                        ))
         except Exception as exc:
             logger.warning("Placebo check skipped: %s", exc)
 

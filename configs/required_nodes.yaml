@@ -1,0 +1,93 @@
+# Required-node thresholds for paper gates.
+#
+# minimum_for_public_tier_b:
+#   Minimum number of nodes with tier_actual >= B for the pipeline to produce
+#   any paper output.  Below this threshold the claim gate aborts.
+#
+# minimum_for_headline_tier_a:
+#   Target minimum number of nodes with tier_actual = A for the headline result.
+#   Falling below this threshold triggers a WARNING in strict mode but does not
+#   abort — the result is downgraded to B_B_context_only in the claim language.
+#
+# minimum_tier_a_pairs:
+#   Minimum number of directed node pairs (i, j) where both i and j have
+#   tier_actual = A.  At least one such pair must produce a significant TE or
+#   lead-lag result for the headline A_A claim to be made.
+
+global:
+  minimum_for_public_tier_b: 3
+  minimum_for_headline_tier_a: 2
+  minimum_tier_a_pairs: 1
+
+# Per-event overrides.  If an event is not listed here, global defaults apply.
+per_event:
+  usdc_svb_2023:
+    minimum_for_public_tier_b: 4
+    minimum_for_headline_tier_a: 2
+    minimum_tier_a_pairs: 1
+    notes: >
+      Headline event.  Requires at least usdc_binance_l2 + usdt_binance_l2 (or
+      usdc_coinbase_l2) with full L2 data before strict mode allows A_A claim.
+
+  terra_luna_2022:
+    minimum_for_public_tier_b: 3
+    minimum_for_headline_tier_a: 1
+    minimum_tier_a_pairs: 1
+    notes: >
+      UST is delisted; Tardis archive availability uncertain.  Fallback to 1 Tier-A
+      node (curve_ust_wormhole) with one A/B pair is acceptable for this event.
+
+  usdt_curve_2023:
+    minimum_for_public_tier_b: 3
+    minimum_for_headline_tier_a: 2
+    minimum_tier_a_pairs: 1
+
+  ftx_2022:
+    minimum_for_public_tier_b: 3
+    minimum_for_headline_tier_a: 2
+    minimum_tier_a_pairs: 1
+
+  busd_2023:
+    minimum_for_public_tier_b: 3
+    minimum_for_headline_tier_a: 2
+    minimum_tier_a_pairs: 1
+
+# Nodes that must be present (by node_id) for specific events.
+# Missing required nodes cause a WARNING (not abort) so the pipeline can still
+# run in degraded mode.
+required_nodes_by_event:
+  usdc_svb_2023:
+    - curve_3pool          # A — critical DEX node
+    - usdc_mint_burn       # A — on-chain issuance signal
+  terra_luna_2022:
+    - curve_ust_wormhole   # A — key contagion node
+  usdt_curve_2023:
+    - curve_crvusd_usdt    # A — primary pool under stress
+    - usdt_mint_burn       # A — Tether issuance signal
+
+# Nodes that are preferred Tier-A targets (once vendor L2 is available)
+tier_a_targets:
+  - node_id: usdc_binance_l2
+    exchange: binance
+    symbol: USDCUSDT
+    tardis_data_type: incremental_book_L2
+    events: [usdc_svb_2023, usdt_curve_2023, ftx_2022, busd_2023]
+
+  - node_id: usdt_binance_l2
+    exchange: binance
+    symbol: USDCUSDT        # USDT side of USDC/USDT pair
+    tardis_data_type: incremental_book_L2
+    events: [usdc_svb_2023, usdt_curve_2023, ftx_2022, busd_2023, terra_luna_2022]
+
+  - node_id: busd_binance_l2
+    exchange: binance
+    symbol: BUSDUSDT
+    tardis_data_type: incremental_book_L2
+    events: [busd_2023, ftx_2022]
+
+  - node_id: ust_binance_l2
+    exchange: binance
+    symbol: USTUSDT
+    tardis_data_type: incremental_book_L2
+    events: [terra_luna_2022]
+    notes: "Delisted — check Tardis archive availability before scheduling."

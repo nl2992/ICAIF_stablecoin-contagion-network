@@ -118,7 +118,9 @@ def _try_real_cex(node: Node, start_date: date, end_date: date,
     return None, "books", "fixture_non_empirical"
 
 
-def _try_real_dex(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path | None, str, str]:
+def _try_real_dex(
+    node: Node, start_utc, end_utc, out_dir: Path, event_id: str = ""
+) -> tuple[Path | None, str, str]:
     """Try real DEX ingestion. Returns (path, kind, tier) or (None, kind, fallback)."""
     import os
     contract = node.metadata.get("contract") or node.metadata.get("pool_address")
@@ -127,6 +129,7 @@ def _try_real_dex(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path |
 
     if node.venue == "Curve":
         if not os.environ.get("ETHERSCAN_API_KEY"):
+            logger.debug("ETHERSCAN_API_KEY not set; skipping Curve ingest for %s", node.id)
             return None, "pool_events", "fixture_non_empirical"
         from stressnet.data.curve import ingest_curve_pool_events
         from stressnet.data.etherscan import get_block_number_by_timestamp
@@ -134,7 +137,7 @@ def _try_real_dex(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path |
             start_block = get_block_number_by_timestamp(int(start_utc.timestamp()))
             end_block   = get_block_number_by_timestamp(int(end_utc.timestamp()), closest="after")
             path, tier  = ingest_curve_pool_events(
-                contract, start_block, end_block, out_dir, node.metadata.get("_event_id", ""), node.id,
+                contract, start_block, end_block, out_dir, event_id, node.id,
             )
         except Exception as exc:
             logger.warning("Curve ingest error (%s): %s", node.id, exc)
@@ -145,12 +148,15 @@ def _try_real_dex(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path |
         pool_addr = node.metadata.get("pool_address")
         if not pool_addr:
             return None, "pool_events", "fixture_non_empirical"
+        if not os.environ.get("THE_GRAPH_API_KEY"):
+            logger.debug("THE_GRAPH_API_KEY not set; skipping Uniswap ingest for %s", node.id)
+            return None, "pool_events", "fixture_non_empirical"
         from stressnet.data.uniswap import ingest_uniswap_pool_swaps
         try:
             path, tier = ingest_uniswap_pool_swaps(
                 pool_addr,
                 int(start_utc.timestamp()), int(end_utc.timestamp()),
-                out_dir, node.metadata.get("_event_id", ""), node.id,
+                out_dir, event_id, node.id,
             )
         except Exception as exc:
             logger.warning("Uniswap ingest error (%s): %s", node.id, exc)
@@ -160,13 +166,17 @@ def _try_real_dex(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path |
     return None, "pool_events", "fixture_non_empirical"
 
 
-def _try_real_flow(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path | None, str, str]:
+def _try_real_flow(
+    node: Node, start_utc, end_utc, out_dir: Path, event_id: str = ""
+) -> tuple[Path | None, str, str]:
     """Try real flow/mint_burn ingestion."""
     import os
     token_contract = node.metadata.get("token_contract")
     if not token_contract:
+        logger.debug("No token_contract for %s; skipping real flow ingest.", node.id)
         return None, "flows", "fixture_non_empirical"
     if not os.environ.get("ETHERSCAN_API_KEY"):
+        logger.debug("ETHERSCAN_API_KEY not set; skipping flow ingest for %s", node.id)
         return None, "flows", "fixture_non_empirical"
 
     from stressnet.data.etherscan import get_block_number_by_timestamp
@@ -180,7 +190,9 @@ def _try_real_flow(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path 
     if node.layer == "mint_burn":
         from stressnet.data.etherscan import ingest_mint_burn
         try:
-            path, tier = ingest_mint_burn(token_contract, start_block, end_block, out_dir, "", node.id)
+            path, tier = ingest_mint_burn(
+                token_contract, start_block, end_block, out_dir, event_id, node.id,
+            )
         except Exception as exc:
             logger.warning("Mint/burn ingest error (%s): %s", node.id, exc)
             path, tier = None, "fixture_non_empirical"
@@ -189,7 +201,9 @@ def _try_real_flow(node: Node, start_utc, end_utc, out_dir: Path) -> tuple[Path 
     else:  # onchain_flow, bridge_flow
         from stressnet.data.etherscan import ingest_exchange_flows
         try:
-            path, tier = ingest_exchange_flows(token_contract, start_block, end_block, out_dir, "", node.id)
+            path, tier = ingest_exchange_flows(
+                token_contract, start_block, end_block, out_dir, event_id, node.id,
+            )
         except Exception as exc:
             logger.warning("Exchange flow ingest error (%s): %s", node.id, exc)
             path, tier = None, "fixture_non_empirical"
@@ -332,9 +346,9 @@ def main() -> None:
             if node.layer == "CEX":
                 path, kind, tier = _try_real_cex(node, start_date, end_date, out_dir)
             elif node.layer == "DEX":
-                path, kind, tier = _try_real_dex(node, start_utc, end_utc, out_dir)
+                path, kind, tier = _try_real_dex(node, start_utc, end_utc, out_dir, args.event)
             elif node.layer in ("onchain_flow", "bridge_flow", "mint_burn", "flow"):
-                path, kind, tier = _try_real_flow(node, start_utc, end_utc, out_dir)
+                path, kind, tier = _try_real_flow(node, start_utc, end_utc, out_dir, args.event)
 
         # ---- fallback to fixture ----
         if path is None:

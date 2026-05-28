@@ -126,10 +126,13 @@ nodes:
       layer: DEX
       chain: Ethereum
       assets: ["crvUSD", "USDT"]
+      contract: "0x390f3595bCa2Df7d23783dFd126427CCeb997BF4"
       provenance_best: "dex_pool_onchain"
       tier: A
       events_covered: [usdt_curve_2023]
-      notes: "Relevant for June 2023 USDT stress in crvUSD pools."
+      notes: >
+        crvUSD/USDT StableSwap-ng pool. Contract 0x390f…BF4 deployed May 2023.
+        Relevant for June 2023 USDT stress in crvUSD pools.
 
   # ---------------------------------------------------------------------------
   # Flow nodes — settlement, bridge, and on-chain flow channels

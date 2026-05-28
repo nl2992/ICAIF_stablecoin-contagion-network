@@ -191,3 +191,20 @@ def test_consolidate_table_strict_writes_no_fixture(tmp_path: Path):
     written = pl.read_csv(tmp_path / "table_leadlag_tests.csv")
     assert written.height == 1
     assert FIXTURE not in written["edge_tier_actual"].to_list()
+
+
+# ---------------------------------------------------------------------------
+# Makefile regression tests
+# ---------------------------------------------------------------------------
+
+def test_paper_gate_uses_strict():
+    """Makefile paper_gate target must invoke 99_make_paper_outputs.py with --strict."""
+    makefile = Path(__file__).parent.parent / "Makefile"
+    assert "99_make_paper_outputs.py --strict" in makefile.read_text()
+
+
+def test_all_routes_to_empirical_all():
+    """Makefile 'all' target must route to empirical_all, not demo_all or fixture pipeline."""
+    makefile = Path(__file__).parent.parent / "Makefile"
+    text = makefile.read_text()
+    assert "all: empirical_all" in text

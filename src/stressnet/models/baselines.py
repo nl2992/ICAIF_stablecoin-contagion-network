@@ -44,9 +44,22 @@ def prepare_Xy(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Extract feature matrix and label vector from a panel DataFrame.
 
-    Drops rows with any null feature or null label.
+    Null features are median-imputed (column-wise) so that nodes with
+    partial real data are included rather than dropped entirely.  Only rows
+    where the *label* itself is null are removed.
     """
-    subset = panel.select(feature_cols + [label_col]).drop_nulls()
+    subset = panel.select(feature_cols + [label_col]).filter(
+        pl.col(label_col).is_not_null()
+    )
+    # Median-impute each feature column
+    fill_exprs = []
+    for col in feature_cols:
+        median_val = subset[col].median()
+        if median_val is None:
+            median_val = 0.0
+        fill_exprs.append(pl.col(col).fill_null(pl.lit(float(median_val))))
+    subset = subset.with_columns(fill_exprs)
+
     X = subset.select(feature_cols).to_numpy().astype(np.float32)
     y = subset[label_col].cast(pl.Int8).to_numpy()
     return X, y

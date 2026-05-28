@@ -19,7 +19,7 @@ from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-_BASE         = "https://api.etherscan.io/api"
+_BASE         = "https://api.etherscan.io/v2/api"
 _PAGE_SIZE    = 10_000  # max offset supported by Etherscan
 _RATE_SLEEP   = 0.25    # seconds between calls (free tier: 5 calls/s)
 _NULL_ADDRS   = frozenset({
@@ -52,6 +52,7 @@ KNOWN_EXCHANGE_ADDRESSES: dict[str, str] = {
 # ---------------------------------------------------------------------------
 
 def _get(params: dict[str, Any]) -> dict[str, Any]:
+    params.setdefault("chainid", 1)
     params.setdefault("apikey", os.environ.get("ETHERSCAN_API_KEY", ""))
     try:
         resp = requests.get(_BASE, params=params, timeout=30)

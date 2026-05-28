@@ -1,5 +1,5 @@
 caused_node,causing_node,fevd_share,horizon,method
-usdc_coinbase,usdc_coinbase,0.04702292207585729,10,fevd
+usdc_coinbase,usdc_coinbase,0.04702292207585725,10,fevd
 usdc_coinbase,usdt_binance,0.9529770779241427,10,fevd
-usdt_binance,usdc_coinbase,0.08951537959609604,10,fevd
+usdt_binance,usdc_coinbase,0.08951537959609601,10,fevd
 usdt_binance,usdt_binance,0.910484620403904,10,fevd

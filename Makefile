@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper empirical empirical_all paper_gate mvp usdc all
+.PHONY: setup test windows coverage audit claimgate ingest reconstruct panel eventmaps combine maps leadlag var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper empirical empirical_all paper_gate mvp usdc all
 
 setup:
 	pip install -r requirements.txt
@@ -36,6 +36,9 @@ panel:
 
 eventmaps:
 	python scripts/03b_make_event_maps.py --event $(EVENT)
+
+combine:
+	python scripts/03c_combine_panels.py
 
 maps: eventmaps
 

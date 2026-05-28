@@ -1,66 +1,53 @@
-caused_node,causing_node,fevd_share,horizon,method,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
-usdc_coinbase,usdc_coinbase,0.04702292207585725,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_coinbase,usdt_binance,0.9529770779241427,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdc_coinbase,0.08951537959609601,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,0.910484620403904,10,fevd,usdc_svb_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-ust_binance,ust_binance,0.024638401113310247,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-ust_binance,usdt_binance,0.9753615988866898,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,ust_binance,0.0333330596382891,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,0.9666669403617111,10,fevd,terra_luna_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,1.7689528558194396e-10,10,var_abscoef_fallback,usdt_curve_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,curve_3pool,0.06050660381099691,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_binance,uniswap_usdc_usdt_005,0.04071443730545166,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_binance,usdt_kraken,0.0001376040103265287,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_binance,eth_usdt_exchange_flows,0.3546313746231377,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_binance,usdt_mint_burn,0.30332655965682725,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_binance,tron_usdt_exchange_flows,0.2406834204163647,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,B,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,usdt_binance,2.0898522728834313e-10,10,var_abscoef_fallback,usdt_curve_2023,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,curve_3pool,0.11310343832748407,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,uniswap_usdc_usdt_005,0.1013361289914884,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,usdt_kraken,0.00013253132561865457,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,eth_usdt_exchange_flows,0.3128201537346688,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,usdt_mint_burn,0.263562005691253,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-curve_3pool,tron_usdt_exchange_flows,0.20904574172050144,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,usdt_binance,2.2199547818756168e-10,10,var_abscoef_fallback,usdt_curve_2023,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,curve_3pool,0.11052078270239873,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,uniswap_usdc_usdt_005,0.0805244313551111,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,usdt_kraken,0.0001307277151158517,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,eth_usdt_exchange_flows,0.3216922373349424,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,usdt_mint_burn,0.27145659734360494,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-uniswap_usdc_usdt_005,tron_usdt_exchange_flows,0.21567522332683137,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,usdt_binance,3.3302807810895295e-10,10,var_abscoef_fallback,usdt_curve_2023,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,curve_3pool,0.05892446907936823,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,uniswap_usdc_usdt_005,0.029686389143295112,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,usdt_kraken,0.00017898741901951464,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,eth_usdt_exchange_flows,0.35976517286175497,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,usdt_mint_burn,0.3077073121735781,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_kraken,tron_usdt_exchange_flows,0.2437376689899561,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,usdt_binance,9.372047869543573e-11,10,var_abscoef_fallback,usdt_curve_2023,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,curve_3pool,0.05014243588388092,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,uniswap_usdc_usdt_005,0.05554456535187283,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,usdt_kraken,0.00005034256466232693,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,eth_usdt_exchange_flows,0.3866503986920602,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,usdt_mint_burn,0.29788917642942736,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-eth_usdt_exchange_flows,tron_usdt_exchange_flows,0.20972308098434947,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,usdt_binance,1.8840682635882145e-12,10,var_abscoef_fallback,usdt_curve_2023,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,curve_3pool,2.567947569259682e-7,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,uniswap_usdc_usdt_005,2.3781888600849521e-7,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,usdt_kraken,1.4947200763943445e-9,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,eth_usdt_exchange_flows,0.9999950391060992,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,usdt_mint_burn,2.4709393897109304e-6,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-usdt_mint_burn,tron_usdt_exchange_flows,1.993843263687784e-6,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,usdt_binance,1.3431431248092374e-12,10,var_abscoef_fallback,usdt_curve_2023,B,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,curve_3pool,1.3870260113436968e-7,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,uniswap_usdc_usdt_005,2.796929366195746e-7,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,usdt_kraken,1.1241995371202066e-9,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,eth_usdt_exchange_flows,0.4999997011316153,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,usdt_mint_burn,0.49999970944829253,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-tron_usdt_exchange_flows,tron_usdt_exchange_flows,1.6989801161707223e-7,10,var_abscoef_fallback,usdt_curve_2023,fixture_non_empirical,fixture_non_empirical,fixture_non_empirical,false,true,fixture_disallowed,At least one endpoint is deterministic fixture data.
-busd_binance,busd_binance,0.0018997171871736659,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,usdt_binance,0.9981002828128266,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,busd_binance,0.0011328118257401233,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdt_binance,usdt_binance,0.9988671881742601,10,fevd,ftx_2022,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,busd_binance,0.12921590527873564,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,usdc_binance,0.8707840947212643,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_binance,busd_binance,0.08083498857767567,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_binance,usdc_binance,0.9191650114223244,10,fevd,busd_2023,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason,event_id
+usdc_coinbase,usdc_coinbase,0.04337421591447154,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdc_coinbase,curve_3pool,0.022193189650191052,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdc_coinbase,usdt_binance,0.9344325944353373,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+curve_3pool,usdc_coinbase,0.08853577450944379,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+curve_3pool,curve_3pool,0.019480536633755326,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+curve_3pool,usdt_binance,0.8919836888568007,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdt_binance,usdc_coinbase,0.1266525515972532,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdt_binance,curve_3pool,0.014898503389427449,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+usdt_binance,usdt_binance,0.8584489450133191,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdc_svb_2023
+ust_binance,ust_binance,0.00022286342580816567,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+ust_binance,curve_3pool,0.04031198389314947,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+ust_binance,usdt_binance,0.009108281969365067,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+ust_binance,curve_ust_wormhole,0.9503568707116771,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_3pool,ust_binance,0.00015717509565513657,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_3pool,curve_3pool,0.026761198081296143,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_3pool,usdt_binance,0.02871358898922543,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_3pool,curve_ust_wormhole,0.9443680378338231,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,ust_binance,0.0001334753691920872,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,curve_3pool,0.02404431208843534,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,usdt_binance,0.04553823488129797,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+usdt_binance,curve_ust_wormhole,0.9302839776610744,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_ust_wormhole,ust_binance,0.0001514386771681194,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_ust_wormhole,curve_3pool,0.027234492481810573,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_ust_wormhole,usdt_binance,0.05757295012768084,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_ust_wormhole,curve_ust_wormhole,0.9150411187133402,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",terra_luna_2022
+curve_crvusd_usdt,curve_crvusd_usdt,0.00993432268035821,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+curve_crvusd_usdt,curve_3pool,0.03265400764119675,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+curve_crvusd_usdt,usdt_binance,0.9574116696784449,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+curve_3pool,curve_crvusd_usdt,0.018798421515766425,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+curve_3pool,curve_3pool,0.09859791071394547,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+curve_3pool,usdt_binance,0.882603667770288,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+usdt_binance,curve_crvusd_usdt,0.026448308919823055,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+usdt_binance,curve_3pool,0.13971692716495235,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+usdt_binance,usdt_binance,0.8338347639152245,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",usdt_curve_2023
+busd_binance,busd_binance,0.001043915815808684,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+busd_binance,curve_3pool,0.00771624073898611,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+busd_binance,usdt_binance,0.9912398434452051,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+curve_3pool,busd_binance,0.0007688062032111528,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+curve_3pool,curve_3pool,0.007441223597643093,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+curve_3pool,usdt_binance,0.9917899701991455,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+usdt_binance,busd_binance,0.004955148856959499,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+usdt_binance,curve_3pool,0.007569775455269723,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+usdt_binance,usdt_binance,0.9874750756877707,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",ftx_2022
+curve_3pool,curve_3pool,0.006887769972215035,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+curve_3pool,busd_binance,0.11498084934155228,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+curve_3pool,usdc_binance,0.8781313806862325,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+busd_binance,curve_3pool,0.003503121255259098,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+busd_binance,busd_binance,0.07766528440026722,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+busd_binance,usdc_binance,0.9188315943444736,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+usdc_binance,curve_3pool,0.004971944277908668,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+usdc_binance,busd_binance,0.05594155065189333,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023
+usdc_binance,usdc_binance,0.9390865050701979,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language.",busd_2023

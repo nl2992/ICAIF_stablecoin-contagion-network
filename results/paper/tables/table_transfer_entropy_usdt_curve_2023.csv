@@ -1,1 +1,7 @@
-node_i,node_j,te_i_to_j,p_value,significant_p05,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
+node_i,node_j,te_i_to_j,p_value,p_value_block,significant_p05,p_value_fdr,significant_fdr,p_value_block_fdr,significant_block_fdr,p_bonferroni,significant_bonferroni,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason
+curve_crvusd_usdt,curve_3pool,0.5954546117428307,0.145,0.62,false,0.43499999999999994,false,1.0,false,0.8699999999999999,false,usdt_curve_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,curve_crvusd_usdt,0.44379596021870915,0.915,0.98,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_3pool,0.25000004500001327,1.0,0.97,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdt_binance,0.09338308727440564,0.0,0.62,true,0.0,true,1.0,false,0.0,true,usdt_curve_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_crvusd_usdt,2.220446049250313e-16,1.0,1.0,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_crvusd_usdt,usdt_binance,0.0,1.0,1.0,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

@@ -1,3 +1,13 @@
-causing_node,caused_node,f_stat,p_value,significant,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
-usdt_binance,ust_binance,0.9193037309788867,0.3380643642129237,false,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-ust_binance,usdt_binance,9.350431416727796,0.0023339020559972556,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+causing_node,caused_node,f_stat,p_value,significant_p05,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason
+curve_3pool,ust_binance,0.030242611871612535,0.8620951908659946,false,0.8685314310319466,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,ust_binance,0.02746005179460376,0.8685314310319466,false,0.8685314310319466,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_ust_wormhole,ust_binance,0.709866825512249,0.4003709669936902,false,0.6863502291320404,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,curve_3pool,0.29533003648783757,0.5873559244271932,false,0.7524613706453973,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_3pool,0.23672193818603235,0.6270511422044978,false,0.7524613706453973,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_ust_wormhole,curve_3pool,1.2925285763500918,0.2567759334971984,false,0.5308298941603551,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,usdt_binance,1.8636390206468236,0.17355088804752064,false,0.520652664142562,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdt_binance,13.16630992099995,0.00035179498438741745,true,0.0042215398126490096,true,0.0042215398126490096,true,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_ust_wormhole,usdt_binance,2.1788076013303215,0.14130256051825243,false,0.520652664142562,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,curve_ust_wormhole,0.4409073684926162,0.5073557427212109,false,0.7524613706453973,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,curve_ust_wormhole,2.982640003910595,0.08551623266391335,false,0.5130973959834801,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_ust_wormhole,1.2464073352515403,0.26541494708017754,false,0.5308298941603551,false,1.0,false,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

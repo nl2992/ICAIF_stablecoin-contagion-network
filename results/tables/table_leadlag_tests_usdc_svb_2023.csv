@@ -1,7 +1,13 @@
 node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason
 usdc_coinbase,usdc_binance,-60,-0.8261043719802086,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
 usdc_coinbase,usdt_binance,-60,-0.8261043719802086,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_coinbase,curve_3pool,0,-0.7177701570441987,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
 usdc_binance,usdc_coinbase,60,-0.8261043719802086,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
 usdc_binance,usdt_binance,0,1.0,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_binance,curve_3pool,-24,0.7996604348275566,1.0,false,1.0,false,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
 usdt_binance,usdc_coinbase,60,-0.8261043719802086,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
 usdt_binance,usdc_binance,0,1.0,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_3pool,-24,0.7996604348275566,1.0,false,1.0,false,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdc_coinbase,0,-0.7177701570441987,0.0,true,0.0,true,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdc_binance,24,0.7996604348275566,1.0,false,1.0,false,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdt_binance,24,0.7996604348275566,1.0,false,1.0,false,usdc_svb_2023,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

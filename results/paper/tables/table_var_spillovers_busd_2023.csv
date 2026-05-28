@@ -1,5 +1,10 @@
-caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
-busd_binance,busd_binance,0.12921590527873564,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-busd_binance,usdc_binance,0.8707840947212643,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_binance,busd_binance,0.08083498857767567,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-usdc_binance,usdc_binance,0.9191650114223244,10,fevd,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason
+curve_3pool,curve_3pool,0.006887769972215035,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,busd_binance,0.11498084934155228,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdc_binance,0.8781313806862325,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,curve_3pool,0.003503121255259098,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,busd_binance,0.07766528440026722,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+busd_binance,usdc_binance,0.9188315943444736,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_binance,curve_3pool,0.004971944277908668,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_binance,busd_binance,0.05594155065189333,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdc_binance,usdc_binance,0.9390865050701979,10,fevd,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

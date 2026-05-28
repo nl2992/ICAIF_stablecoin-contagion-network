@@ -1,3 +1,13 @@
-node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,tier_i_actual,tier_j_actual,edge_tier_actual,claim_allowed,uses_fixture,claim_level,claim_reason
-usdt_binance,ust_binance,5,-0.251350774291623,0.001,true,0.004,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
-ust_binance,usdt_binance,-5,-0.251350774291623,0.01,false,0.03,true,B,B,B,true,false,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason
+usdt_binance,ust_binance,5,-0.251350774291623,0.001,true,0.004,true,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_3pool,-1,-0.40313345978260473,0.0,true,0.0,true,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+usdt_binance,curve_ust_wormhole,-48,0.9584470139318367,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,usdt_binance,-5,-0.251350774291623,0.015,false,0.045,true,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,curve_3pool,-14,0.7685310250695631,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+ust_binance,curve_ust_wormhole,-60,-0.9966794204009828,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,usdt_binance,1,-0.40313345978260473,0.0,true,0.0,true,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,ust_binance,14,0.7685310250695631,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_3pool,curve_ust_wormhole,-48,-0.8281501123560291,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_ust_wormhole,usdt_binance,48,0.9584470139318367,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_ust_wormhole,ust_binance,60,-0.9966794204009829,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."
+curve_ust_wormhole,curve_3pool,48,-0.8281501123560292,1.0,false,1.0,false,terra_luna_2022,B,B,B,false,true,B_B_context_only,"Both endpoints are Tier B, so use contextual language."

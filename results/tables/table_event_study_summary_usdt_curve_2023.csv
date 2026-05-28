@@ -1,2 +1,4 @@
 node_id,has_baseline,estimation_mean,estimation_std,cab_event,p_value,significant_p05,first_deviation_ts,n_pre_obs,n_event_obs,transmission_rank,event_id
-usdt_binance,true,-0.0001316028806283081,0.00025189524567447856,48395.13970134099,0.0,true,11220.0,7200,10080,1,usdt_curve_2023
+usdt_binance,true,-0.0001316028806283081,0.00025189524567447856,48395.13970134099,0.0,true,11220.0,7200,10080,2,usdt_curve_2023
+curve_3pool,true,-0.024232655818243215,0.013878486837628894,-735.2493878958179,0.0,true,0.0,117,167,1,usdt_curve_2023
+curve_crvusd_usdt,true,-21.785507083355153,1.4871944774168016,-11838.523269648751,0.0,true,NaN,98,119,3,usdt_curve_2023

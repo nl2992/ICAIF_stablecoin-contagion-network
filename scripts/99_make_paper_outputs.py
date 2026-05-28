@@ -23,16 +23,18 @@ logger = get_logger(__name__)
 
 _EVENTS = ["usdc_svb_2023", "terra_luna_2022", "usdt_curve_2023", "ftx_2022", "busd_2023"]
 
-# (output_stem, per-event filename pattern)
-_TABLE_SPECS = [
-    ("table_leadlag_tests",       "table_leadlag_tests_{event}.csv"),
-    ("table_var_spillovers",      "table_var_spillovers_{event}.csv"),
-    ("table_hawkes_params",       "table_hawkes_params_{event}.csv"),
-    ("table_transfer_entropy",    "table_transfer_entropy_{event}.csv"),
-    ("table_tvp_var_summary",     "table_tvp_var_summary_{event}.csv"),
-    ("table_event_study_summary", "table_event_study_summary_{event}.csv"),
-    ("table_node_centrality",     "table_node_centrality_{event}.csv"),
-    ("table_prediction_metrics",  "table_prediction_metrics_{event}.csv"),
+# (output_stem, per-event filename pattern, is_edge_table)
+# is_edge_table=True  → claim-gated in strict mode (read from paper/tables)
+# is_edge_table=False → no claim columns; read from results/tables even in strict mode
+_TABLE_SPECS: list[tuple[str, str, bool]] = [
+    ("table_leadlag_tests",       "table_leadlag_tests_{event}.csv",       True),
+    ("table_var_spillovers",      "table_var_spillovers_{event}.csv",       True),
+    ("table_hawkes_params",       "table_hawkes_params_{event}.csv",        True),
+    ("table_transfer_entropy",    "table_transfer_entropy_{event}.csv",     True),
+    ("table_tvp_var_summary",     "table_tvp_var_summary_{event}.csv",      True),
+    ("table_event_study_summary", "table_event_study_summary_{event}.csv",  False),
+    ("table_node_centrality",     "table_node_centrality_{event}.csv",      False),
+    ("table_prediction_metrics",  "table_prediction_metrics_{event}.csv",   False),
 ]
 
 
@@ -44,17 +46,30 @@ def _enforce_clean(df: pl.DataFrame, table_name: str, strict: bool) -> pl.DataFr
     """Filter to claim_allowed rows and fail on fixture leakage in strict mode."""
     if "claim_allowed" in df.columns:
         n_before = df.height
-        df = df.filter(pl.col("claim_allowed"))
+        # CSV round-trip may store booleans as "true"/"false" strings
+        col = df["claim_allowed"]
+        if col.dtype == pl.Boolean:
+            df = df.filter(pl.col("claim_allowed"))
+        else:
+            df = df.filter(pl.col("claim_allowed").cast(pl.String).str.to_lowercase() == "true")
         dropped = n_before - df.height
         if dropped:
             logger.info("  %s: dropped %d non-claimable rows", table_name, dropped)
 
     if strict:
-        if "uses_fixture" in df.columns and df.filter(pl.col("uses_fixture")).height > 0:
-            raise SystemExit(
-                f"--strict: fixture-derived rows found in {table_name} after filtering. "
-                "Run 00c_claim_gate.py --all-events --strict first."
-            )
+        if "uses_fixture" in df.columns:
+            fix_col = df["uses_fixture"]
+            if fix_col.dtype == pl.Boolean:
+                n_fix = df.filter(pl.col("uses_fixture")).height
+            else:
+                n_fix = df.filter(
+                    pl.col("uses_fixture").cast(pl.String).str.to_lowercase() == "true"
+                ).height
+            if n_fix > 0:
+                raise SystemExit(
+                    f"--strict: {n_fix} fixture-derived rows found in {table_name} after filtering. "
+                    "Run 00c_claim_gate.py --all-events --strict first."
+                )
         if "edge_tier_actual" in df.columns:
             bad = df.filter(pl.col("edge_tier_actual").is_in(["fixture_non_empirical", "missing"]))
             if bad.height > 0:
@@ -393,8 +408,20 @@ def plot_claim_gate_summary(tables_dir: Path, figures_dir: Path) -> None:
     logger.info("Saved figure_claim_gate_summary.png")
 
 
+def _count_sig(df: pl.DataFrame, sig_col: str) -> int:
+    """Count rows where a boolean (or boolean-string) column is True."""
+    if sig_col not in df.columns:
+        return 0
+    col = df[sig_col]
+    if col.dtype == pl.Boolean:
+        return int(df.filter(pl.col(sig_col)).height)
+    return int(df.filter(pl.col(sig_col).cast(pl.String).str.to_lowercase() == "true").height)
+
+
 def write_paper_summary_table(tables_dir: Path, out_dir: Path, strict: bool) -> None:
     """Write a compact cross-event summary table for the paper."""
+    # Granger tables only live in results/tables (not paper-gated)
+    raw_dir = tables_dir.parent.parent / "tables" if strict else tables_dir
     rows = []
     for event_id in _EVENTS:
         row: dict = {"event_id": event_id}
@@ -402,10 +429,9 @@ def write_paper_summary_table(tables_dir: Path, out_dir: Path, strict: bool) -> 
         # Lead-lag significant pairs
         ll_path = tables_dir / f"table_leadlag_tests_{event_id}.csv"
         if ll_path.exists():
-            ll = pl.read_csv(ll_path)
-            ll = _enforce_clean(ll, ll_path.name, strict)
+            ll = _enforce_clean(pl.read_csv(ll_path), ll_path.name, strict)
             sig_col = "significant_p01" if "significant_p01" in ll.columns else "significant"
-            row["ll_sig"] = int(ll.filter(pl.col(sig_col)).height) if sig_col in ll.columns else 0
+            row["ll_sig"]   = _count_sig(ll, sig_col)
             row["ll_total"] = ll.height
         else:
             row["ll_sig"] = row["ll_total"] = 0
@@ -413,30 +439,29 @@ def write_paper_summary_table(tables_dir: Path, out_dir: Path, strict: bool) -> 
         # TE significant pairs (block-FDR)
         te_path = tables_dir / f"table_transfer_entropy_{event_id}.csv"
         if te_path.exists():
-            te = pl.read_csv(te_path)
-            te = _enforce_clean(te, te_path.name, strict)
+            te = _enforce_clean(pl.read_csv(te_path), te_path.name, strict)
             sig_col = "significant_block_fdr" if "significant_block_fdr" in te.columns else "significant_p05"
-            row["te_sig"] = int(te.filter(pl.col(sig_col)).height) if sig_col in te.columns else 0
+            row["te_sig"]   = _count_sig(te, sig_col)
             row["te_total"] = te.height
         else:
             row["te_sig"] = row["te_total"] = 0
 
-        # Granger significant (FDR)
-        gr_path = tables_dir / f"table_granger_{event_id}.csv"
+        # Granger significant (FDR) — read from raw tables dir
+        gr_path = (results_root() / "tables") / f"table_granger_{event_id}.csv"
         if gr_path.exists():
             gr = pl.read_csv(gr_path)
-            gr = _enforce_clean(gr, gr_path.name, strict)
+            gr = _enforce_clean(gr, gr_path.name, False)  # no strict on granger (not in paper dir)
             sig_col = "significant_fdr" if "significant_fdr" in gr.columns else "significant_p05"
-            row["granger_sig"] = int(gr.filter(pl.col(sig_col)).height) if sig_col in gr.columns else 0
+            row["granger_sig"]   = _count_sig(gr, sig_col)
             row["granger_total"] = gr.height
         else:
             row["granger_sig"] = row["granger_total"] = 0
 
-        # Event study — nodes with significant CAB
-        es_path = tables_dir / f"table_event_study_summary_{event_id}.csv"
+        # Event study — nodes with significant CAB (always from results/tables)
+        es_path = (results_root() / "tables") / f"table_event_study_summary_{event_id}.csv"
         if es_path.exists():
             es = pl.read_csv(es_path)
-            row["event_study_sig"] = int(es.filter(pl.col("significant_p05")).height) if "significant_p05" in es.columns else 0
+            row["event_study_sig"]   = _count_sig(es, "significant_p05")
             row["event_study_total"] = es.height
         else:
             row["event_study_sig"] = row["event_study_total"] = 0
@@ -492,8 +517,13 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Consolidate per-event tables
-    for table_name, pattern in _TABLE_SPECS:
-        consolidate_table(table_name, pattern, tables_dir, out_dir, args.events, args.strict)
+    # Edge tables: in strict mode read from paper/tables (claim-gated)
+    # Non-edge tables: always read from results/tables (no claim columns)
+    raw_tables_dir = results_root() / "tables"
+    for table_name, pattern, is_edge in _TABLE_SPECS:
+        src = tables_dir if is_edge else raw_tables_dir
+        consolidate_table(table_name, pattern, src, out_dir, args.events,
+                          strict=args.strict if is_edge else False)
 
     # Cross-event summary
     write_paper_summary_table(tables_dir, out_dir, args.strict)

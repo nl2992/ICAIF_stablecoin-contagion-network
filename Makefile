@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage audit ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness paper mvp usdc all
+.PHONY: setup test windows coverage audit ingest reconstruct panel eventmaps maps leadlag var tvpvar hawkes te network predict predset gnn robustness summary paper mvp usdc all
 
 setup:
 	pip install -r requirements.txt
@@ -64,6 +64,9 @@ gnn:
 
 robustness:
 	python scripts/10_run_robustness.py --event $(EVENT)
+
+summary:
+	python scripts/11_make_preliminary_summary.py
 
 paper:
 	python scripts/99_make_paper_outputs.py

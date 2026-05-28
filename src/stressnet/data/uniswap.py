@@ -41,6 +41,24 @@ query Swaps($pool: String!, $skip: Int!, $first: Int!, $startTime: Int!, $endTim
 """
 
 
+def parse_graph_decimal(value: Any, default: float = 0.0) -> float:
+    """Parse a The Graph BigDecimal field without token-decimal rescaling.
+
+    Uniswap v3 subgraph swap amounts are already decimal-normalised strings.
+    Dividing them by token decimals again would understate swap-flow proxies by
+    orders of magnitude.
+    """
+    if value is None:
+        return default
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return default
+    if math.isnan(parsed) or math.isinf(parsed):
+        return default
+    return parsed
+
+
 def fetch_pool_swaps(
     pool_address: str,
     start_ts: int,
@@ -117,16 +135,10 @@ def ingest_uniswap_pool_swaps(
         sqrt_x96 = int(swap.get("sqrtPriceX96", 0))
         implied = (sqrt_x96 / (2 ** 96)) ** 2 if sqrt_x96 > 0 else None
 
-        # amount0 = USDC (token0), amount1 = USDT (token1)
-        # Both have 6 decimals; positive = in, negative = out
-        # TODO: verify against a raw sample whether The Graph already normalises
-        # amounts. If so, remove the /1e6 division to avoid double-scaling.
-        # USDC decimals=6, USDT decimals=6. If raw amounts are already in decimal
-        # units (confirmed by The Graph schema), this division must be removed.
-        try:
-            amt0 = float(swap.get("amount0", 0)) / 1e6
-        except (ValueError, TypeError):
-            amt0 = 0.0
+        # amount0 = USDC (token0), amount1 = USDT (token1).
+        # The Graph exposes these as BigDecimal strings, already adjusted for
+        # token decimals, so do not divide by 1e6 here.
+        amt0 = parse_graph_decimal(swap.get("amount0", 0))
 
         usdc_net += amt0  # net USDC into pool (positive = more USDC in pool)
 
@@ -136,7 +148,7 @@ def ingest_uniswap_pool_swaps(
             "implied_pool_price": implied,
             "usdc_net": amt0,
             "usdc_net_cum": usdc_net,
-            "amount_usd": float(swap.get("amountUSD", 0) or 0),
+            "amount_usd": parse_graph_decimal(swap.get("amountUSD", 0)),
         })
 
     if not rows:

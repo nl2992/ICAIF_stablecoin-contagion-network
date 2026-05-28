@@ -169,8 +169,12 @@ def _try_real_dex(
 def _try_real_flow(
     node: Node, start_utc, end_utc, out_dir: Path, event_id: str = ""
 ) -> tuple[Path | None, str, str]:
-    """Try real flow/mint_burn ingestion."""
+    """Try real flow/mint_burn ingestion (Ethereum only; Tron gracefully skips)."""
     import os
+    # Tron uses a separate API — not supported by Etherscan block lookups.
+    if node.metadata.get("chain", "").lower() == "tron":
+        logger.debug("Tron chain not supported via Etherscan; skipping %s (fixture fallback).", node.id)
+        return None, "flows", "fixture_non_empirical"
     token_contract = node.metadata.get("token_contract")
     if not token_contract:
         logger.debug("No token_contract for %s; skipping real flow ingest.", node.id)

@@ -18,7 +18,7 @@ During the USDT/Curve 2023 event, `curve_3pool` and `curve_crvusd_usdt` exhibit 
 
 **What this does and does not claim:**
 - **Does claim**: statistically supported bidirectional AMM-flow linkage between the two Curve pools during the USDT stress episode, using execution-grade on-chain data.
-- **Does not claim**: causal contagion. Lead-lag evidence shows directional timing correlation, not structural causality.
+- **Does not claim**: structural causal identification. Lead-lag evidence shows directional timing correlation, not structural causality.
 - **Does not claim**: CEX microstructure transmission. Historical full-depth CEX order books are not freely available; public Binance/Kraken data are Tier B.
 - **Does not claim**: that Terra/LUNA, USDC/SVB, FTX, or BUSD events exhibit A/A paper-claimable propagation. Each provides either provenance-valid candidates (Terra, USDC/SVB) or A/B contextual evidence (FTX, BUSD).
 
@@ -87,7 +87,7 @@ Only `paper_claim_allowed = True` rows support directional paper claims. **Prove
 This paper package does **not** claim:
 
 - Historical full-depth CEX order-book coverage (Binance, Kraken, Coinbase L2 data require paid vendor archives such as Tardis or Kaiko, or a live collector operating at the time of the event).
-- Causal contagion from correlation or lead-lag evidence alone.
+- Structural causal identification from correlation or lead-lag evidence alone.
 - Tier-A status for derived Curve pool proxies (`reserve_imbalance`, `implied_pool_price`).
 - Paper-claimable A/A evidence for Terra/LUNA 2022 (provenance-valid candidate, not statistically supported at the hourly grid).
 - Paper-claimable evidence for the USDC/SVB 2023 sparse settlement-flow test (underpowered: 4 mint/burn arrivals, p = 1.0).

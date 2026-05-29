@@ -20,12 +20,13 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-TABLE_DIR = REPO_ROOT / "results" / "paper" / "tables"
-RAW_TBL   = REPO_ROOT / "results" / "tables"
-FIG_DIR   = REPO_ROOT / "results" / "paper" / "figures"
-README    = REPO_ROOT / "README.md"
-PAPER_DIR = REPO_ROOT / "paper"
+REPO_ROOT       = Path(__file__).resolve().parents[1]
+TABLE_DIR       = REPO_ROOT / "results" / "paper" / "tables"
+RAW_TBL         = REPO_ROOT / "results" / "tables"
+FIG_DIR         = REPO_ROOT / "results" / "paper" / "figures"
+COLUMBIA_FIG_DIR = REPO_ROOT / "results" / "paper" / "figures_columbia"
+README          = REPO_ROOT / "README.md"
+PAPER_DIR       = REPO_ROOT / "paper"
 
 EXPECTED_FIGURES = [
     "figure_01_multilayer_architecture.png",
@@ -42,9 +43,36 @@ EXPECTED_FIGURES = [
     "figure_12_full_paper_claimable_network.png",
 ]
 
+COLUMBIA_EXPECTED_FILES = [
+    "01_architecture_columbia.png",
+    "02_claim_gate_columbia.png",
+    "03_claim_audit_columbia.png",
+    "04_usdt_curve_timeline_columbia.png",
+    "05_usdt_curve_leadlag_columbia.png",
+    "06_aa_network_columbia.png",
+    "07_cross_event_evidence_map_columbia.png",
+    "08_full_paper_network_columbia.png",
+    "A01_leadlag_heatmap_columbia.png",
+    "A02_transfer_entropy_heatmap_columbia.png",
+    "A03_terra_negative_result_columbia.png",
+    "A04_usdc_svb_sparse_response_columbia.png",
+    "A05_feature_tier_matrix_columbia.png",
+    "A06_node_provenance_heatmap_columbia.png",
+    "A07_data_lineage_sankey_columbia.png",
+    "A08_non_claims_map_columbia.png",
+    "A09_method_comparison_columbia.png",
+    "A10_paper_claim_waterfall_columbia.png",
+]
+
 README_BANNED_PHRASES = [
     "headline microstructure claims",
     "A/A edges are confirmed",
+]
+
+PAPER_MARKDOWN_BANNED_PHRASES = [
+    "proves contagion",
+    "causal contagion",
+    "directional microstructure transmission",
 ]
 
 
@@ -356,3 +384,59 @@ def test_figure_captions_complete():
     text = cap_path.read_text()
     for i in range(1, 13):
         assert f"Figure {i}" in text, f"Figure {i} caption missing from figure_captions.md"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# K. All 18 Columbia figure-pack files exist
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("fname", COLUMBIA_EXPECTED_FILES)
+def test_columbia_figure_exists(fname: str):
+    p = COLUMBIA_FIG_DIR / fname
+    assert p.exists(), (
+        f"Missing Columbia figure: {fname}\n"
+        f"Run: python scripts/15_make_columbia_paper_pack.py"
+    )
+
+
+def test_columbia_figures_directory_exists():
+    assert COLUMBIA_FIG_DIR.exists(), (
+        f"Columbia figures directory not found: {COLUMBIA_FIG_DIR}\n"
+        "Run: python scripts/15_make_columbia_paper_pack.py"
+    )
+
+
+def test_columbia_figures_count():
+    if not COLUMBIA_FIG_DIR.exists():
+        pytest.skip("Columbia figures directory not found")
+    found = sorted(COLUMBIA_FIG_DIR.glob("*.png"))
+    assert len(found) == len(COLUMBIA_EXPECTED_FILES), (
+        f"Expected {len(COLUMBIA_EXPECTED_FILES)} Columbia figures, "
+        f"found {len(found)}: {[f.name for f in found]}"
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# L. Paper markdown must not contain banned overclaim phrases
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("phrase", PAPER_MARKDOWN_BANNED_PHRASES)
+def test_paper_main_md_no_banned_phrases(phrase: str):
+    md_path = PAPER_DIR / "main.md"
+    if not md_path.exists():
+        pytest.skip("paper/main.md not found")
+    text = md_path.read_text().lower()
+    assert phrase.lower() not in text, (
+        f"paper/main.md contains banned overclaim phrase: {phrase!r}"
+    )
+
+
+@pytest.mark.parametrize("phrase", PAPER_MARKDOWN_BANNED_PHRASES)
+def test_paper_readme_package_no_banned_phrases(phrase: str):
+    md_path = PAPER_DIR / "README_paper_package.md"
+    if not md_path.exists():
+        pytest.skip("paper/README_paper_package.md not found")
+    text = md_path.read_text().lower()
+    assert phrase.lower() not in text, (
+        f"paper/README_paper_package.md contains banned overclaim phrase: {phrase!r}"
+    )

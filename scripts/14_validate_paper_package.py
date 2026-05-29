@@ -3,7 +3,7 @@ scripts/14_validate_paper_package.py
 =====================================
 Read-only validation of the complete paper package.
 
-Runs checks A–J and exits nonzero if any check fails.
+Runs checks A–K and exits nonzero if any check fails.
 
 Usage:
     python scripts/14_validate_paper_package.py
@@ -45,6 +45,29 @@ EXPECTED_FIGURES = [
     "figure_12_full_paper_claimable_network.png",
 ]
 
+COLUMBIA_FIG_DIR = REPO_ROOT / "results" / "paper" / "figures_columbia"
+
+COLUMBIA_EXPECTED_FILES = [
+    "01_architecture_columbia.png",
+    "02_claim_gate_columbia.png",
+    "03_claim_audit_columbia.png",
+    "04_usdt_curve_timeline_columbia.png",
+    "05_usdt_curve_leadlag_columbia.png",
+    "06_aa_network_columbia.png",
+    "07_cross_event_evidence_map_columbia.png",
+    "08_full_paper_network_columbia.png",
+    "A01_leadlag_heatmap_columbia.png",
+    "A02_transfer_entropy_heatmap_columbia.png",
+    "A03_terra_negative_result_columbia.png",
+    "A04_usdc_svb_sparse_response_columbia.png",
+    "A05_feature_tier_matrix_columbia.png",
+    "A06_node_provenance_heatmap_columbia.png",
+    "A07_data_lineage_sankey_columbia.png",
+    "A08_non_claims_map_columbia.png",
+    "A09_method_comparison_columbia.png",
+    "A10_paper_claim_waterfall_columbia.png",
+]
+
 README_REQUIRED_PHRASES = [
     "Provenance-Aware Stablecoin Stress Propagation Networks",
     "Provenance-valid ≠ paper-claimable",
@@ -56,6 +79,13 @@ README_REQUIRED_PHRASES = [
 README_BANNED_PHRASES = [
     "headline microstructure claims",
     "A/A edges are confirmed",
+]
+
+# Phrases that must never appear in any paper markdown (main.md, README_paper_package.md)
+PAPER_MARKDOWN_BANNED_PHRASES = [
+    "proves contagion",
+    "causal contagion",
+    "directional microstructure transmission",
 ]
 
 _AA_LEVELS = frozenset({
@@ -343,6 +373,46 @@ def check_I(verbose: bool) -> _Check:
     return c
 
 
+def check_I_paper_md(verbose: bool) -> _Check:
+    """I-ext. Paper markdown files must not contain banned overclaim phrases."""
+    c = _Check("I-ext – paper markdown banned phrases absent")
+    candidates = [
+        PAPER_DIR / "main.md",
+        PAPER_DIR / "README_paper_package.md",
+    ]
+    for md_path in candidates:
+        if not md_path.exists():
+            continue
+        text = md_path.read_text()
+        for phrase in PAPER_MARKDOWN_BANNED_PHRASES:
+            if phrase.lower() in text.lower():
+                c.fail(f"{md_path.name}: banned phrase found: {phrase!r}")
+            elif verbose:
+                c.ok(f"{md_path.name}: does not contain banned phrase: {phrase!r}")
+    if c.passed:
+        c.ok("no banned overclaim phrases in paper markdown files")
+    return c
+
+
+def check_K(verbose: bool) -> _Check:
+    """K. All 18 Columbia figure-pack files exist."""
+    c = _Check("K – all 18 Columbia figures present")
+    if not COLUMBIA_FIG_DIR.exists():
+        c.fail(f"Columbia figures directory not found: {COLUMBIA_FIG_DIR}")
+        c.fail("Run: python scripts/15_make_columbia_paper_pack.py")
+        return c
+    for fname in COLUMBIA_EXPECTED_FILES:
+        p = COLUMBIA_FIG_DIR / fname
+        if p.exists():
+            if verbose:
+                c.ok(f"  {fname}")
+        else:
+            c.fail(f"missing Columbia figure: {fname}")
+    if c.passed:
+        c.ok(f"all {len(COLUMBIA_EXPECTED_FILES)} Columbia figures present")
+    return c
+
+
 def check_J(verbose: bool) -> _Check:
     """J. Compact summary report of key counts."""
     c = _Check("J – key counts summary")
@@ -413,7 +483,7 @@ def main() -> None:
     checks = [
         check_A, check_B, check_C, check_D,
         check_E, check_F, check_G, check_H,
-        check_I, check_J,
+        check_I, check_I_paper_md, check_J, check_K,
     ]
 
     results: list[_Check] = []

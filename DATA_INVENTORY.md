@@ -34,7 +34,7 @@ its verified provenance tier, what features it populates, and what is missing or
 | `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic `reserve_imbalance` | The Graph subgraph not fetched |
 | `eth_bridge_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flow values | Dune query not executed |
 
-**A/A edge confirmed**: `usdc_mint_burn (A) ↔ curve_3pool (A)` via `usdc_net_sold_1h` and `mint_burn_net_1h`
+**A/A provenance-valid pair**: `usdc_mint_burn (A) ↔ curve_3pool (A)` via `usdc_net_sold_1h` and `mint_burn_net_1h`. Directional paper claim requires statistical support (`paper_claim_allowed == True`).
 
 ---
 
@@ -47,7 +47,7 @@ its verified provenance tier, what features it populates, and what is missing or
 | `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
 | `ust_binance` | ⚠️ B | Binance Vision aggTrades | `spread_bps`, `basis_vs_usd` | Trade-level; `depth_10bps_bid_usd = null` |
 
-**A/A edge confirmed**: `curve_3pool (A) ↔ curve_ust_wormhole (A)` via `usdc_net_sold_1h` (3pool USDC flow vs UST/3CRV pool imbalance)
+**A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_ust_wormhole (A)` via `usdc_net_sold_1h` (3pool USDC flow vs UST/3CRV pool imbalance). Directional paper claim requires statistical support (`paper_claim_allowed == True`).
 
 ---
 
@@ -64,7 +64,7 @@ its verified provenance tier, what features it populates, and what is missing or
 | `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic pool state | |
 | `tron_usdt_exchange_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flows | TronGrid not implemented |
 
-**A/A edge confirmed**: `curve_3pool (A) ↔ curve_crvusd_usdt (A)` — both Etherscan on-chain flow features
+**A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_crvusd_usdt (A)` — both Etherscan on-chain flow features. Directional paper claim requires statistical support (`paper_claim_allowed == True`).
 
 ---
 
@@ -142,16 +142,21 @@ with `ng_scaled=True`, dividing by 1e18 instead. After the fix:
 
 ---
 
-## Current A/A confirmed pairs (2026-05-29)
+## Current A/A provenance-valid pairs (2026-05-29)
 
-| Pair | Event | Claim type |
+These pairs pass the **provenance gate** only. Whether they also pass the **statistical gate**
+is determined by `paper_claim_allowed == True` in the claim-gated result tables after running
+`python scripts/00c_claim_gate.py --all-events`.
+
+| Pair | Event | Provenance claim type |
 |---|---|---|
-| `usdc_mint_burn` ↔ `curve_3pool` via `usdc_net_sold_1h` / `mint_burn_net_1h` | usdc_svb_2023 | Directed on-chain flow: CEX redemption pressure vs. AMM swap flow |
-| `curve_3pool` ↔ `curve_ust_wormhole` via `usdc_net_sold_1h` | terra_luna_2022 | Cross-pool USDC stress propagation during Terra collapse |
-| `curve_3pool` ↔ `curve_crvusd_usdt` via `usdc_net_sold_1h` | usdt_curve_2023 | Cross-pool USDT stress: 3pool vs crvUSD pool imbalance |
+| `usdc_mint_burn` ↔ `curve_3pool` via `usdc_net_sold_1h` / `mint_burn_net_1h` | usdc_svb_2023 | A/A on-chain settlement + AMM flow |
+| `curve_3pool` ↔ `curve_ust_wormhole` via `usdc_net_sold_1h` | terra_luna_2022 | A/A DEX flow (cross-pool) |
+| `curve_3pool` ↔ `curve_crvusd_usdt` via `usdc_net_sold_1h` | usdt_curve_2023 | A/A DEX flow (cross-pool) |
 
-Note: All A/A pairs use `usdc_net_sold_1h` (Tier A) as the linking feature. Claims
-using `reserve_imbalance` or `implied_pool_price` are A/B, not A/A.
+Note: All A/A pairs use `usdc_net_sold_1h` (Tier A direct on-chain AMM flow) as the linking feature.
+Claims using `reserve_imbalance` or `implied_pool_price` are A/B, not A/A.
+**Provenance-valid ≠ paper-claimable.** Paper claims require both gates to pass.
 
 ---
 
@@ -169,13 +174,18 @@ using `reserve_imbalance` or `implied_pool_price` are A/B, not A/A.
 
 | Claim level | Evidence available | Events |
 |---|---|---|
-| **A_A** | 3 confirmed pairs (see table above) | usdc_svb_2023, terra_luna_2022, usdt_curve_2023 |
+| **A_A_dex_flow** | 2 provenance-valid pairs (`curve_3pool`↔`curve_ust_wormhole`, `curve_3pool`↔`curve_crvusd_usdt`) | terra_luna_2022, usdt_curve_2023 |
+| **A_A_onchain_settlement** | 1 provenance-valid pair (`usdc_mint_burn`↔`curve_3pool`) — sparse; use event-arrival method | usdc_svb_2023 |
 | **A_B** | `curve_3pool (A)` paired with any B node | All 5 events |
-| **B_B** | All Binance/CoinMetrics results (876 rows) | All 5 events |
+| **B_B** | All Binance/CoinMetrics results | All 5 events |
 
-The 881-row result set from the empirical pipeline uses real data (no fixture).
-With A/A pairs now confirmed in 3 events, the paper gate for headline
-microstructure claims is unlocked for those 3 events.
+The paper gate for headline **Tier-A on-chain AMM-flow claims** is unlocked when at least one
+A/A DEX-flow edge is `paper_claim_allowed == True` after statistical testing. Run
+`python scripts/00c_claim_gate.py --all-events --strict` to verify.
+
+Historical CEX microstructure claims (executable L2 depth, order-book imbalance) remain
+**unavailable** without vendor/live L2 data (Tardis or Kaiko). Public Binance bookTicker
+and OHLCV data are Tier B and support contextual co-movement only.
 
 For ftx_2022 and busd_2023, A/A claims remain blocked (single A node each).
-These events are supported by A/B directional evidence.
+These events are supported by A/B directional evidence (`curve_3pool A` + Binance/CoinMetrics B).

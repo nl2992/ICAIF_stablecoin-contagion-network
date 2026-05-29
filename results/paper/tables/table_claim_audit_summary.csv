@@ -1,5 +1,4 @@
 event_id,n_total_edges,n_fixture_blocked,n_provenance_claimable,n_statistically_supported,n_paper_claimable,n_AA_provenance,n_AA_paper_claimable,n_AB_paper_claimable,n_BB_context
-,0,0,0,0,0,0,0,0,0
 busd_2023,36,0,36,17,17,0,0,7,18
 ftx_2022,18,0,18,9,9,0,0,5,6
 terra_luna_2022,26,0,26,6,6,6,0,4,4

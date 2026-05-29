@@ -66,6 +66,16 @@ COLUMBIA_EXPECTED_FILES = [
     "A08_non_claims_map_columbia.png",
     "A09_method_comparison_columbia.png",
     "A10_paper_claim_waterfall_columbia.png",
+    "A11_bipartite_claim_network_columbia.png",
+    "A12_paper_claimable_by_method_columbia.png",
+    "A13_pvalue_waterfall_columbia.png",
+    "A14_robustness_grid_columbia.png",
+    "A15_fixture_blocking_audit_columbia.png",
+    "A16_sparse_flow_barcode_columbia.png",
+    "A17_method_pvalue_comparison_columbia.png",
+    "A18_feature_tier_sankey_columbia.png",
+    "A19_event_timeline_panel_columbia.png",
+    "A20_final_evidence_map_columbia.png",
 ]
 
 README_REQUIRED_PHRASES = [
@@ -395,8 +405,8 @@ def check_I_paper_md(verbose: bool) -> _Check:
 
 
 def check_K(verbose: bool) -> _Check:
-    """K. All 18 Columbia figure-pack files exist."""
-    c = _Check("K – all 18 Columbia figures present")
+    """K. All 28 Columbia figure-pack files exist (8 main + 20 appendix A01-A20)."""
+    c = _Check("K – all 28 Columbia figures present")
     if not COLUMBIA_FIG_DIR.exists():
         c.fail(f"Columbia figures directory not found: {COLUMBIA_FIG_DIR}")
         c.fail("Run: python scripts/15_make_columbia_paper_pack.py")

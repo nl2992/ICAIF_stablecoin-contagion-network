@@ -99,15 +99,23 @@ in the final panel.
 No edge may support a stronger claim than the weaker endpoint tier.
 
 ```
-tier_i = A, tier_j = A  →  claim_level = A_A_directional_microstructure
+tier_i = A, tier_j = A (both DEX)         →  claim_level = A_A_dex_flow
+tier_i = A, tier_j = A (settlement layer) →  claim_level = A_A_onchain_settlement
+tier_i = A, tier_j = A (CEX + L2 data)   →  claim_level = A_A_cex_microstructure
+tier_i = A, tier_j = A (other)            →  claim_level = A_A_high_provenance
 tier_i = A, tier_j = B  →  claim_level = A_B_suggestive_directional
 tier_i = B, tier_j = B  →  claim_level = B_B_context_only
 Any endpoint = C         →  claim_level = C_taxonomy_only
 Any endpoint = fixture   →  not claimable
 ```
 
+Note: edges are also capped by the **feature tier** (see `configs/feature_tiers.yaml`).
+A node-A/A edge using a Tier-B feature (`reserve_imbalance`, `implied_pool_price`) is
+downgraded to A/B. Full logic in `src/stressnet/evaluation/claim_gate.py`.
+
 Claim sentences written to result tables (`claim_language` column):
-- `A_A`: "directional microstructure transmission"
+- `A_A_dex_flow`: "high-provenance on-chain AMM-flow evidence"
+- `A_A_onchain_settlement`: "high-provenance on-chain settlement-flow evidence"
 - `A_B`: "suggestive timing evidence"
 - `B_B`: "contextual co-movement"
 - `C`:   "event co-occurrence context only"
@@ -117,7 +125,7 @@ Claim sentences written to result tables (`claim_language` column):
 ## Review checklist before paper submission
 
 - [ ] Every node has a `tier_actual` (not just `tier_nominal`) populated in the manifest.
-- [ ] At least one `A_A_directional_microstructure` edge exists for the headline event.
+- [ ] At least one `A_A_dex_flow` or `A_A_onchain_settlement` edge with `paper_claim_allowed == True` exists for the headline event.
 - [ ] No `fixture_non_empirical` rows in the paper panel.
 - [ ] All Tier-A CEX nodes have `is_executable_bookwalk = True` or a documented
       fallback explaining why bookwalk VWAP is unavailable.

@@ -34,7 +34,18 @@ its verified provenance tier, what features it populates, and what is missing or
 | `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic `reserve_imbalance` | The Graph subgraph not fetched |
 | `eth_bridge_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flow values | Dune query not executed |
 
-**A/A provenance-valid pair**: `usdc_mint_burn (A) ↔ curve_3pool (A)` via `usdc_net_sold_1h` and `mint_burn_net_1h`. Directional paper claim requires statistical support (`paper_claim_allowed == True`).
+**A/A provenance-valid pair**: `usdc_mint_burn (A) ↔ curve_3pool (A)` via `usdc_net_sold_1h`
+and `mint_burn_net_1h`.
+
+**Paper-claimable result**: Not statistically supported. The sparse-flow event study (4 arrivals,
+1000 permutations) finds no significant response enrichment (p = 1.0 for curve_3pool, NaN for
+CEX nodes which lack `usdc_net_sold_1h`). Reported as **high-provenance descriptive evidence**.
+The mint/burn series is too sparse for continuous lead-lag; a Hawkes or binomial test with larger
+time windows may recover power.
+
+**Limitations**: Only 4 mint/burn events in the 12-day window. CEX nodes do not have
+`usdc_net_sold_1h` (Tier-A feature); responses of CEX nodes to mint/burn arrivals cannot be
+tested with this feature. `reserve_imbalance` is Tier B derived.
 
 ---
 
@@ -47,11 +58,20 @@ its verified provenance tier, what features it populates, and what is missing or
 | `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
 | `ust_binance` | ⚠️ B | Binance Vision aggTrades | `spread_bps`, `basis_vs_usd` | Trade-level; `depth_10bps_bid_usd = null` |
 
-**A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_ust_wormhole (A)` via `usdc_net_sold_1h` (3pool USDC flow vs UST/3CRV pool imbalance). Directional paper claim requires statistical support (`paper_claim_allowed == True`).
+**A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_ust_wormhole (A)` via `usdc_net_sold_1h`
+(3pool USDC flow vs UST/3CRV pool imbalance).
+
+**Paper-claimable result**: Not statistically supported at the hourly grid in the AMM-only
+lead-lag analysis (0/2 pairs pass at p < 0.01). Reported as **high-provenance descriptive
+evidence** (`claim_strength = suggestive`). The pool drain is extreme and may reduce
+cross-correlation power.
+
+**Limitations**: `curve_ust_wormhole` coverage < 50% for some sub-windows (pool drained mid-event);
+may be downgraded to Tier B in robustness checks. `reserve_imbalance` is Tier B derived.
 
 ---
 
-## usdt_curve_2023 (USDT/Curve stress, June 2023)
+## usdt_curve_2023 (USDT/Curve stress, June 2023)  ← **primary technical case study**
 
 | Node | `tier_actual` | Source | Populated features | Notes |
 |---|---|---|---|---|
@@ -64,7 +84,15 @@ its verified provenance tier, what features it populates, and what is missing or
 | `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic pool state | |
 | `tron_usdt_exchange_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flows | TronGrid not implemented |
 
-**A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_crvusd_usdt (A)` — both Etherscan on-chain flow features. Directional paper claim requires statistical support (`paper_claim_allowed == True`).
+**A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_crvusd_usdt (A)` — both Etherscan on-chain flow features.
+
+**Paper-claimable result**: Both directions (`curve_3pool → curve_crvusd_usdt` and reverse) are
+**Bonferroni-significant (p ≤ 0.014) on `usdc_net_sold_1h` at the hourly grid** in the AMM-only
+lead-lag analysis. `claim_strength = robust`, `paper_claim_allowed = True`. These 2 rows are in
+`results/paper/tables/table_aa_paper_claimable_edges.csv`.
+
+**Limitations**: `reserve_imbalance` and `implied_pool_price` are Tier-B derived proxies.
+`usdt_mint_burn` is not real (Tether Issue/Redeem not yet decoded).
 
 ---
 

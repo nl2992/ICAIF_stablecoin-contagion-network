@@ -20,13 +20,14 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-REPO_ROOT       = Path(__file__).resolve().parents[1]
-TABLE_DIR       = REPO_ROOT / "results" / "paper" / "tables"
-RAW_TBL         = REPO_ROOT / "results" / "tables"
-FIG_DIR         = REPO_ROOT / "results" / "paper" / "figures"
-COLUMBIA_FIG_DIR = REPO_ROOT / "results" / "paper" / "figures_columbia"
-README          = REPO_ROOT / "README.md"
-PAPER_DIR       = REPO_ROOT / "paper"
+REPO_ROOT          = Path(__file__).resolve().parents[1]
+TABLE_DIR          = REPO_ROOT / "results" / "paper" / "tables"
+RAW_TBL            = REPO_ROOT / "results" / "tables"
+FIG_DIR            = REPO_ROOT / "results" / "paper" / "figures"
+COLUMBIA_FIG_DIR   = REPO_ROOT / "results" / "paper" / "figures_columbia"
+EXTENDED_FIG_DIR   = REPO_ROOT / "results" / "paper" / "figures_extended"
+README             = REPO_ROOT / "README.md"
+PAPER_DIR          = REPO_ROOT / "paper"
 
 EXPECTED_FIGURES = [
     "figure_01_multilayer_architecture.png",
@@ -73,6 +74,29 @@ PAPER_MARKDOWN_BANNED_PHRASES = [
     "proves contagion",
     "causal contagion",
     "directional microstructure transmission",
+]
+
+EXTENDED_EXPECTED_FILES = [
+    "E01_peg_deviation_all_events.png",
+    "E02_usdt_curve_cumulative_flow.png",
+    "E03_event_study_cab_curves.png",
+    "E04_basis_bps_distribution.png",
+    "C01_cross_event_leadlag_dotplot.png",
+    "C02_transfer_entropy_all_events.png",
+    "C03_granger_pvalue_comparison.png",
+    "C04_event_window_calendar.png",
+    "R01_robustness_significance_heatmap.png",
+    "R02_robustness_peak_corr_distribution.png",
+    "R03_grid_sensitivity_headline_pair.png",
+    "M01_leadlag_correlation_matrix.png",
+    "M02_tvp_var_spillovers_all_events.png",
+    "M03_method_pvalue_comparison.png",
+    "M04_prediction_auroc_auprc.png",
+    "N01_node_centrality_comparison.png",
+    "N02_bipartite_claim_network.png",
+    "N03_stress_propagation_sequence.png",
+    "P01_prediction_roc_by_event.png",
+    "P02_claim_strength_by_event.png",
 ]
 
 
@@ -439,4 +463,34 @@ def test_paper_readme_package_no_banned_phrases(phrase: str):
     text = md_path.read_text().lower()
     assert phrase.lower() not in text, (
         f"paper/README_paper_package.md contains banned overclaim phrase: {phrase!r}"
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# M. Extended figure pack — 20 figures in figures_extended/
+# ─────────────────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("fname", EXTENDED_EXPECTED_FILES)
+def test_extended_figure_exists(fname: str):
+    p = EXTENDED_FIG_DIR / fname
+    assert p.exists(), (
+        f"Missing extended figure: {fname}\n"
+        f"Run: python scripts/16_make_extended_figures.py"
+    )
+
+
+def test_extended_figures_directory_exists():
+    assert EXTENDED_FIG_DIR.exists(), (
+        f"Extended figures directory not found: {EXTENDED_FIG_DIR}\n"
+        "Run: python scripts/16_make_extended_figures.py"
+    )
+
+
+def test_extended_figures_count():
+    if not EXTENDED_FIG_DIR.exists():
+        pytest.skip("Extended figures directory not found")
+    found = sorted(EXTENDED_FIG_DIR.glob("*.png"))
+    assert len(found) == len(EXTENDED_EXPECTED_FILES), (
+        f"Expected {len(EXTENDED_EXPECTED_FILES)} extended figures, "
+        f"found {len(found)}: {[f.name for f in found]}"
     )

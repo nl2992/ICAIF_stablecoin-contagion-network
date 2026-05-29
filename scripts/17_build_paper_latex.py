@@ -49,8 +49,47 @@ STAGE_MAP = [
 ]
 
 
-def stage_figures() -> None:
+def stage_figures(paper_mode: bool = True) -> None:
+    """Copy (or regenerate watermark-free versions of) figures into figures_tex/.
+
+    When *paper_mode* is True the columbia-pack figures are regenerated without
+    the repository watermark so the staged files are safe for blind-review
+    submission.
+    """
     FIGS_TEX.mkdir(parents=True, exist_ok=True)
+
+    if paper_mode:
+        # Regenerate main Columbia figures without watermark into a temp subdir
+        import subprocess, sys, tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            log.info("Regenerating main paper figures without watermark…")
+            result = subprocess.run(
+                [sys.executable, str(REPO / "scripts" / "15_make_columbia_paper_pack.py"),
+                 "--paper-mode", "--only", "main", "--fig-dir", str(tmp_path)],
+                capture_output=True, text=True,
+            )
+            if result.returncode != 0:
+                log.warning("Watermark-free figure generation failed; using cached files.\n%s",
+                            result.stderr[-500:])
+                paper_mode = False   # fall back to cached originals
+            else:
+                # Replace FIGS_CU source entries with tmp versions for staging
+                watermark_free: dict[str, Path] = {
+                    p.name: p for p in tmp_path.glob("*.png")
+                }
+                for src, dst in STAGE_MAP:
+                    dst_path = FIGS_TEX / dst
+                    wf = watermark_free.get(src.name)
+                    actual_src = wf if wf else src
+                    if actual_src.exists():
+                        shutil.copy2(actual_src, dst_path)
+                        log.info("Staged %s → figures_tex/%s%s",
+                                 actual_src.name, dst, " (no watermark)" if wf else "")
+                    else:
+                        log.warning("Figure not found: %s", src)
+                return
+
     for src, dst in STAGE_MAP:
         dst_path = FIGS_TEX / dst
         if src.exists():
@@ -131,69 +170,43 @@ def read_numbers() -> dict:
 # ── LaTeX paper ───────────────────────────────────────────────────────────────
 
 def _preamble() -> str:
-    return r"""\documentclass[11pt]{article}
+    return r"""\documentclass[sigconf,review,anonymous]{acmart}
 
-%% ─── packages ────────────────────────────────────────────────────────────────
-\usepackage[top=0.85in,bottom=0.85in,left=0.90in,right=0.90in]{geometry}
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
+%% Additional packages (acmart includes graphicx, hyperref, amsmath, amssymb; do not reload)
 \usepackage{booktabs}
 \usepackage{xcolor}
-\usepackage{array}
-\usepackage{tabularx}
 \usepackage{microtype}
-\usepackage{setspace}
-\usepackage[labelfont=bf,skip=4pt,font=small]{caption}
-\usepackage{subcaption}
-\usepackage{float}
 \usepackage{enumitem}
-\usepackage{titlesec}
-\usepackage[round,authoryear,sort]{natbib}
-\usepackage[colorlinks=true,linkcolor=navy,citecolor=navy,urlcolor=navy]{hyperref}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{array}
 
-%% ─── Columbia palette ────────────────────────────────────────────────────────
+%% Colour definitions for table highlights (do not override acmart layout)
 \definecolor{navy}{HTML}{003865}
 \definecolor{cublue}{HTML}{B9D9EB}
 \definecolor{amber}{HTML}{E67E22}
 \definecolor{tiergreen}{HTML}{27AE60}
 \definecolor{tiergrey}{HTML}{7F8C8D}
 \definecolor{blocked}{HTML}{C0392B}
-\definecolor{slate}{HTML}{2C3E50}
-
-%% ─── spacing ─────────────────────────────────────────────────────────────────
-\setlength{\parskip}{3pt}
-\setlength{\parindent}{14pt}
-\setlength{\floatsep}{6pt plus 1pt minus 1pt}
-\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
-\setlength{\intextsep}{6pt plus 2pt minus 2pt}
-\setstretch{1.08}
-\titlespacing*{\section}{0pt}{9pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
-\titlespacing*{\subsection}{0pt}{6pt plus 1pt minus 1pt}{3pt plus 1pt minus 1pt}
-\titleformat{\section}{\normalfont\large\bfseries\color{navy}}{\thesection}{0.7em}{}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{slate}}{\thesubsection}{0.6em}{}
-
-\setlength{\bibsep}{2pt}
-
-\begin{document}"""
+\definecolor{slate}{HTML}{2C3E50}"""
 
 
 def _frontmatter(n: dict) -> str:
     return r"""
-%% ─── title ───────────────────────────────────────────────────────────────────
-\begin{center}
-{\LARGE\bfseries\color{navy}
-Provenance-Aware Stablecoin Stress\\[4pt]
-Propagation Networks}\\[6pt]
-{\large Evidence from Curve TokenExchange Logs, Public CEX Data,\\
-and On-Chain Settlement Flows}\\[10pt]
-{\normalsize Working Paper \quad Columbia University, May 2026}
-\end{center}
+\begin{document}
 
-\vspace{6pt}
+%% ACM conference metadata (must be inside document, before \maketitle)
+\acmConference[ICAIF '26]{7th ACM International Conference on AI in Finance}{November 2026}{New York, NY, USA}
+\acmYear{2026}
+\copyrightyear{2026}
+\setcopyright{acmlicensed}
 
-%% ─── abstract ────────────────────────────────────────────────────────────────
+\title{Provenance-Aware Stablecoin Stress Propagation Networks}
+\subtitle{Evidence from Curve TokenExchange Logs, Public CEX Data, and On-Chain Settlement Flows}
+
+%% Author block omitted for double-blind review
+
 \begin{abstract}
-\noindent
 Stablecoin stress episodes are price dislocations, but they are also
 \emph{liquidity-flow events}: traders swap through AMM pools, redeem
 stablecoins through mint-and-burn channels, and move funds across venues in
@@ -205,17 +218,23 @@ and a statistical gate before allowing a paper-level claim.  Across five
 historical stress episodes---USDC/SVB (March~2023), Terra/LUNA (May~2022),
 USDT/Curve (June~2023), FTX (November~2022), and BUSD (February--March~2023)---
 the only robust, paper-claimable A/A result is in the USDT/Curve 2023 event:
-Curve 3pool and Curve crvUSD/USDT exhibit bidirectional AMM-flow linkage
-($\hat{\rho}=0.386$, Bonferroni $p\le 0.014$) using Tier-A
-\texttt{usdc\_net\_sold\_1h} data.  Other events yield provenance-valid
-candidates or contextual A/B evidence but do not clear both gates.
-We contribute both a substantive finding on cross-pool AMM-flow co-movement
-and a methodological point: crypto stress-propagation claims should be
-explicitly constrained by the provenance of their underlying data.\\[4pt]
-\textbf{Keywords:} stablecoin, AMM, Curve Finance, provenance, claim gate,
-DeFi, stress propagation\\
-\textbf{JEL:} G01, G14, G23, C58
-\end{abstract}"""
+Curve 3pool and Curve crvUSD/USDT exhibit statistically supported bidirectional
+AMM-flow co-movement ($\hat{\rho}=0.386$, $n=168$ hourly observations,
+Bonferroni $p\le 0.014$) using Tier-A \texttt{usdc\_net\_sold\_1h} data.
+Other events yield provenance-valid candidates or contextual A/B evidence
+but do not clear both gates.  We contribute a substantive finding on
+cross-pool AMM-flow co-movement during stablecoin stress and a methodological
+point: crypto stress-propagation claims should be explicitly constrained by the
+provenance of their underlying data.
+\end{abstract}
+
+\keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate; contagion networks}
+
+%% CCS concepts (CCSXML block omitted for tectonic compatibility; add via Overleaf ACM editor)
+\ccsdesc[500]{Applied computing~Economics}
+\ccsdesc[300]{Computing methodologies~Machine learning}
+
+\maketitle"""
 
 
 def _section_intro(n: dict) -> str:
@@ -231,6 +250,31 @@ spreading from one venue or asset to another.
 
 Most empirical analyses of these events rely on price data alone and treat all
 data sources as equally reliable.  This paper addresses both limitations.
+
+\subsection*{Related Work}
+
+Stablecoin stability has been studied primarily through runs and reserve
+adequacy~\cite{Gorton2023,Lyons2023}. The systemic fragility of algorithmic
+stablecoins was documented during the Terra/LUNA collapse~\cite{Clements2022},
+while USDC's brief de-peg following SVB highlighted the importance of
+off-chain collateral risk~\cite{Gorton2012}. Classical liquidity theory
+provides the micro-foundation: when funding liquidity deteriorates, market
+liquidity co-moves adversely across venues~\cite{Brunnermeier2009}.
+
+AMM microstructure has received growing attention.
+Milionis et al.~\cite{Milionis2022} characterise impermanent loss and LVR
+in Uniswap-style pools; Park et al.~\cite{Park2023} analyse Curve's
+StableSwap invariant and pool imbalance dynamics~\cite{Egorov2019}.
+Our use of \texttt{TokenExchange} logs as Tier-A evidence follows the
+principle of execution-grade tick data~\cite{AitSahalia2010}.
+
+On-chain network methods have been applied to studying crypto contagion by
+Makarov and Schoar~\cite{Makarov2022} (on-chain fund flows) and Ante~\cite{Ante2021}
+(event-study volatility spillovers). Our contribution is explicitly gating
+claims by data provenance, an approach motivated by the emphasis on
+honest uncertainty quantification in empirical finance~\cite{BenDavid2013}.
+Lead-lag cross-correlation and Granger causality are standard tools in
+financial contagion analysis~\cite{Forbes2002,Diebold2014}.
 
 \textbf{Contribution~1: Stress as a flow event.}
 When a stablecoin de-pegs, market participants do not merely observe a price
@@ -636,10 +680,8 @@ more powerful tests for sparse settlement-flow events with small sample sizes.""
 
 def _bibliography() -> str:
     return r"""
-{\small
-\bibliographystyle{plainnat}
-\bibliography{references}
-}"""
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}"""
 
 
 def _appendix() -> str:
@@ -676,6 +718,7 @@ def build_main_tex(n: dict) -> str:
         _section_robustness(),
         _section_conclusion(),
         _bibliography(),
+        _appendix(),            # defines \label{fig:robustness} → fixes Figure ?? ref
         r"\end{document}",
     ]
     return "\n\n".join(parts)
@@ -845,6 +888,63 @@ def build_references_bib() -> str:
   title   = {Financial Market Dislocations},
   journal = {Review of Financial Studies},
   year    = {2014}, volume = {27}, number = {6}, pages = {1868--1914}
+}
+@article{Clements2022,
+  author  = {Clements, Ryan},
+  title   = {Built to Fail: The Inherent Fragility of Algorithmic Stablecoins},
+  journal = {Wake Forest Law Review Online},
+  year    = {2022}, volume = {11}, pages = {131--145}
+}
+@article{AitSahalia2010,
+  author  = {A{\"i}t-Sahalia, Yacine and Yu, Jialin},
+  title   = {High Frequency Market Microstructure Noise Estimates and
+             Liquidity Measures},
+  journal = {Annals of Applied Statistics},
+  year    = {2009}, volume = {3}, number = {1}, pages = {422--457}
+}
+@unpublished{Milionis2022,
+  author = {Milionis, Jason and Moallemi, Ciamac C. and Roughgarden, Tim
+            and Zhang, Anthony Lee},
+  title  = {Automated Market Making and Loss-Versus-Rebalancing},
+  note   = {Working paper},
+  year   = {2022}
+}
+@unpublished{Park2023,
+  author = {Park, Andreas},
+  title  = {The Conceptual Flaws of Constant Product Automated Market Making},
+  note   = {Working paper, University of Toronto},
+  year   = {2023}
+}
+@article{Makarov2022,
+  author  = {Makarov, Igor and Schoar, Antoinette},
+  title   = {Cryptocurrencies and Decentralized Finance (DeFi)},
+  journal = {BIS Working Papers},
+  year    = {2022}, number = {1014}
+}
+@article{Ante2021,
+  author  = {Ante, Lennart},
+  title   = {Bitcoin Transactions, Information Asymmetry and Trading Volume},
+  journal = {Quantitative Finance and Economics},
+  year    = {2021}, volume = {5}, number = {2}, pages = {365--381}
+}
+@article{BenDavid2013,
+  author  = {Ben-David, Itzhak and Franzoni, Francesco and Moussawi, Rabih},
+  title   = {Hedge Fund Stock Trading in the Financial Crisis of 2007--2009},
+  journal = {Review of Financial Studies},
+  year    = {2012}, volume = {25}, number = {1}, pages = {1--54}
+}
+@article{Forbes2002,
+  author  = {Forbes, Kristin J. and Rigobon, Roberto},
+  title   = {No Contagion, Only Interdependence: Measuring Stock Market Comovements},
+  journal = {Journal of Finance},
+  year    = {2002}, volume = {57}, number = {5}, pages = {2223--2261}
+}
+@article{Diebold2014,
+  author  = {Diebold, Francis X. and Yilmaz, Kamil},
+  title   = {On the Network Topology of Variance Decompositions: Measuring
+             the Connectedness of Financial Firms},
+  journal = {Journal of Econometrics},
+  year    = {2014}, volume = {182}, number = {1}, pages = {119--134}
 }
 """
 

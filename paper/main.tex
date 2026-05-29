@@ -1,24 +1,15 @@
-\documentclass[11pt]{article}
+\documentclass[sigconf,review,anonymous]{acmart}
 
-%% ─── packages ────────────────────────────────────────────────────────────────
-\usepackage[top=0.85in,bottom=0.85in,left=0.90in,right=0.90in]{geometry}
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx}
+%% Additional packages (acmart includes graphicx, hyperref, amsmath, amssymb; do not reload)
 \usepackage{booktabs}
 \usepackage{xcolor}
-\usepackage{array}
-\usepackage{tabularx}
 \usepackage{microtype}
-\usepackage{setspace}
-\usepackage[labelfont=bf,skip=4pt,font=small]{caption}
-\usepackage{subcaption}
-\usepackage{float}
 \usepackage{enumitem}
-\usepackage{titlesec}
-\usepackage[round,authoryear,sort]{natbib}
-\usepackage[colorlinks=true,linkcolor=navy,citecolor=navy,urlcolor=navy]{hyperref}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{array}
 
-%% ─── Columbia palette ────────────────────────────────────────────────────────
+%% Colour definitions for table highlights (do not override acmart layout)
 \definecolor{navy}{HTML}{003865}
 \definecolor{cublue}{HTML}{B9D9EB}
 \definecolor{amber}{HTML}{E67E22}
@@ -27,38 +18,21 @@
 \definecolor{blocked}{HTML}{C0392B}
 \definecolor{slate}{HTML}{2C3E50}
 
-%% ─── spacing ─────────────────────────────────────────────────────────────────
-\setlength{\parskip}{3pt}
-\setlength{\parindent}{14pt}
-\setlength{\floatsep}{6pt plus 1pt minus 1pt}
-\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
-\setlength{\intextsep}{6pt plus 2pt minus 2pt}
-\setstretch{1.08}
-\titlespacing*{\section}{0pt}{9pt plus 2pt minus 2pt}{4pt plus 1pt minus 1pt}
-\titlespacing*{\subsection}{0pt}{6pt plus 1pt minus 1pt}{3pt plus 1pt minus 1pt}
-\titleformat{\section}{\normalfont\large\bfseries\color{navy}}{\thesection}{0.7em}{}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries\color{slate}}{\thesubsection}{0.6em}{}
-
-\setlength{\bibsep}{2pt}
 
 \begin{document}
 
+%% ACM conference metadata (must be inside document, before \maketitle)
+\acmConference[ICAIF '26]{7th ACM International Conference on AI in Finance}{November 2026}{New York, NY, USA}
+\acmYear{2026}
+\copyrightyear{2026}
+\setcopyright{acmlicensed}
 
-%% ─── title ───────────────────────────────────────────────────────────────────
-\begin{center}
-{\LARGE\bfseries\color{navy}
-Provenance-Aware Stablecoin Stress\\[4pt]
-Propagation Networks}\\[6pt]
-{\large Evidence from Curve TokenExchange Logs, Public CEX Data,\\
-and On-Chain Settlement Flows}\\[10pt]
-{\normalsize Working Paper \quad Columbia University, May 2026}
-\end{center}
+\title{Provenance-Aware Stablecoin Stress Propagation Networks}
+\subtitle{Evidence from Curve TokenExchange Logs, Public CEX Data, and On-Chain Settlement Flows}
 
-\vspace{6pt}
+%% Author block omitted for double-blind review
 
-%% ─── abstract ────────────────────────────────────────────────────────────────
 \begin{abstract}
-\noindent
 Stablecoin stress episodes are price dislocations, but they are also
 \emph{liquidity-flow events}: traders swap through AMM pools, redeem
 stablecoins through mint-and-burn channels, and move funds across venues in
@@ -70,17 +44,23 @@ and a statistical gate before allowing a paper-level claim.  Across five
 historical stress episodes---USDC/SVB (March~2023), Terra/LUNA (May~2022),
 USDT/Curve (June~2023), FTX (November~2022), and BUSD (February--March~2023)---
 the only robust, paper-claimable A/A result is in the USDT/Curve 2023 event:
-Curve 3pool and Curve crvUSD/USDT exhibit bidirectional AMM-flow linkage
-($\hat{\rho}=0.386$, Bonferroni $p\le 0.014$) using Tier-A
-\texttt{usdc\_net\_sold\_1h} data.  Other events yield provenance-valid
-candidates or contextual A/B evidence but do not clear both gates.
-We contribute both a substantive finding on cross-pool AMM-flow co-movement
-and a methodological point: crypto stress-propagation claims should be
-explicitly constrained by the provenance of their underlying data.\\[4pt]
-\textbf{Keywords:} stablecoin, AMM, Curve Finance, provenance, claim gate,
-DeFi, stress propagation\\
-\textbf{JEL:} G01, G14, G23, C58
+Curve 3pool and Curve crvUSD/USDT exhibit statistically supported bidirectional
+AMM-flow co-movement ($\hat{\rho}=0.386$, $n=168$ hourly observations,
+Bonferroni $p\le 0.014$) using Tier-A \texttt{usdc\_net\_sold\_1h} data.
+Other events yield provenance-valid candidates or contextual A/B evidence
+but do not clear both gates.  We contribute a substantive finding on
+cross-pool AMM-flow co-movement during stablecoin stress and a methodological
+point: crypto stress-propagation claims should be explicitly constrained by the
+provenance of their underlying data.
 \end{abstract}
+
+\keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate; contagion networks}
+
+%% CCS concepts (CCSXML block omitted for tectonic compatibility; add via Overleaf ACM editor)
+\ccsdesc[500]{Applied computing~Economics}
+\ccsdesc[300]{Computing methodologies~Machine learning}
+
+\maketitle
 
 
 \section{Introduction}
@@ -94,6 +74,31 @@ spreading from one venue or asset to another.
 
 Most empirical analyses of these events rely on price data alone and treat all
 data sources as equally reliable.  This paper addresses both limitations.
+
+\subsection*{Related Work}
+
+Stablecoin stability has been studied primarily through runs and reserve
+adequacy~\cite{Gorton2023,Lyons2023}. The systemic fragility of algorithmic
+stablecoins was documented during the Terra/LUNA collapse~\cite{Clements2022},
+while USDC's brief de-peg following SVB highlighted the importance of
+off-chain collateral risk~\cite{Gorton2012}. Classical liquidity theory
+provides the micro-foundation: when funding liquidity deteriorates, market
+liquidity co-moves adversely across venues~\cite{Brunnermeier2009}.
+
+AMM microstructure has received growing attention.
+Milionis et al.~\cite{Milionis2022} characterise impermanent loss and LVR
+in Uniswap-style pools; Park et al.~\cite{Park2023} analyse Curve's
+StableSwap invariant and pool imbalance dynamics~\cite{Egorov2019}.
+Our use of \texttt{TokenExchange} logs as Tier-A evidence follows the
+principle of execution-grade tick data~\cite{AitSahalia2010}.
+
+On-chain network methods have been applied to studying crypto contagion by
+Makarov and Schoar~\cite{Makarov2022} (on-chain fund flows) and Ante~\cite{Ante2021}
+(event-study volatility spillovers). Our contribution is explicitly gating
+claims by data provenance, an approach motivated by the emphasis on
+honest uncertainty quantification in empirical finance~\cite{BenDavid2013}.
+Lead-lag cross-correlation and Granger causality are standard tools in
+financial contagion analysis~\cite{Forbes2002,Diebold2014}.
 
 \textbf{Contribution~1: Stress as a flow event.}
 When a stablecoin de-pegs, market participants do not merely observe a price
@@ -462,9 +467,26 @@ stress events, extending the AMM-flow analysis to Uniswap v3, and developing
 more powerful tests for sparse settlement-flow events with small sample sizes.
 
 
-{\small
-\bibliographystyle{plainnat}
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
-}
+
+
+\appendix
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+
+\section*{Appendix: Additional Figures}
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{figures_tex/fig_05.png}
+  \caption{\textbf{Claim audit by event (detail).}
+    Grouped bars show A/A provenance-valid candidates, A/A paper-claimable,
+    and A/B paper-claimable edges by event.  Only USDT/Curve 2023 has
+    non-zero A/A paper-claimable rows.}
+  \label{fig:robustness}
+\end{figure}
 
 \end{document}

@@ -139,7 +139,14 @@ def _cu_title(ax: plt.Axes, title: str, subtitle: str = "") -> None:
                 fontsize=8.5, color=CSL, va="bottom")
 
 
+_PAPER_MODE: bool = False   # set True via --paper-mode to omit deanonymising text
+
+
 def _watermark(ax: plt.Axes) -> None:
+    """Adds a small attribution mark.  In --paper-mode the text is blank so
+    staged paper figures do not expose the repository URL."""
+    if _PAPER_MODE:
+        return   # no watermark on blind-review figures
     ax.text(0.99, 0.01, "nl2992 / Columbia MAFN  ·  github.com/nl2992/stablecoin-contagion-network",
             transform=ax.transAxes, fontsize=6.5, color="#aaaaaa",
             ha="right", va="bottom")
@@ -1772,12 +1779,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate Columbia-themed paper figure pack.")
     parser.add_argument("--fig-dir", default=None, help="Output directory override.")
     parser.add_argument("--only", nargs="+",
-                        help="Subset: 'main', 'appendix', or figure numbers 1–8 / A01–A10")
+                        help="Subset: 'main', 'appendix', or figure numbers 1–8 / A01–A20")
+    parser.add_argument("--paper-mode", action="store_true",
+                        help="Omit repository watermark (required for blind-review submission)")
     args = parser.parse_args()
 
-    global OUT_DIR
+    global OUT_DIR, _PAPER_MODE
     if args.fig_dir:
         OUT_DIR = Path(args.fig_dir)
+    if args.paper_mode:
+        _PAPER_MODE = True
+        logger.info("Paper mode: watermarks disabled for blind-review submission")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     to_run: list[tuple[str, object]] = []

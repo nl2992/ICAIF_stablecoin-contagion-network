@@ -42,6 +42,8 @@ def main() -> None:
                         help="Block size for block-shuffle null (default 60 = 1h of 1-min data).")
     parser.add_argument("--paper-mode", action="store_true",
                         help="Restrict to real (non-fixture) nodes only.")
+    parser.add_argument("--layer-filter", default=None,
+                        help="Restrict to nodes of a single layer (e.g. DEX, CEX, mint_burn).")
     args = parser.parse_args()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
@@ -57,15 +59,22 @@ def main() -> None:
             raise SystemExit(f"No rows found for phase '{args.phase}'.")
     nodes = nodes_for_event(args.event)
 
+    panel_node_ids = set(panel["node_id"].unique().to_list())
+
     if args.paper_mode:
-        real_node_ids = (
+        real_node_ids = set(
             panel.filter(pl.col("tier_actual") != "fixture_non_empirical")
             ["node_id"].unique().to_list()
         )
         node_ids = [n.id for n in nodes if n.id in real_node_ids]
         logger.info("--paper-mode: restricting to %d real nodes", len(node_ids))
     else:
-        node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
+        node_ids = [n.id for n in nodes if n.id in panel_node_ids]
+
+    if args.layer_filter:
+        layer_node_ids = {n.id for n in nodes if n.layer == args.layer_filter}
+        node_ids = [nid for nid in node_ids if nid in layer_node_ids]
+        logger.info("--layer-filter %s: restricting to %d nodes", args.layer_filter, len(node_ids))
 
     if args.paper_mode and len(node_ids) < 3:
         raise SystemExit(

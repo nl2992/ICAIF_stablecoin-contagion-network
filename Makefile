@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures empirical empirical_all mvp usdc demo_all all
 
 setup:
 	pip install -r requirements.txt
@@ -119,6 +119,9 @@ claim_summary:
 narrative_figures:
 	python scripts/98_make_narrative_figures.py
 
+paper_figures:
+	python scripts/13_make_paper_figures.py
+
 # Claim-gated paper build: annotate all events, strict-exit on fixture,
 # then assemble final paper outputs exclusively from results/paper/tables/.
 paper_gate:
@@ -126,6 +129,7 @@ paper_gate:
 	python scripts/11d_make_claim_summary_tables.py
 	python scripts/99_make_paper_outputs.py --strict
 	python scripts/98_make_narrative_figures.py
+	python scripts/13_make_paper_figures.py
 
 # run an empirical paper-claim pipeline for one event.
 # Disables fixture fallback; gates result edges by provenance; uses --paper-mode

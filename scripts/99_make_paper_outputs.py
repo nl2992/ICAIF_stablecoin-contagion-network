@@ -677,6 +677,9 @@ def write_aa_amm_edge_table(tables_dir: Path, out_dir: Path, events: list[str]) 
             # Optionally narrow to AMM feature only when feature_col is present
             if "feature_col" in aa_dex.columns:
                 aa_dex = aa_dex.filter(pl.col("feature_col") == _AMM_FEATURE)
+            # Drop self-loops (VAR/FEVD diagonal; not cross-node propagation)
+            if "node_i" in aa_dex.columns and "node_j" in aa_dex.columns:
+                aa_dex = aa_dex.filter(pl.col("node_i") != pl.col("node_j"))
 
             if aa_dex.height == 0:
                 continue

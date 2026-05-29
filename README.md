@@ -1,216 +1,306 @@
-# Stablecoin Contagion Network
+# Provenance-Aware Stablecoin Stress Propagation Networks
 
-A multi-layer benchmark for measuring how stablecoin stress propagates across
-centralized venues, decentralized liquidity pools, and on-chain settlement channels.
+Evidence from Curve TokenExchange logs, public CEX data, and on-chain settlement flows.
+
+---
+
+This repository builds a provenance-aware empirical framework for studying how stablecoin
+stress propagates across public CEX markets, on-chain AMM pools, and settlement-flow channels.
+The core contribution is not merely a directed network of correlations; it is a claim-gated
+pipeline that restricts every empirical claim by both **data provenance** and **statistical
+support**.
+
+The strongest current evidence layer is **Tier-A on-chain AMM flow** from Curve
+`TokenExchange` logs. Public CEX prices, BBO, and trade/candle data provide broader market
+context but are capped at Tier B because historical full-depth CEX order books are not freely
+available.
+
+---
 
 ## Research question
 
-> **How does stress propagate across stablecoins, venues, and liquidity pools once a shock starts?**
+> **How does stablecoin stress propagate across venues, liquidity pools, and settlement channels once a shock begins?**
 
-This project extends the execution-aware logic of [Stablecoin StressBench](../ICAIF/).
-The previous benchmark asked whether a local stablecoin dislocation is executable after
-depth, fees, and settlement frictions. This project asks how one node's stress becomes
-another node's stress across a multi-layer financial network.
+We treat stablecoin stress as both a price event and a flow event. During stress, users trade
+on centralized venues, swap through AMMs, redeem or mint stablecoins, and move liquidity across
+settlement channels. The repo constructs a multi-layer network from these channels and gates
+each edge by the quality of its underlying evidence.
+
+---
 
 ## Core thesis
 
-Stablecoin stress propagates through a layered network. Centralized venues often lead
-price discovery at shock onset, decentralized pools amplify or prolong deviations through
-inventory imbalance, and on-chain settlement or bridge-flow frictions help explain persistence.
+Stablecoin de-pegs are not only price deviations; they are **observable liquidity-flow events**.
+The cleanest freely reproducible Tier-A evidence comes from on-chain AMM flow logs, especially
+Curve `TokenExchange` events. Public CEX data are useful for timing and context, but they
+cannot support historical order-book microstructure claims without vendor or live-captured L2.
 
-## Event set
+Accordingly, this project separates:
 
-| Event | Mechanism | Analysis window |
-|---|---|---|
-| USDC/SVB 2023 | Fiat-reserve bank shock | 2023-03-08 → 2023-03-20 |
-| Terra/LUNA 2022 | Algorithmic/reflexive collapse | 2022-05-01 → 2022-05-31 |
-| USDT/Curve 2023 | DeFi pool imbalance | 2023-06-10 → 2023-06-25 |
-| FTX 2022 | Exchange credit/liquidity shock | 2022-11-01 → 2022-11-30 |
-| BUSD 2023 | Regulatory/issuer wind-down | 2023-02-06 → 2023-03-13 |
+- **Tier-A AMM / on-chain flow evidence**: direct logs such as Curve `TokenExchange` and
+  mint/burn events.
+- **Tier-B public market context**: Binance/Coinbase/Kraken OHLCV, trades, BBO, and aggregate
+  flows.
+- **Fixture/diagnostic outputs**: synthetic data used only for pipeline testing; blocked from
+  all paper claims.
 
-## Node taxonomy
-
-The network contains three node layers:
-
-| Layer | Examples | Primary features |
-|---|---|---|
-| Market nodes | USDC-Coinbase, USDT-Binance | mid, spread, depth, imbalance, executable price |
-| Pool nodes | Curve 3pool, Uniswap USDC/USDT | reserve imbalance, implied price, swap flow, slippage |
-| Flow nodes | ETH exchange flows, bridge flows, mint/burn | inflow, outflow, netflow, mint/burn, gas |
-
-## Data provenance tiers
-
-Every node and every claim is assigned a provenance tier:
-
-| Tier | What it means | Permitted claim |
-|---|---|---|
-| A | On-chain logs, verified pool events, high-quality timestamped data | On-chain AMM flow, directional propagation |
-| B | Trades, OHLCV, pool snapshots, aggregate on-chain flows | Price/liquidity context, weaker directional evidence |
-| C | Partial, proxy, or sparse data | Taxonomy and qualitative context only |
-
-No edge can support a stronger claim than the weaker of its two endpoint tiers.
-
-Price co-movement is not treated as contagion. Contagion requires time-directed evidence:
-lag structure, Granger/VAR relation, Hawkes excitation, transfer entropy, or temporal-graph
-predictive lift.
-
-## Methods
-
-| Method | Role |
-|---|---|
-| Lead-lag cross-correlation | First-pass directional timing |
-| Block-bootstrap inference | Robust significance testing |
-| VAR / Granger causality | Linear directed dependence |
-| Time-varying VAR spillovers | Dynamic edge strength across phases |
-| Multivariate Hawkes processes | Mutual excitation of stress arrivals |
-| Transfer entropy | Non-linear directional information flow |
-| Temporal network centrality | Node roles: originator / amplifier / sink |
-| Temporal GNN (TGN/DySAT) | Predictive extension |
-
-## Primary outputs
-
-| File | Description |
-|---|---|
-| `results/tables/table_event_windows.csv` | Event definitions and quality flags |
-| `results/tables/table_node_coverage.csv` | Node availability and provenance tiers |
-| `data/gold/dataset_contagion_features.parquet` | Final event-time feature panel |
-| `results/tables/table_leadlag_tests.csv` | Pairwise lag tests with bootstrap p-values |
-| `results/tables/table_var_spillovers.csv` | VAR/FEVD spillover estimates |
-| `results/tables/table_hawkes_params.csv` | Hawkes branching ratios and CIs |
-| `results/tables/table_transfer_entropy.csv` | Directional information flow estimates |
-| `results/tables/table_node_centrality.csv` | Weighted centrality by event |
-| `results/tables/table_prediction_metrics.csv` | AUC, PR-AUC, Brier, lift by event |
-| `results/figures/figure_heatmap_coverage.png` | Data coverage heatmap |
-| `results/figures/figure_event_time_map.png` | Event-time stress map |
-| `results/figures/figure_contagion_map.png` | Directed multi-layer stress network |
-
-## Success criteria
-
-| Dimension | Criterion |
-|---|---|
-| Lead-lag | Upstream-to-downstream lags significant at p < 0.01 after block bootstrap |
-| VAR/FEVD | At least one key off-diagonal relation per major event, spillover share > 10% |
-| Hawkes | Off-diagonal branching ratio > 0.1 with CI excluding zero |
-| Flow relevance | On-chain/bridge flows reduce downstream variance or RMSE by > 10% |
-| Predictive | Graph model improves AUC or PR-AUC by > 5% over best non-graph baseline |
-| Replication | Core propagation ordering in at least 4 of 5 event windows |
-
-## Quick start
-
-```bash
-# 1. environment
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt && pip install -e .
-cp .env.example .env   # add API keys
-
-# 2. generate event window definitions and coverage table
-make windows
-
-# 3. MVP: USDC/SVB full analysis pipeline
-make mvp EVENT=usdc_svb_2023
-
-# 4. paper outputs
-make paper
-```
-
-See `Makefile` for per-step targets (`leadlag`, `var`, `hawkes`, `te`, `network`, `predict`).
-
-> **⚠ Fixture data notice**
->
-> Until real vendor/API ingestion is configured, `make ingest` writes
-> **deterministic fixture files** into `data/bronze/` and marks them
-> `tier_actual = fixture_non_empirical` in `data/manifests/`.
-> These fixtures are valid for **pipeline testing only** and must
-> **never be used as paper evidence**.  All empirical claims in the paper
-> must be reproduced using real data; see `docs/reproducibility.md` and
-> `docs/provenance_tiers.md`.
+---
 
 ## Current empirical status
 
-**See [`DATA_INVENTORY.md`](DATA_INVENTORY.md) for the full, verified inventory of what data is real, what is Tier B proxy, and what is fixture.**
+As of 2026-05-29 the repo has Tier-A on-chain AMM-flow anchors through Curve `TokenExchange`
+logs.
 
-The repo is pipeline-complete. Verified provenance as of 2026-05-29:
+> **Terminology**
+>
+> - **Provenance-valid**: both endpoints and the feature used by the edge are sufficiently high
+>   quality (no fixture, no missing tier, feature-level cap applied).
+> - **Statistically supported**: the relevant method passes its significance criterion (FDR,
+>   block-shuffle, Bonferroni, or Granger p-values).
+> - **Paper-claimable** (`paper_claim_allowed == True`): **both** gates pass.
 
-| Tier | Nodes | Events |
+A/A provenance-valid candidate pairs exist in 3 of 5 events.
+**Provenance-valid ≠ paper-claimable.** Only pairs that also pass the statistical gate support
+directional paper claims.
+
+| Pair | Event | Evidence type | Paper-claimable? |
+|---|---|---|---|
+| `curve_3pool` ↔ `curve_crvusd_usdt` | USDT/Curve 2023 | A/A DEX-flow | **Yes** (Bonferroni p ≤ 0.014) |
+| `curve_3pool` ↔ `curve_ust_wormhole` | Terra/LUNA 2022 | A/A DEX-flow | No (not sig. at hourly grid) |
+| `usdc_mint_burn` ↔ `curve_3pool` | USDC/SVB 2023 | A/A on-chain settlement | No (sparse; 4 events, underpowered) |
+
+For FTX 2022 and BUSD 2023, A/B directional evidence is available (`curve_3pool` A +
+Binance/CoinMetrics B nodes).
+
+The verified headline result is:
+
+> In the USDT/Curve 2023 event, `curve_3pool` and `curve_crvusd_usdt` exhibit Bonferroni-
+> significant bidirectional lead-lag on Tier-A `usdc_net_sold_1h` hourly on-chain AMM flow
+> (both directions, claim_strength = robust, paper_claim_allowed = True).
+
+See `results/paper/tables/table_aa_paper_claimable_edges.csv` for the full headline table.
+See `DATA_INVENTORY.md` for the complete verified data inventory.
+
+---
+
+## Data provenance and feature-tiering
+
+The repo uses both **node-level** and **feature-level** provenance. A node can be Tier A while
+some of its derived features are Tier B.
+
+| Feature | Tier | Evidence type |
 |---|---|---|
-| **A (real)** | `usdc_mint_burn`, all `curve_*` pool nodes | usdc_svb_2023; all 5 events for Curve |
-| **B (real proxy)** | all Binance nodes, `usdc_coinbase`, CoinMetrics flows | All 5 events |
-| **fixture** | `usdc_kraken`, `usdt_kraken`, `uniswap_usdc_usdt_005`, `eth_bridge_flows`, `usdt_mint_burn`, `tron_usdt_exchange_flows` | Various |
+| `usdc_net_sold_1h` | **A** | direct hourly sum from Curve `TokenExchange` logs |
+| `mint_burn_net_1h` | **A** | direct mint/burn settlement event flow |
+| `reserve_imbalance` | B | derived proxy using approximate pool-size normaliser |
+| `implied_pool_price` | B | derived proxy, not an actual execution price |
+| `basis_vs_usd` | B | public market or derived price proxy |
+| `spread_bps` | B | BBO/candle proxy, not full executable depth |
+| `depth_10bps_bid_usd` | A only with real L2 | unavailable without vendor/live L2 |
 
-**A/A provenance-valid pairs available in 3 of 5 events:**
+Full feature-tier table: `results/paper/tables/table_feature_tiers.csv`  
+Full node provenance inventory: `results/paper/tables/table_provenance_inventory.csv`
 
-| A/A pair | Event |
+An edge is capped by the **weakest of**: (1) source node tier, (2) target node tier,
+(3) feature tier.
+
+---
+
+## Claim gate
+
+Every result edge passes through three gates:
+
+1. **Provenance gate** — blocks fixture/missing data and caps the edge by endpoint and
+   feature tiers.
+2. **Statistical gate** — requires method-specific significance: FDR-adjusted bootstrap,
+   block-shuffle inference, Bonferroni correction, Granger p-values, or Hawkes CIs.
+3. **Paper gate** — a row is paper-claimable only when **both** gates pass.
+
+Key output columns in every edge table:
+
+| Column | Meaning |
 |---|---|
-| `usdc_mint_burn` ↔ `curve_3pool` | usdc_svb_2023 |
-| `curve_3pool` ↔ `curve_ust_wormhole` | terra_luna_2022 |
-| `curve_3pool` ↔ `curve_crvusd_usdt` | usdt_curve_2023 |
+| `provenance_claim_allowed` | data quality is sufficient for some claim |
+| `statistical_claim_allowed` | passes method-specific significance test |
+| `paper_claim_allowed` | both gates pass |
+| `claim_level` | permitted claim category (see below) |
+| `claim_strength` | descriptive / suggestive / statistically\_supported / robust |
 
-All A/A pairs use `usdc_net_sold_1h` (direct hourly sum from on-chain `TokenExchange` logs).
-Claims using derived features (`reserve_imbalance`, `implied_pool_price`) are A/B, not A/A.
+A/A claim levels are **layer-aware**:
 
-**Provenance-valid ≠ statistically supported.** Directional paper claims require both gates:
-the provenance gate (data source tier, no fixture, feature-level cap) *and* the statistical
-gate (FDR-adjusted significance). Only rows where `paper_claim_allowed == True` in the
-claim-gated result tables are used for headline directional claims in the paper.
+| Claim level | Meaning |
+|---|---|
+| `A_A_dex_flow` | Tier-A AMM/on-chain pool flow evidence |
+| `A_A_onchain_settlement` | Tier-A settlement or mint/burn evidence |
+| `A_A_cex_microstructure` | Tier-A CEX L2 microstructure (requires vendor L2) |
+| `A_A_high_provenance` | other high-provenance A/A relation |
+| `A_B_suggestive_directional` | suggestive edge capped by a Tier-B endpoint or feature |
+| `B_B_context_only` | contextual co-movement only |
 
-For ftx_2022 and busd_2023, A/B directional evidence is available (curve_3pool A + Binance B nodes).
+---
+
+## Event set
+
+| Event | Mechanism | Window | Main evidence layer |
+|---|---|---|---|
+| USDC/SVB 2023 | fiat-reserve bank shock | 2023-03-08 → 2023-03-20 | Curve 3pool, USDC mint/burn, public CEX context |
+| Terra/LUNA 2022 | algorithmic stablecoin collapse | 2022-05-01 → 2022-05-31 | Curve 3pool and UST/wormhole pool |
+| USDT/Curve 2023 | DeFi pool imbalance | 2023-06-10 → 2023-06-25 | Curve 3pool and crvUSD/USDT pool |
+| FTX 2022 | exchange credit/liquidity shock | 2022-11-01 → 2022-11-30 | Curve 3pool + public CEX/flow context |
+| BUSD 2023 | issuer/regulatory wind-down | 2023-02-06 → 2023-03-13 | Curve 3pool + public CEX context |
+
+---
+
+## Node taxonomy
+
+| Layer | Examples | Best free data | Tier |
+|---|---|---|---|
+| CEX market | USDC-Coinbase, USDT-Binance | public OHLCV, BBO, trades | B |
+| AMM pool | Curve 3pool, Curve crvUSD/USDT | on-chain `TokenExchange` logs | **A** |
+| Settlement flow | USDC mint/burn, exchange flows | on-chain Transfer events, CoinMetrics | A / B |
+
+---
+
+## Methodology
+
+| Method | Purpose | Claim role |
+|---|---|---|
+| Event study | identify stress onset and response timing | descriptive and timing evidence |
+| Lead-lag cross-correlation | estimate whether one node precedes another | directional timing evidence |
+| Transfer entropy | test nonlinear directional information flow | nonlinear propagation evidence |
+| VAR / Granger / TVP-VAR | benchmark predictive spillovers | linear directed dependence |
+| Sparse-flow event study | handle mint/burn and settlement events | event-arrival response evidence |
+| Temporal network centrality | rank transmitters, receivers, amplifiers | network role taxonomy |
+
+The **AMM-only analysis** is central to the paper narrative. It uses DEX nodes only, the
+Tier-A `usdc_net_sold_1h` feature, and an hourly grid to avoid stale-value artifacts from
+resampling hourly on-chain flows onto minute grids.
+
+---
+
+## Key outputs
+
+| Output | Description |
+|---|---|
+| `results/paper/tables/table_aa_paper_claimable_edges.csv` | **Headline**: A/A edges passing both gates |
+| `results/paper/tables/table_aa_provenance_valid_edges.csv` | All A/A provenance-valid candidate edges |
+| `results/paper/tables/table_ab_suggestive_edges.csv` | A/B statistically supported edges |
+| `results/paper/tables/table_claim_audit_summary.csv` | Per-event claim-gate counts (anti-cherry-pick) |
+| `results/paper/tables/table_feature_tiers.csv` | Feature-level provenance tiers |
+| `results/paper/tables/table_provenance_inventory.csv` | Node provenance, coverage, claim ceiling |
+| `results/paper/tables/table_claim_gate_all_events.csv` | Full claim-gate audit summary |
+| `configs/feature_tiers.yaml` | Feature-tier definitions (source of truth) |
+| `results/tables/table_node_coverage.csv` | Node coverage, source tier, fixture flags |
+| `data/gold/dataset_contagion_features_{event}.parquet` | Final event-time feature panels |
+
+---
+
+## Reproduction
 
 ```bash
-make coveragegate EVENT=usdc_svb_2023
+# 1. Install
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e .
+cp .env.example .env
+# Required: ETHERSCAN_API_KEY
+# Optional: DUNE_API_KEY, THE_GRAPH_API_KEY
+
+# 2. Run one event (empirical, no fixture)
+make empirical EVENT=usdt_curve_2023
+
+# 3. Run all 5 events
+make empirical_all
+
+# 4. Build claim-gated paper outputs only
 python scripts/00c_claim_gate.py --all-events --strict
+python scripts/11d_make_claim_summary_tables.py
+python scripts/99_make_paper_outputs.py --strict
+
+# Shortcut:
+make paper_gate
 ```
+
+> **Fixture data warning** — `make ingest` (without `--no-fixture`) writes
+> deterministic synthetic fixtures marked `tier_actual = fixture_non_empirical`.
+> These are for pipeline testing only and are blocked from all paper claims.
+> Use `make empirical` or `make empirical_all` for paper evidence.
+
+---
 
 ## Repository structure
 
 ```
 stablecoin-contagion-network/
-├── configs/           # event windows, nodes, features, sources, models, paper
+├── configs/
+│   ├── feature_tiers.yaml      # feature-level provenance tiers
+│   ├── events/                 # event windows and node configurations
+│   └── models/                 # model configs
 ├── data/
-│   ├── raw/           # never committed
-│   ├── bronze/        # normalized raw payloads
-│   ├── silver/        # reconstructed books / pools / flows
-│   ├── gold/          # final feature panels
-│   └── manifests/     # source hashes and query manifests
+│   ├── raw/                    # never committed
+│   ├── bronze/                 # normalized raw payloads
+│   ├── silver/                 # reconstructed pool states / books / flows
+│   ├── gold/                   # final feature panels (*.parquet)
+│   └── manifests/              # source hashes and query manifests
 ├── src/stressnet/
-│   ├── utils/         # time, I/O, logging, validation
-│   ├── data/          # ingestion: binance, coinbase, kraken, uniswap, curve, etherscan, dune, coinmetrics
-│   ├── reconstruct/   # orderbook, dex_pool, flows
-│   ├── features/      # market, dex, onchain, basis, panels
-│   ├── graph/         # nodes, edges, temporal_graph, centrality
-│   ├── models/        # leadlag, var_granger, tvp_var, hawkes, transfer_entropy, baselines, temporal_gnn
-│   ├── evaluation/    # bootstrap, placebo, metrics, robustness
-│   └── plotting/      # coverage, event_maps, networks, sankey, paper_figures
-├── scripts/           # 00_make_event_windows.py … 99_make_paper_outputs.py
-├── notebooks/
+│   ├── evaluation/
+│   │   └── claim_gate.py       # three-gate provenance/statistical/paper pipeline
+│   ├── models/
+│   │   └── sparse_events.py    # sparse mint/burn event-arrival analysis
+│   ├── data/                   # ingestion: binance, coinbase, curve, etherscan, …
+│   ├── features/               # market, dex, onchain, basis, panels
+│   ├── graph/                  # nodes, edges, temporal_graph, centrality
+│   └── reconstruct/            # orderbook, dex_pool, flows
+├── scripts/
+│   ├── 00c_claim_gate.py       # annotate all result tables with claim columns
+│   ├── 04_run_leadlag.py       # lead-lag (supports --layer-filter, --grid-seconds)
+│   ├── 06b_run_sparse_flow_event_study.py
+│   ├── 11d_make_claim_summary_tables.py  # build paper summary tables
+│   └── 99_make_paper_outputs.py
 ├── results/
-│   ├── tables/
+│   ├── tables/                 # annotated result tables (all edges + claim columns)
+│   ├── paper/
+│   │   ├── tables/             # claim-gated paper tables (paper_claim_allowed only)
+│   │   └── figures/
 │   └── figures/
 ├── docs/
-│   ├── data_card.md
-│   ├── node_taxonomy.md
-│   ├── provenance_tiers.md
-│   ├── event_windows.md
 │   ├── methodology.md
+│   ├── provenance_tiers.md
 │   ├── limitations.md
-│   ├── reproducibility.md
-│   └── project_control/
-│       ├── full_project_control_report.md
-│       ├── implementation_todo.md
-│       ├── icaif_2026_submission_plan.md
-│       └── gnn_extension_plan.md
-├── tests/
-└── paper/
+│   └── reproducibility.md
+└── tests/
 ```
 
-## Reproducibility
+---
 
-All raw data sources are recorded in `data/manifests/`. Raw and reconstructed data are
-not committed to git. Curated feature panels and paper-ready tables are generated by
-numbered scripts and saved under `data/gold/` and `results/`.
+## Tests and validation
+
+```bash
+python -m pytest tests -q
+```
+
+Validation covers: Curve StableSwap-ng decimal handling, per-pool `PoolConfig` mapping,
+feature-tier claim caps, claim-gate taxonomy, sparse-flow response calculations, fixture
+blocking, and provenance/statistical/paper gate separation.
+
+A result table is not paper-ready unless it contains `paper_claim_allowed` and
+`claim_strength`.
+
+---
 
 ## Non-claims
 
-- Not all cross-node co-movement is causal contagion.
-- Route-complete Tier-A L2 coverage is not available for every historical event.
-- Correlation does not imply directed transmission.
-- Temporal GNN prediction improvements do not imply causal mechanisms.
+This repo does **not** claim:
+
+- historical Binance full-depth L2 order-book coverage;
+- historical Kraken full-depth L2 coverage;
+- executable CEX liquidity transmission without vendor/live L2 data;
+- causal contagion from correlation alone;
+- Tier-A status for derived Curve reserve proxies (`reserve_imbalance`,
+  `implied_pool_price`);
+- paper evidence from fixture-generated data.
+
+Public CEX data are useful for context and timing, but not for full microstructure claims.
+Historical full-depth CEX L2 requires vendor archives (Tardis/Kaiko) or a live collector
+running at the time of the event.
+
+See `docs/limitations.md` for the full limitations discussion.

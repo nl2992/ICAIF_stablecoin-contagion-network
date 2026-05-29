@@ -1,0 +1,18 @@
+feature_col,tier,evidence_type,claim_language,effective_tier_without_l2,notes
+usdc_net_sold_1h,A,direct_onchain_flow,on-chain AMM flow (hourly TokenExchange sum),"","Direct hourly sum of on-chain Curve TokenExchange event amounts. For 3pool: USDC-denominated. For crvUSD/USDT pool: USDT-denominated. Tier A in substance because it is a reproducible, timestamped, on-chain record."
+mint_burn_net_1h,A,direct_onchain_settlement,on-chain mint/burn settlement response,"","Net USDC/USDT minted minus burned, summed to 1-hour windows from on-chain Transfer events to/from null address. Sparse: typically a handful of events per event window. Use event-arrival analysis, not continuous lead-lag, for robust inference."
+depth_10bps_bid_usd,A,cex_l2_depth,executable bid-side depth within 10 bps,B,Requires full L2 order-book (Tardis or Kaiko). Currently NULL for all CEX nodes (no vendor key set). Will remain Tier B until vendor data is sourced.
+depth_10bps_ask_usd,A,cex_l2_depth,executable ask-side depth within 10 bps,B,""
+orderbook_imbalance,A,cex_l2_depth,order-book imbalance from full L2 depth,B,""
+executable_price_10k_buy,A,cex_l2_depth,bookwalk executable VWAP for $10k buy,B,""
+executable_price_10k_sell,A,cex_l2_depth,bookwalk executable VWAP for $10k sell,B,""
+spread_bps,B,bbo_proxy,BBO spread proxy (Binance bookTicker or Coinbase candle),"",Computed from best-bid-offer only; does not reflect actual trading cost for any meaningful notional size. Tier B: public market context.
+mid_price,B,ohlcv_proxy,mid-price proxy from public BBO or OHLCV,"",""
+basis_vs_usd,B,market_price_proxy,log-peg deviation (log mid_price or log implied_pool_price),"",Log deviation of price from 1.0 USD. Computed from either CEX mid-price (Tier B BBO) or pool implied price (Tier B derived). Valid for contextual co-movement; not execution-grade.
+reserve_imbalance,B,derived_proxy,derived AMM reserve imbalance proxy,"",Cumulative stablecoin net-sold divided by a hardcoded pool-size normaliser. Approximate: true reserve ratio requires archive-RPC get_balances() at each block. Use as stress-direction indicator only.
+implied_pool_price,B,derived_proxy,derived pool implied price (1 / (1 + |reserve_imbalance|)),"",Approximate implied price from reserve imbalance. Not an actual execution price; use as directional proxy only.
+pool_slippage_10k,B,derived_proxy,derived pool slippage proxy for $10k,"",""
+virtual_price,B,derived_proxy,pool virtual price (LP value proxy),"",""
+exchange_netflow_1h,B,aggregate_flow,CoinMetrics aggregate exchange netflow,"",Pre-aggregated by CoinMetrics using heuristic exchange address labelling (~80% confidence). Use as directional context only.
+exchange_inflow_1h,B,aggregate_flow,CoinMetrics exchange inflow,"",""
+exchange_outflow_1h,B,aggregate_flow,CoinMetrics exchange outflow,"",""

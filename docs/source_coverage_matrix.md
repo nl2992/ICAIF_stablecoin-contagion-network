@@ -39,16 +39,23 @@ Status key: ✅ empirical data in pipeline  |  ⚠️ partial/proxy  |  ❌ miss
 
 ---
 
-## Critical gaps blocking Tier-A edges
+## A/A DEX-flow edges (current status)
 
-The following are the minimum changes required to produce at least one
-`A_A_directional_microstructure` edge per headline event:
+Tier-A DEX-flow (`A_A_dex_flow`) edges come from Curve `TokenExchange` logs on-chain.
+CEX microstructure (`A_A_cex_microstructure`) edges require vendor/live L2 and are not
+currently available.
 
-| Event | Blocking gap | Required action |
+| Event | A/A DEX-flow status | Paper-claimable? |
 |---|---|---|
-| usdc_svb_2023 | CEX nodes are Tier B (BBO/klines) | Ingest Tardis `incremental_book_L2` for `usdc_binance` + `usdt_binance` |
-| terra_luna_2022 | `ust_binance` is Tier B only; L2 may be missing | Tardis `USTUSDT` archive check; fallback Tier B/B acceptable |
-| usdt_curve_2023 | CEX nodes are Tier B | Tardis `USDCUSDT` L2 for `usdt_binance` |
+| usdt_curve_2023 | `curve_3pool` ↔ `curve_crvusd_usdt` (Bonferroni p ≤ 0.014) | **Yes** |
+| terra_luna_2022 | `curve_3pool` ↔ `curve_ust_wormhole` (not significant at hourly grid) | No |
+| usdc_svb_2023 | `usdc_mint_burn` ↔ `curve_3pool` (sparse; event-arrival underpowered) | No |
+| ftx_2022 | Single Tier-A node only; A/B edges available | No A/A |
+| busd_2023 | Single Tier-A node only; A/B edges available | No A/A |
+
+For CEX `A_A_cex_microstructure` edges, the minimum requirement is Tardis/Kaiko L2 for
+the relevant CEX pairs. This is an optional future extension; the paper narrative leads
+with Tier-A AMM-flow evidence.
 | ftx_2022 | `busd_binance` Tier B; `usdt_binance` Tier B | Tardis `BUSDUSDT`+`USDCUSDT` |
 | busd_2023 | Same as ftx_2022 | Tardis `BUSDUSDT` |
 

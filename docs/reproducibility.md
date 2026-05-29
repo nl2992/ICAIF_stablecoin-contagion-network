@@ -62,10 +62,13 @@ This target:
    with provenance tiers and writes claim-gated outputs to `results/paper/tables/`.
 
 The claim-gate enforces:
-- `A+A` edges → `A_A_directional_microstructure` (paper-claimable)
-- `A+B` edges → `A_B_suggestive_directional` (paper-claimable)
-- `B+B` edges → `B_B_context_only` (paper-claimable, hedged language)
+- `A+A` edges → `A_A_dex_flow` / `A_A_onchain_settlement` / `A_A_high_provenance` depending on node layer
+- `A+B` edges → `A_B_suggestive_directional` (paper-claimable with hedged language)
+- `B+B` edges → `B_B_context_only` (contextual co-movement only)
 - Any `fixture_non_empirical` endpoint → `fixture_disallowed` (blocked)
+
+A row is **paper-claimable** only when `paper_claim_allowed == True` (both provenance and
+statistical gates pass). See `src/stressnet/evaluation/claim_gate.py` for the full taxonomy.
 
 Once every configured event has sufficient real data coverage, run the full
 empirical benchmark with:

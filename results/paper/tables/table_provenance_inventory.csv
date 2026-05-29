@@ -1,0 +1,34 @@
+event_id,node_id,layer,source_tier_actual,sources,coverage_pct,rows_available,fixture_flag,claim_ceiling
+busd_2023,busd_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,99.99810317384026,103680,false,"A/B suggestive, B/B context"
+busd_2023,curve_3pool,DEX,A,silver_reconstruction_from_pool_states;real_Curve_tier_A,99.88442513950712,1728,false,"A/A DEX-flow, A/A settlement, A/B, B/B"
+busd_2023,usdc_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,6.712835629725388,6960,false,"A/B suggestive, B/B context"
+busd_2023,usdt_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,6.712835629725388,6960,false,"A/B suggestive, B/B context"
+ftx_2022,busd_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,99.99772381724337,86400,false,"A/B suggestive, B/B context"
+ftx_2022,curve_3pool,DEX,A,real_Curve_tier_A;silver_reconstruction_from_pool_states,99.58394960084358,1436,false,"A/A DEX-flow, A/A settlement, A/B, B/B"
+ftx_2022,eth_bridge_flows,bridge_flow,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_flows,9.986134221811612,144,true,not claimable
+ftx_2022,eth_usdc_exchange_flows,onchain_flow,B,real_onchain_flow_tier_B;silver_reconstruction_from_flows,91.26217108266724,1316,false,"A/B suggestive, B/B context"
+ftx_2022,eth_usdt_exchange_flows,onchain_flow,B,real_onchain_flow_tier_B;silver_reconstruction_from_flows,34.53538085043183,498,false,"A/B suggestive, B/B context"
+ftx_2022,usdt_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,99.99772381724337,86400,false,"A/B suggestive, B/B context"
+terra_luna_2022,curve_3pool,DEX,A,real_Curve_tier_A;silver_reconstruction_from_pool_states,94.09399481506145,1402,false,"A/A DEX-flow, A/A settlement, A/B, B/B"
+terra_luna_2022,curve_ust_wormhole,DEX,B,real_Curve_tier_A;silver_reconstruction_from_pool_states,48.25739062309749,360,false,"A/B suggestive, B/B context"
+terra_luna_2022,usdt_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,99.9977972408762,89280,false,"A/B suggestive, B/B context"
+terra_luna_2022,ust_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,38.82082943961435,34660,false,"A/B suggestive, B/B context"
+usdc_svb_2023,curve_3pool,DEX,A,real_Curve_tier_A;silver_reconstruction_from_pool_states,99.6805996455446,624,false,"A/A DEX-flow, A/A settlement, A/B, B/B"
+usdc_svb_2023,eth_bridge_flows,bridge_flow,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_flows,23.003215302817985,144,true,not claimable
+usdc_svb_2023,eth_usdc_exchange_flows,onchain_flow,B,real_onchain_flow_tier_B;silver_reconstruction_from_flows,100.0,626,false,"A/B suggestive, B/B context"
+usdc_svb_2023,eth_usdt_exchange_flows,onchain_flow,B,real_onchain_flow_tier_B;silver_reconstruction_from_flows,76.67738434272661,480,false,"A/B suggestive, B/B context"
+usdc_svb_2023,uniswap_usdc_usdt_005,DEX,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_pool_states,23.07078154942728,1728,true,not claimable
+usdc_svb_2023,usdc_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,72.43209268743897,27120,false,"A/B suggestive, B/B context"
+usdc_svb_2023,usdc_coinbase,CEX,B,real_Coinbase_tier_B;silver_reconstruction_from_books,99.97872262763975,37434,false,"A/B suggestive, B/B context"
+usdc_svb_2023,usdc_kraken,CEX,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_books,23.07078154942728,1728,true,not claimable
+usdc_svb_2023,usdc_mint_burn,mint_burn,B,real_mint_burn_tier_A;silver_reconstruction_from_flows,1.2779564057121102,8,false,"A/B suggestive, B/B context"
+usdc_svb_2023,usdt_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,72.43209268743897,27120,false,"A/B suggestive, B/B context"
+usdc_svb_2023,usdt_kraken,CEX,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_books,23.07078154942728,1728,true,not claimable
+usdt_curve_2023,curve_3pool,DEX,A,real_Curve_tier_A;silver_reconstruction_from_pool_states,98.44162946726513,758,false,"A/A DEX-flow, A/A settlement, A/B, B/B"
+usdt_curve_2023,curve_crvusd_usdt,DEX,A,real_Curve_tier_A;silver_reconstruction_from_pool_states,74.02602743580623,570,false,"A/A DEX-flow, A/A settlement, A/B, B/B"
+usdt_curve_2023,eth_usdt_exchange_flows,onchain_flow,B,real_onchain_flow_tier_B;silver_reconstruction_from_flows,92.20785873582882,710,false,"A/B suggestive, B/B context"
+usdt_curve_2023,tron_usdt_exchange_flows,onchain_flow,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_flows,18.701312194308944,144,true,not claimable
+usdt_curve_2023,uniswap_usdc_usdt_005,DEX,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_pool_states,18.745945429916418,1728,true,not claimable
+usdt_curve_2023,usdt_binance,CEX,B,real_Binance_tier_B;silver_reconstruction_from_books,99.99573224233052,46080,false,"A/B suggestive, B/B context"
+usdt_curve_2023,usdt_kraken,CEX,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_books,18.745945429916418,1728,true,not claimable
+usdt_curve_2023,usdt_mint_burn,mint_burn,fixture_non_empirical,deterministic_pipeline_fixture;silver_reconstruction_from_flows,18.701312194308944,144,true,not claimable

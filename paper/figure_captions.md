@@ -85,3 +85,73 @@ Each cell shows the coverage percentage and provenance tier for a (node, event) 
 
 **Full paper-claimable stress-propagation network.**
 Directed network showing all edges that pass both the provenance and statistical gates: A/A paper-claimable AMM-flow edges (thick amber arrows) and A/B suggestive paper-claimable edges (blue arrows). Node colour encodes tier (green = Tier A, grey = Tier B); node shape encodes layer (square = AMM/DEX, circle = CEX, diamond = settlement/flow). Fixture-derived nodes are omitted. The headline `curve_3pool ↔ curve_crvusd_usdt` pair (USDT/Curve 2023, amber) is the only A/A paper-claimable edge. This figure does not claim causal contagion; it presents the subset of directional timing evidence supported by both data provenance and statistical inference.
+
+---
+
+## Appendix Figure A11
+
+**Bipartite claim network by event.**
+Five panels, one per stress event, showing directional edges between source and target nodes that appear in `table_statistically_supported_edges.csv`. Node colour encodes evidence tier (green = Tier A, grey = Tier B). Amber arrows indicate A/A paper-claimable edges; blue arrows indicate A/B edges. Only the USDT/Curve 2023 panel contains paper-claimable A/A edges. All other panels show either A/B edges or no supported edges at all. This figure illustrates the event-level heterogeneity of the claim gate output.
+
+---
+
+## Appendix Figure A12
+
+**Paper-claimable rows by method and event.**
+Grouped bar chart showing the number of paper-claimable rows produced by each statistical method (lead-lag, transfer entropy, Granger, TVP-VAR, event study) for each of the five stress events. Only the lead-lag method on the USDT/Curve 2023 event produces A/A paper-claimable rows. The figure demonstrates that the headline result is method-specific and event-specific, not a global property of all methods.
+
+---
+
+## Appendix Figure A13
+
+**P-value waterfall — USDT/Curve 2023 lead-lag tests.**
+Sorted p-values for all test rows in `table_leadlag_tests_usdt_curve_2023.csv`, showing raw, FDR-corrected, and Bonferroni-corrected values. Only the rows that fall below the Bonferroni threshold (α = 0.05) are paper-claimable. The shaded region marks Bonferroni-significant rows. The figure shows that the headline result survives the most conservative correction applied.
+
+---
+
+## Appendix Figure A14
+
+**Robustness grid — fraction significant by event and method.**
+Heatmap showing, for each (event, method) cell, the fraction of test rows passing the p < 0.05 threshold. Green cells indicate high fraction significant; grey cells indicate low or zero. The grid confirms that only the USDT/Curve 2023 / lead-lag cell shows high significance, while other event-method combinations are uniformly low or zero.
+
+---
+
+## Appendix Figure A15
+
+**Fixture-blocking audit.**
+Grouped bar chart showing, for each event, the total number of tested edges, edges blocked by the fixture check (synthetic data, not paper-claimable), and paper-claimable edges. Events with fixture-blocked edges cannot make paper-level claims from those edges. The figure confirms zero fixture leakage in the paper-claimable outputs.
+
+---
+
+## Appendix Figure A16
+
+**Sparse-flow barcode — USDC/SVB 2023.**
+Each tick mark on the timeline represents one detected on-chain mint or burn event from `table_sparse_events_usdc_svb_2023.csv`. Amber ticks indicate positive net flow (mint-dominant); red ticks indicate negative (burn-dominant). The sparse and irregular pattern explains why the USDC/SVB event does not support a paper-claimable propagation claim: the settlement-flow signal is too sparse and too non-contemporaneous with market stress to clear the statistical gate.
+
+---
+
+## Appendix Figure A17
+
+**Method p-value comparison across events.**
+Three panels (lead-lag, transfer entropy, Granger) showing the minimum p-value achieved across all test rows for each event. Green bars indicate events where at least one row passes p < 0.05; grey bars indicate no significant row. The figure confirms that lead-lag on USDT/Curve 2023 is the only combination that consistently achieves significance across correction levels.
+
+---
+
+## Appendix Figure A18
+
+**Feature-tier Sankey — raw source → feature → claim ceiling.**
+Approximate Sankey diagram mapping raw data sources (Curve TokenExchange, CEX OHLCV, Etherscan transfers) to feature types (usdc_net_sold_1h, reserve_imbalance, midprice proxy, on-chain flow) and then to claim ceilings (A/A paper-claimable, A/B suggestive, B/B context only). The diagram makes explicit that only features derived from Tier-A sources can reach the A/A paper-claimable ceiling. CEX-derived features are capped at A/B or B/B regardless of statistical significance.
+
+---
+
+## Appendix Figure A19
+
+**Stress-event timeline — all five events.**
+Horizontal timeline panel showing all five stress events, colour-coded by their paper-claim status: green = A/A robust paper-claimable (USDT/Curve 2023), blue = sparse / A/B (USDC/SVB 2023), grey = A/B context or no paper-claim (Terra, FTX, BUSD). Annotations describe the highest claim tier reached for each event. The figure provides temporal context and shows that the paper-claimable event is isolated to mid-2023.
+
+---
+
+## Appendix Figure A20
+
+**Final evidence map — what the paper can and cannot claim.**
+Summary table showing all attempted claim types across events, with columns for source tier, statistical significance, paper-claimable status, and notes. Green rows are paper-claimable; red-tinted rows are explicitly non-paper-claimable. Two rows are marked "NO:" to make explicit that historical CEX full-depth microstructure and structural causal identification are out of scope. This figure serves as the definitive reference for the paper's claim boundaries.

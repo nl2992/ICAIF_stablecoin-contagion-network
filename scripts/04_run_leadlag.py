@@ -78,9 +78,11 @@ def main() -> None:
 
     if not node_ids:
         raise SystemExit("No matching nodes found in panel.")
-    if args.paper_mode and len(node_ids) < 3:
+    min_nodes = 2 if args.layer_filter else 3
+    if args.paper_mode and len(node_ids) < min_nodes:
         raise SystemExit(
-            f"--paper-mode requires at least 3 real nodes for lead-lag; found {len(node_ids)}."
+            f"--paper-mode requires at least {min_nodes} real nodes for lead-lag "
+            f"({'layer-filtered' if args.layer_filter else 'full'}); found {len(node_ids)}."
         )
 
     node_pairs = list(itertools.permutations(node_ids, 2))

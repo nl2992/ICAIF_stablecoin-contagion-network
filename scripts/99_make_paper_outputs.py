@@ -108,6 +108,11 @@ def consolidate_table(
 
     if not frames:
         logger.warning("No data for %s (all events missing or all rows blocked)", table_name)
+        # Remove any stale paper-table file so acceptance tests don't see old columns
+        stale = out_dir / f"{table_name}.csv"
+        if stale.exists():
+            stale.unlink()
+            logger.info("Removed stale paper table %s (no paper-claimable rows)", stale.name)
         return None
 
     combined = pl.concat(frames, how="diagonal")
@@ -598,6 +603,135 @@ def write_tiered_edge_tables(
         )
 
 
+def write_aa_amm_edge_table(tables_dir: Path, out_dir: Path, events: list[str]) -> None:
+    """Write the focused A/A AMM-flow evidence table for the paper.
+
+    This is Table 4 in the paper: only ``A_A_dex_flow`` claim-level edges on the
+    ``usdc_net_sold_1h`` Tier-A feature.  Two files are written:
+
+    table_aa_amm_provenance_edges.csv
+        All rows where ``claim_level == "A_A_dex_flow"`` (provenance gate passed).
+
+    table_aa_amm_paper_edges.csv
+        Subset that also has ``paper_claim_allowed == True`` (both gates passed).
+        These are the headline directional AMM-flow claims in the paper.
+    """
+    _AA_DEX_LEVEL  = "A_A_dex_flow"
+    _AMM_FEATURE   = "usdc_net_sold_1h"
+    _KEEP_COLS     = [
+        "event_id", "node_i", "node_j", "feature_col",
+        "method",
+        "peak_lag_seconds", "peak_corr",           # leadlag
+        "te_i_to_j",                                # TE
+        "fevd_share",                               # VAR spillover
+        "p_value", "p_value_fdr",                   # generic p-value columns
+        "TE_p",                                     # TE p-value
+        "significant_block_fdr", "significant_fdr",
+        "significant_bonferroni", "significant_p01",
+        "claim_level", "claim_language", "claim_sentence",
+        "provenance_claim_allowed", "statistical_claim_allowed",
+        "paper_claim_allowed", "claim_strength",
+    ]
+
+    prov_rows: list[pl.DataFrame] = []
+    paper_rows: list[pl.DataFrame] = []
+
+    for table_name, pattern, is_edge in _TABLE_SPECS:
+        if not is_edge:
+            continue
+        for event_id in events:
+            path = tables_dir / pattern.format(event=event_id)
+            if not path.exists():
+                continue
+            try:
+                df = pl.read_csv(path)
+            except Exception:
+                continue
+            if "claim_level" not in df.columns:
+                continue
+            if "event_id" not in df.columns:
+                df = df.with_columns(pl.lit(event_id).alias("event_id"))
+            df = df.with_columns(pl.lit(table_name).alias("method"))
+
+            # Parse boolean columns
+            for bool_col in ("claim_allowed", "paper_claim_allowed", "provenance_claim_allowed"):
+                if bool_col in df.columns and df[bool_col].dtype != pl.Boolean:
+                    df = df.with_columns(
+                        (pl.col(bool_col).cast(pl.String).str.to_lowercase() == "true")
+                        .alias(bool_col)
+                    )
+
+            # Normalise edge-column naming: some tables use causing_node/caused_node
+            if "causing_node" in df.columns and "node_i" not in df.columns:
+                df = df.rename({"causing_node": "node_i"})
+            if "caused_node" in df.columns and "node_j" not in df.columns:
+                df = df.rename({"caused_node": "node_j"})
+            if "source" in df.columns and "node_i" not in df.columns:
+                df = df.rename({"source": "node_i"})
+            if "target" in df.columns and "node_j" not in df.columns:
+                df = df.rename({"target": "node_j"})
+
+            aa_dex = df.filter(
+                (pl.col("claim_level") == _AA_DEX_LEVEL)
+            )
+            # Optionally narrow to AMM feature only when feature_col is present
+            if "feature_col" in aa_dex.columns:
+                aa_dex = aa_dex.filter(pl.col("feature_col") == _AMM_FEATURE)
+
+            if aa_dex.height == 0:
+                continue
+
+            # Keep only columns that exist
+            keep = [c for c in _KEEP_COLS if c in aa_dex.columns]
+            aa_dex = aa_dex.select(keep)
+            prov_rows.append(aa_dex)
+
+            if "paper_claim_allowed" in aa_dex.columns:
+                paper = aa_dex.filter(pl.col("paper_claim_allowed"))
+                if paper.height > 0:
+                    paper_rows.append(paper)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if prov_rows:
+        prov_df = pl.concat(prov_rows, how="diagonal")
+        prov_path = out_dir / "table_aa_amm_provenance_edges.csv"
+        prov_df.write_csv(prov_path)
+        logger.info(
+            "Wrote %s (%d A/A DEX-flow provenance-valid rows across %d events)",
+            prov_path.name, prov_df.height,
+            prov_df["event_id"].n_unique() if "event_id" in prov_df.columns else 0,
+        )
+        if "node_i" in prov_df.columns and "node_j" in prov_df.columns:
+            print("\n=== A/A AMM provenance-valid edges ===")
+            pair_cols = [c for c in ["event_id", "node_i", "node_j", "method",
+                                      "claim_strength", "paper_claim_allowed"]
+                         if c in prov_df.columns]
+            print(prov_df.select(pair_cols))
+    else:
+        logger.warning(
+            "No A/A DEX-flow edges found on %s. "
+            "Run amm_leadlag targets then re-run 00c_claim_gate.py --all-events.",
+            _AMM_FEATURE,
+        )
+
+    if paper_rows:
+        paper_df = pl.concat(paper_rows, how="diagonal")
+        paper_path = out_dir / "table_aa_amm_paper_edges.csv"
+        paper_df.write_csv(paper_path)
+        logger.info(
+            "Wrote %s (%d headline A/A AMM-flow paper-claimable rows)",
+            paper_path.name, paper_df.height,
+        )
+    else:
+        logger.warning(
+            "No statistically supported A/A AMM-flow edges found. "
+            "High-provenance descriptive edges exist (see table_aa_amm_provenance_edges.csv) "
+            "but none pass the statistical gate. "
+            "Report as high-provenance descriptive evidence, not directional propagation."
+        )
+
+
 def write_claim_language_summary(tables_dir: Path, out_dir: Path) -> None:
     """Summarise claim-language levels across claim-gated paper edge tables."""
     rows = []
@@ -674,6 +808,9 @@ def main() -> None:
 
     # Provenance-stratified paper edge tables (key paper output)
     write_tiered_edge_tables(raw_tables_dir, out_dir, args.events)
+
+    # Focused A/A AMM-flow evidence table (primary headline table in the paper)
+    write_aa_amm_edge_table(raw_tables_dir, out_dir, args.events)
 
     # Figures
     plot_auc_by_event(out_dir, figures_dir)

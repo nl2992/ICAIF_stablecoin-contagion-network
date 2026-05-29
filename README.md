@@ -44,7 +44,7 @@ Every node and every claim is assigned a provenance tier:
 
 | Tier | What it means | Permitted claim |
 |---|---|---|
-| A | Real L2, verified pool state, high-quality timestamped data | Directional propagation, microstructure |
+| A | On-chain logs, verified pool events, high-quality timestamped data | On-chain AMM flow, directional propagation |
 | B | Trades, OHLCV, pool snapshots, aggregate on-chain flows | Price/liquidity context, weaker directional evidence |
 | C | Partial, proxy, or sparse data | Taxonomy and qualitative context only |
 
@@ -137,7 +137,7 @@ The repo is pipeline-complete. Verified provenance as of 2026-05-29:
 | **B (real proxy)** | all Binance nodes, `usdc_coinbase`, CoinMetrics flows | All 5 events |
 | **fixture** | `usdc_kraken`, `usdt_kraken`, `uniswap_usdc_usdt_005`, `eth_bridge_flows`, `usdt_mint_burn`, `tron_usdt_exchange_flows` | Various |
 
-**A/A edges are confirmed in 3 of 5 events:**
+**A/A provenance-valid pairs available in 3 of 5 events:**
 
 | A/A pair | Event |
 |---|---|
@@ -147,6 +147,11 @@ The repo is pipeline-complete. Verified provenance as of 2026-05-29:
 
 All A/A pairs use `usdc_net_sold_1h` (direct hourly sum from on-chain `TokenExchange` logs).
 Claims using derived features (`reserve_imbalance`, `implied_pool_price`) are A/B, not A/A.
+
+**Provenance-valid ≠ statistically supported.** Directional paper claims require both gates:
+the provenance gate (data source tier, no fixture, feature-level cap) *and* the statistical
+gate (FDR-adjusted significance). Only rows where `paper_claim_allowed == True` in the
+claim-gated result tables are used for headline directional claims in the paper.
 
 For ftx_2022 and busd_2023, A/B directional evidence is available (curve_3pool A + Binance B nodes).
 

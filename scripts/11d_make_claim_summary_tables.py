@@ -295,7 +295,10 @@ def write_claim_audit(df: pl.DataFrame, out_dir: Path) -> None:
     df = _parse_bools(df)
 
     audit_rows: list[dict] = []
-    events_in_df = df["event_id"].unique().sort().to_list() if "event_id" in df.columns else ["all"]
+    events_in_df = (
+        [e for e in df["event_id"].drop_nulls().unique().sort().to_list() if e]
+        if "event_id" in df.columns else ["all"]
+    )
 
     for event_id in events_in_df:
         g = df.filter(pl.col("event_id") == event_id) if "event_id" in df.columns else df

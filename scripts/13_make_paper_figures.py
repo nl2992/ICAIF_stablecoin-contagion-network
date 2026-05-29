@@ -309,28 +309,43 @@ def fig03_claim_audit(out: Path) -> None:
     event_order = ["usdt_curve_2023","terra_luna_2022","usdc_svb_2023","ftx_2022","busd_2023"]
     labels_map  = {"usdt_curve_2023":"USDT/Curve\n2023","terra_luna_2022":"Terra/LUNA\n2022",
                    "usdc_svb_2023":"USDC/SVB\n2023","ftx_2022":"FTX\n2022","busd_2023":"BUSD\n2023"}
-    df = df.set_index("event_id").reindex([e for e in event_order if e in df["event_id"].values])
+    valid = [e for e in event_order if e in df["event_id"].values]
+    df = df.set_index("event_id").reindex(valid)
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
     fig.patch.set_facecolor("white")
     x = np.arange(len(df))
 
-    # stacked: B/B bottom, A/B on top, A/A provenance on top, A/A paper-claimable last
-    def ivals(col): return df[col].fillna(0).values.astype(int) if col in df.columns else np.zeros(len(df))
+    def ivals(col):
+        return df[col].fillna(0).values.astype(int) if col in df.columns else np.zeros(len(df))
 
-    bb  = ivals("n_BB_context")
-    ab  = ivals("n_AB_paper_claimable")
-    aap = ivals("n_AA_provenance")
-    aac = ivals("n_AA_paper_claimable")
+    bb   = ivals("n_BB_context")
+    ab   = ivals("n_AB_paper_claimable")
+    aac  = ivals("n_AA_paper_claimable")
+    aap  = ivals("n_AA_provenance")
+    # A/A provenance-valid BUT NOT paper-claimable (the "failed stat gate" slice)
+    # = rows that pass provenance but not the statistical gate
+    aap_only = np.maximum(aap - aac, 0)
 
-    b1 = ax.bar(x, bb,  color=CBB,   alpha=0.8, label="B/B context-only")
-    b2 = ax.bar(x, ab,  bottom=bb,               color=CAB,  alpha=0.8, label="A/B suggestive (paper-claimable)")
-    b3 = ax.bar(x, aap, bottom=bb+ab,             color=CA,   alpha=0.6, hatch="//",
-                edgecolor="#555", lw=0.7, label="A/A provenance-valid (may not pass stat.)")
-    b4 = ax.bar(x, aac, bottom=bb+ab+aap,         color=CSTAR,alpha=1.0, label="A/A paper-claimable ★ (headline)")
+    # Stacked order: B/B → A/B paper → A/A prov-only → A/A paper-claimable
+    # Each row appears exactly once; no double-counting.
+    b1 = ax.bar(x, bb,       color=CBB,   alpha=0.8, label="B/B context-only")
+    b2 = ax.bar(x, ab,       bottom=bb,                       color=CAB,   alpha=0.8,
+                label="A/B suggestive (paper-claimable)")
+    b3 = ax.bar(x, aap_only, bottom=bb+ab,                    color=CA,    alpha=0.55,
+                hatch="//", edgecolor="#555", lw=0.7,
+                label="A/A provenance-valid, stat. unsupported (not paper-claimable)")
+    b4 = ax.bar(x, aac,      bottom=bb+ab+aap_only,           color=CSTAR, alpha=1.0,
+                label="A/A paper-claimable ★ (both gates pass — headline)")
 
-    for bars, stack in [(b1,np.zeros(len(df))), (b2,bb), (b3,bb+ab), (b4,bb+ab+aap)]:
-        for bar, s, v in zip(bars, stack, [bb,ab,aap,aac][list([b1,b2,b3,b4]).index(bars)]):
+    stacks_and_vals = [
+        (b1, np.zeros(len(df)), bb),
+        (b2, bb,                ab),
+        (b3, bb+ab,             aap_only),
+        (b4, bb+ab+aap_only,    aac),
+    ]
+    for bars, stack, vals in stacks_and_vals:
+        for bar, s, v in zip(bars, stack, vals):
             if v > 0:
                 ax.text(bar.get_x()+bar.get_width()/2, s+v/2,
                         str(int(v)), ha="center", va="center",
@@ -339,18 +354,21 @@ def fig03_claim_audit(out: Path) -> None:
     # highlight USDT/Curve
     if "usdt_curve_2023" in df.index:
         ax.axvspan(-0.5, 0.5, facecolor="#fef9e7", alpha=0.5, zorder=0)
-        ax.text(0, ax.get_ylim()[1]*0.98, "★ headline event",
-                ha="center", va="top", fontsize=8.5, color=CSTAR, fontweight="bold")
+        ylim = ax.get_ylim()
+        ax.set_ylim(ylim)
+        ax.text(0, (bb+ab+aap_only+aac).max()*1.06 if len(df) > 0 else 1,
+                "★ headline event", ha="center", va="bottom",
+                fontsize=8.5, color=CSTAR, fontweight="bold")
 
     ax.set_xticks(x)
     ax.set_xticklabels([labels_map.get(e,e) for e in df.index], fontsize=10)
-    ax.set_ylabel("Number of edges", fontsize=9.5)
+    ax.set_ylabel("Number of edges (no double-counting)", fontsize=9.5)
     ax.spines[["top","right"]].set_visible(False)
     ax.grid(axis="y", color="#e0e0e0", lw=0.5)
-    ax.legend(fontsize=8.5, loc="upper right", framealpha=0.95, edgecolor="#ccc")
+    ax.legend(fontsize=8, loc="upper right", framealpha=0.95, edgecolor="#ccc")
     ax.set_title(
-        "Figure 3 – Claim-gate audit: paper-claimable edges per event\n"
-        "(anti-cherry-pick transparency across 867 annotated edge rows, zero fixture leakage)",
+        "Figure 3 – Claim-gate audit: edge composition per event (anti-cherry-pick)\n"
+        "Each edge row counted once — A/A provenance-valid ≠ A/A paper-claimable",
         fontsize=10.5, fontweight="bold", color="#2c3e50", pad=10)
     _save(fig, out, "figure_03_claim_audit_by_event.png")
 
@@ -917,21 +935,23 @@ def fig12_full_paper_network(out: Path) -> None:
                 fontsize=9, fontweight="bold", color="#2c3e50",
                 transform=ax.transAxes if False else ax.transData)
 
-    # legend
+    # legend — no B/B entry: paper-claimable tables do not contain B/B rows
     legend_elements = [
-        mpatches.Patch(facecolor=CA,    label="Tier A node"),
-        mpatches.Patch(facecolor=CB,    label="Tier B node"),
-        Line2D([0],[0], color=CSTAR, lw=2.5, label="A/A paper-claimable ★"),
-        Line2D([0],[0], color=CAB,   lw=1.5, label="A/B suggestive"),
-        Line2D([0],[0], color=CBB,   lw=0.8, label="B/B context-only"),
-        mpatches.Patch(facecolor="white", edgecolor="#555", label="○ CEX  □ AMM  ◇ Settlement"),
+        mpatches.Patch(facecolor=CA,    label="Tier A node (on-chain execution-grade)"),
+        mpatches.Patch(facecolor=CB,    label="Tier B node (public market context)"),
+        Line2D([0],[0], color=CSTAR, lw=2.5, label="A/A paper-claimable ★ (both gates pass)"),
+        Line2D([0],[0], color=CAB,   lw=1.5, label="A/B suggestive (paper-claimable)"),
+        mpatches.Patch(facecolor="white", edgecolor="#555",
+                       label="□ AMM/DEX  ○ CEX  ◇ Settlement/Flow"),
     ]
     ax.legend(handles=legend_elements, loc="lower right", fontsize=8.5,
               framealpha=0.95, edgecolor="#ccc")
 
-    ax.set_title("Figure 12 – Full paper-claimable stress-propagation network\n"
-                 "A/A headline edges (amber) ·  A/B suggestive (blue) ·  node shape by layer ·  node colour by tier",
-                 fontsize=10.5, fontweight="bold", color="#2c3e50", pad=10)
+    ax.set_title(
+        "Figure 12 – Paper-claimable stress-propagation network\n"
+        "Only edges passing both provenance and statistical gates · "
+        "amber = A/A headline · blue = A/B suggestive · fixture nodes omitted",
+        fontsize=10.5, fontweight="bold", color="#2c3e50", pad=10)
     _save(fig, out, "figure_12_full_paper_claimable_network.png")
 
 

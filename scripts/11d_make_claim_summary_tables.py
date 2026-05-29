@@ -231,7 +231,7 @@ def write_aa_ab_tables(df: pl.DataFrame, out_dir: Path) -> None:
 
     # Resolve node_i / node_j regardless of column naming convention
     def _resolve_edge_cols(frame: pl.DataFrame) -> pl.DataFrame:
-        """Normalise to node_i / node_j; drop self-loops."""
+        """Normalise to node_i / node_j; add edge_pair + is_self_loop; drop self-loops."""
         if "node_i" not in frame.columns or "node_j" not in frame.columns:
             for src, tgt in [("causing_node", "caused_node"),
                              ("source_node_id", "target_node_id"),
@@ -240,12 +240,43 @@ def write_aa_ab_tables(df: pl.DataFrame, out_dir: Path) -> None:
                 if src in frame.columns and tgt in frame.columns:
                     frame = frame.rename({src: "node_i", tgt: "node_j"})
                     break
-        # Drop self-loops (VAR/FEVD diagonal; not cross-node propagation)
         if "node_i" in frame.columns and "node_j" in frame.columns:
-            frame = frame.filter(pl.col("node_i") != pl.col("node_j"))
+            # Canonical edge_pair for auditing
+            frame = frame.with_columns(
+                (pl.col("node_i").cast(pl.String) + " ↔ " + pl.col("node_j").cast(pl.String))
+                .alias("edge_pair"),
+                (pl.col("node_i").cast(pl.String) == pl.col("node_j").cast(pl.String))
+                .alias("is_self_loop"),
+            )
+        else:
+            frame = frame.with_columns(
+                pl.lit("").alias("edge_pair"),
+                pl.lit(False).alias("is_self_loop"),
+            )
         return frame
 
     df = _resolve_edge_cols(df)
+
+    # Write excluded self-loops diagnostic table before dropping them
+    if "is_self_loop" in df.columns:
+        self_loop_rows = df.filter(pl.col("is_self_loop"))
+        if self_loop_rows.height > 0:
+            _excl_cols = [c for c in [
+                "event_id", "node_i", "node_j", "edge_pair", "claim_level",
+                "feature_col", "source_table", "is_self_loop",
+            ] if c in self_loop_rows.columns]
+            excl_out = out_dir / "table_excluded_self_loops.csv"
+            self_loop_rows.select(_excl_cols).write_csv(excl_out)
+            logger.info(
+                "Wrote %s (%d excluded self-loop rows)",
+                excl_out.name, self_loop_rows.height,
+            )
+        else:
+            logger.info("No self-loops detected in combined table.")
+
+    # Drop self-loops (VAR/FEVD diagonal; not cross-node propagation)
+    if "is_self_loop" in df.columns:
+        df = df.filter(~pl.col("is_self_loop"))
 
     # Table 3: A/A provenance-valid (all A/A levels, provenance gate passes)
     aa_prov = df.filter(

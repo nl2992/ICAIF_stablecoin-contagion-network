@@ -12,8 +12,7 @@ support**.
 
 The strongest current evidence layer is **Tier-A on-chain AMM flow** from Curve
 `TokenExchange` logs. Public CEX prices, BBO, and trade/candle data provide broader market
-context but are capped at Tier B because historical full-depth CEX order books are not freely
-available.
+context but are capped at Tier B because **historical full-depth CEX order books are not freely available**.
 
 ---
 
@@ -211,13 +210,19 @@ make empirical EVENT=usdt_curve_2023
 # 3. Run all 5 events
 make empirical_all
 
-# 4. Build claim-gated paper outputs only
-python scripts/00c_claim_gate.py --all-events --strict
-python scripts/11d_make_claim_summary_tables.py
-python scripts/99_make_paper_outputs.py --strict
-
-# Shortcut:
+# 4. Build claim-gated paper outputs, all figures, and validate
 make paper_gate
+
+# The paper_gate target runs in order:
+#   00c_claim_gate.py --all-events --strict
+#   11d_make_claim_summary_tables.py
+#   99_make_paper_outputs.py --strict
+#   98_make_narrative_figures.py
+#   13_make_paper_figures.py
+#   14_validate_paper_package.py        ← prints PASS/FAIL
+
+# 5. Validate the paper package independently
+python scripts/14_validate_paper_package.py
 ```
 
 > **Fixture data warning** — `make ingest` (without `--no-fixture`) writes
@@ -276,11 +281,24 @@ stablecoin-contagion-network/
 
 ```bash
 python -m pytest tests -q
+python scripts/14_validate_paper_package.py
 ```
 
-Validation covers: Curve StableSwap-ng decimal handling, per-pool `PoolConfig` mapping,
+Unit tests cover: Curve StableSwap-ng decimal handling, per-pool `PoolConfig` mapping,
 feature-tier claim caps, claim-gate taxonomy, sparse-flow response calculations, fixture
 blocking, and provenance/statistical/paper gate separation.
+
+Acceptance tests (`tests/test_paper_package.py`) verify:
+- `table_aa_paper_claimable_edges.csv` contains only USDT/Curve 2023 A/A DEX-flow rows.
+- No self-loops in any A/A summary table.
+- Terra/LUNA 2022 has A/A provenance candidates but zero A/A paper-claimable rows.
+- Sparse-flow table is annotated but not paper-claimable.
+- README contains no banned overclaim phrases.
+- All 12 paper figures exist.
+- No fixture rows leaked into paper outputs.
+
+The validation script (`scripts/14_validate_paper_package.py`) runs checks A–J and
+exits nonzero if any check fails. It is the final step in `make paper_gate`.
 
 A result table is not paper-ready unless it contains `paper_claim_allowed` and
 `claim_strength`.
@@ -289,7 +307,7 @@ A result table is not paper-ready unless it contains `paper_claim_allowed` and
 
 ## Non-claims
 
-This repo does **not** claim:
+This repo does not claim, and the paper does not claim:
 
 - historical Binance full-depth L2 order-book coverage;
 - historical Kraken full-depth L2 coverage;

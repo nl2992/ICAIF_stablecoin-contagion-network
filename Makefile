@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag subhourly sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary propagation_score paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all
 
 setup:
 	pip install -r requirements.txt
@@ -71,6 +71,9 @@ sparse_flow:
 		--n-permutations 1000 \
 		--paper-mode
 
+subhourly:
+	python scripts/18_build_subhourly_features.py --event $(EVENT)
+
 hy:
 	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT)
 
@@ -109,6 +112,9 @@ summary:
 	python scripts/11c_summarise_robustness.py
 	python scripts/11_summarise_results.py
 
+propagation_score:
+	python scripts/19_compute_propagation_intensity.py
+
 # Diagnostic paper build (reads results/tables, no claim enforcement)
 paper:
 	python scripts/99_make_paper_outputs.py
@@ -142,6 +148,7 @@ paper_gate:
 	python scripts/13_make_paper_figures.py
 	python scripts/15_make_columbia_paper_pack.py
 	python scripts/16_make_extended_figures.py
+	python scripts/19_compute_propagation_intensity.py
 	python scripts/14_validate_paper_package.py
 
 # run an empirical paper-claim pipeline for one event.

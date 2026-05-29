@@ -85,3 +85,25 @@ Do not start GNN as a paper claim until:
 
 The GNN enters the paper only if it improves AUROC or AUPRC by more than 5%
 over the best non-graph baseline and shuffled-edge ablations perform worse.
+
+## Benchmark Upgrade Track
+
+The next paper version should move beyond a single Curve-only positive result.
+The current implementation now supports three upgrades:
+
+1. **Cross-protocol AMM ingestion.** Uniswap v3 pool support has a direct
+   Etherscan `Swap`-log ingestion path that can produce Tier-A
+   `usdc_net_sold_1h` features when `ETHERSCAN_API_KEY` is available. The Graph
+   remains a Tier-B fallback. This lets the paper compare Curve and Uniswap
+   stress propagation under the same provenance gate.
+2. **Resolution-dependence tests.** Run
+   `python scripts/18_build_subhourly_features.py --event terra_luna_2022`
+   to rebuild Tier-A AMM flow features at 5-minute, 15-minute, and hourly grids.
+   This directly tests whether Terra/LUNA's hourly non-result is a true
+   negative or a sampling-resolution artifact.
+3. **Propagation-intensity ranking.** Run
+   `python scripts/19_compute_propagation_intensity.py` to generate
+   `results/paper/tables/table_propagation_intensity.csv`. The score is a
+   benchmark summary statistic, not a causal estimand: it rewards A/A
+   paper-claimable edges most heavily, includes A/B suggestive evidence and
+   effect-size strength, and subtracts fixture-coverage penalties.

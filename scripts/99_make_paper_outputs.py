@@ -502,6 +502,102 @@ def write_empirical_coverage_table(out_dir: Path) -> None:
     logger.info("Wrote %s", out_path.name)
 
 
+def write_tiered_edge_tables(
+    tables_dir: Path,
+    out_dir: Path,
+    events: list[str],
+) -> None:
+    """Write two provenance-stratified edge tables for the paper.
+
+    table_provenance_claimable_edges.csv
+        All edge rows that pass the provenance gate (claim_allowed=True)
+        across all result tables and events.  Use this to show the full set
+        of real-data edges the analysis is based on.
+
+    table_statistically_supported_edges.csv
+        Subset that also passes the statistical gate (paper_claim_allowed=True).
+        Use this for headline directional claims in the paper.
+    """
+    prov_rows: list[pl.DataFrame] = []
+    paper_rows: list[pl.DataFrame] = []
+
+    source_dir = results_root() / "tables"  # always read annotated tables from full dir
+
+    for table_name, pattern, is_edge in _TABLE_SPECS:
+        if not is_edge:
+            continue
+        for event_id in events:
+            path = source_dir / pattern.format(event=event_id)
+            if not path.exists():
+                continue
+            try:
+                df = pl.read_csv(path)
+            except Exception:
+                continue
+            if "claim_allowed" not in df.columns:
+                continue
+            if "event_id" not in df.columns:
+                df = df.with_columns(pl.lit(event_id).alias("event_id"))
+            df = df.with_columns(pl.lit(table_name).alias("method"))
+
+            # Parse boolean columns (CSV round-trip stores as strings)
+            for bool_col in ("claim_allowed", "paper_claim_allowed", "provenance_claim_allowed"):
+                if bool_col in df.columns and df[bool_col].dtype != pl.Boolean:
+                    df = df.with_columns(
+                        (pl.col(bool_col).cast(pl.String).str.to_lowercase() == "true")
+                        .alias(bool_col)
+                    )
+
+            prov = df.filter(pl.col("claim_allowed"))
+            if prov.height > 0:
+                prov_rows.append(prov)
+
+            if "paper_claim_allowed" in df.columns:
+                paper = df.filter(pl.col("paper_claim_allowed"))
+            else:
+                paper = prov.filter(pl.lit(False))  # empty — stat gate column not present
+            if paper.height > 0:
+                paper_rows.append(paper)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    if prov_rows:
+        prov_df = pl.concat(prov_rows, how="diagonal")
+        prov_path = out_dir / "table_provenance_claimable_edges.csv"
+        prov_df.write_csv(prov_path)
+        logger.info(
+            "Wrote %s (%d rows, %d events, %d claim levels)",
+            prov_path.name, prov_df.height,
+            prov_df["event_id"].n_unique() if "event_id" in prov_df.columns else 0,
+            prov_df["claim_level"].n_unique() if "claim_level" in prov_df.columns else 0,
+        )
+        if "claim_level" in prov_df.columns:
+            print("\n=== Provenance-claimable edges by claim level ===")
+            print(prov_df.group_by("claim_level").len().sort("len", descending=True))
+    else:
+        logger.warning("No provenance-claimable edges found.")
+
+    if paper_rows:
+        paper_df = pl.concat(paper_rows, how="diagonal")
+        paper_path = out_dir / "table_statistically_supported_edges.csv"
+        paper_df.write_csv(paper_path)
+        logger.info(
+            "Wrote %s (%d rows, %d A/A rows)",
+            paper_path.name, paper_df.height,
+            paper_df.filter(
+                pl.col("claim_level").str.starts_with("A_A_")
+            ).height if "claim_level" in paper_df.columns else 0,
+        )
+        if "claim_level" in paper_df.columns:
+            print("\n=== Statistically supported edges by claim level ===")
+            print(paper_df.group_by("claim_level").len().sort("len", descending=True))
+    else:
+        logger.warning(
+            "No statistically supported edges found. "
+            "Run analysis scripts then re-run 00c_claim_gate.py --all-events."
+        )
+
+
 def write_claim_language_summary(tables_dir: Path, out_dir: Path) -> None:
     """Summarise claim-language levels across claim-gated paper edge tables."""
     rows = []
@@ -575,6 +671,9 @@ def main() -> None:
     write_paper_summary_table(tables_dir, out_dir, args.strict)
     write_empirical_coverage_table(out_dir)
     write_claim_language_summary(tables_dir, out_dir)
+
+    # Provenance-stratified paper edge tables (key paper output)
+    write_tiered_edge_tables(raw_tables_dir, out_dir, args.events)
 
     # Figures
     plot_auc_by_event(out_dir, figures_dir)

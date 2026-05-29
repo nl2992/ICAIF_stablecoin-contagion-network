@@ -23,6 +23,8 @@ def main() -> None:
     parser.add_argument("--decay", type=float, default=1.0)
     parser.add_argument("--n-bootstraps", type=int, default=100,
                         help="Number of bootstrap replicates for branching-ratio CIs (default: 100).")
+    parser.add_argument("--layer-filter", default=None,
+                        help="Restrict to nodes of a single layer (e.g. DEX, CEX, mint_burn).")
     args = parser.parse_args()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
@@ -32,6 +34,11 @@ def main() -> None:
     panel = pl.read_parquet(panel_path)
     nodes = nodes_for_event(args.event)
     node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
+
+    if args.layer_filter:
+        layer_node_ids = {n.id for n in nodes if n.layer == args.layer_filter}
+        node_ids = [nid for nid in node_ids if nid in layer_node_ids]
+        logger.info("--layer-filter %s: restricting to %d nodes", args.layer_filter, len(node_ids))
 
     logger.info("Extracting stress events (threshold=%.0fbps) for %d nodes", args.threshold_bps, len(node_ids))
     events = define_stress_events(panel, node_ids, threshold_bps=args.threshold_bps)

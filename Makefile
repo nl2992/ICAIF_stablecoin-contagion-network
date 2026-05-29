@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate empirical empirical_all mvp usdc demo_all all
 
 setup:
 	pip install -r requirements.txt
@@ -47,6 +47,29 @@ maps: eventmaps
 
 leadlag:
 	python scripts/04_run_leadlag.py --event $(EVENT)
+
+# AMM-only lead-lag: DEX layer, Tier-A usdc_net_sold_1h, hourly grid, paper-mode nodes only.
+# This is the primary Tier-A narrative analysis in the paper.
+amm_leadlag:
+	python scripts/04_run_leadlag.py \
+		--event $(EVENT) \
+		--layer-filter DEX \
+		--feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 \
+		--max-lag 12 \
+		--paper-mode
+
+# Sparse flow event study: mint/burn arrivals → AMM + CEX response
+sparse_flow:
+	python scripts/06b_run_sparse_flow_event_study.py \
+		--event $(EVENT) \
+		--source-node usdc_mint_burn \
+		--source-feature mint_burn_net_1h \
+		--target-feature usdc_net_sold_1h \
+		--post-hours 3 \
+		--baseline-hours 12 \
+		--n-permutations 1000 \
+		--paper-mode
 
 hy:
 	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT)
@@ -116,6 +139,10 @@ empirical:
 	python scripts/09_run_prediction.py --event $(EVENT)
 	python scripts/10_run_robustness.py --event $(EVENT)
 	python scripts/12_run_event_study.py --event $(EVENT) --paper-mode
+	# AMM-only Tier-A analysis (paper narrative)
+	python scripts/04_run_leadlag.py --event $(EVENT) --layer-filter DEX --feature-cols usdc_net_sold_1h --grid-seconds 3600 --max-lag 12 --paper-mode || true
+	# Sparse mint/burn event study (soft-fail: usdc_mint_burn not available for all events)
+	python scripts/06b_run_sparse_flow_event_study.py --event $(EVENT) --source-node usdc_mint_burn --source-feature mint_burn_net_1h --target-feature usdc_net_sold_1h --post-hours 3 --baseline-hours 12 --paper-mode || true
 	python scripts/00c_claim_gate.py --event $(EVENT)
 
 # Run all 5 events empirically then assemble claim-gated paper outputs.

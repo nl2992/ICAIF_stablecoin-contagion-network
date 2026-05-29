@@ -27,11 +27,36 @@ def test_claim_decision_blocks_fixture_endpoint() -> None:
 
 
 def test_claim_decision_assigns_expected_claim_levels() -> None:
-    assert decide_claim("A", "A").claim_level == "A_A_directional_microstructure"
+    # No layer → falls through to high-provenance fallback
+    assert decide_claim("A", "A").claim_level == "A_A_high_provenance"
+    # DEX/DEX layer → AMM-flow claim
+    assert decide_claim("A", "A", "DEX", "DEX").claim_level == "A_A_dex_flow"
     assert decide_claim("A", "B").claim_level == "A_B_suggestive_directional"
     assert decide_claim("B", "B").claim_level == "B_B_context_only"
     assert decide_claim("C", "A").claim_allowed is False
     assert decide_claim("C", "A").claim_level == "C_taxonomy_only"
+
+
+def test_claim_decision_settlement_layers() -> None:
+    d = decide_claim("A", "A", "mint_burn", "DEX")
+    assert d.claim_level == "A_A_onchain_settlement"
+    assert d.claim_allowed is True
+
+    d = decide_claim("A", "A", "onchain_flow", "CEX")
+    assert d.claim_level == "A_A_onchain_settlement"
+
+
+def test_feature_cap_demotes_aa_to_ab() -> None:
+    # reserve_imbalance is Tier B (derived proxy) — caps A/A to A/B
+    d = decide_claim("A", "A", "DEX", "DEX", feature_col="reserve_imbalance")
+    assert d.claim_level == "A_B_suggestive_directional"
+    assert d.claim_allowed is True
+    assert d.feature_tier == "B"
+
+    # usdc_net_sold_1h is Tier A — A/A stays A/A
+    d = decide_claim("A", "A", "DEX", "DEX", feature_col="usdc_net_sold_1h")
+    assert d.claim_level == "A_A_dex_flow"
+    assert d.feature_tier == "A"
 
 
 def test_annotate_edge_table_adds_claim_metadata(tmp_path: Path) -> None:

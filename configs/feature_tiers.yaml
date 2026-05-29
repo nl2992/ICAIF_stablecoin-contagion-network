@@ -1,0 +1,146 @@
+# Feature-level provenance tiers
+#
+# Every feature column in the gold panel has an inherent evidence tier.
+# An edge claim is capped at min(node_tier_i, node_tier_j, feature_tier).
+#
+# Tiers:
+#   A = execution-grade / directly from on-chain logs or L2 book
+#   B = real proxy data, sufficient for context; not execution-grade
+#   C = sparse, partial, or taxonomy-only context
+#
+# evidence_type categories:
+#   direct_onchain_flow       — raw sum of on-chain token amounts (TokenExchange, Transfer)
+#   direct_onchain_settlement — raw mint/burn/issue/redeem from null-address Transfers
+#   cex_l2_depth              — full L2 order-book depth (Tardis/Kaiko)
+#   bbo_proxy                 — best-bid-offer from bookTicker (BBO only, no depth walk)
+#   ohlcv_proxy               — open/high/low/close/volume candle proxy
+#   market_price_proxy        — log-return / basis from public trade or candle prices
+#   derived_proxy             — computed from Tier-A inputs but requires approximation
+#   aggregate_flow            — pre-aggregated third-party flow estimate
+#   synthetic                 — deterministic fixture; not paper-claimable
+
+features:
+
+  # ── Tier A: direct on-chain AMM flow ────────────────────────────────────────
+  usdc_net_sold_1h:
+    tier: A
+    evidence_type: direct_onchain_flow
+    claim_language: "on-chain AMM flow (hourly TokenExchange sum)"
+    notes: >
+      Direct hourly sum of on-chain Curve TokenExchange event amounts.
+      For 3pool: USDC-denominated. For crvUSD/USDT pool: USDT-denominated.
+      Tier A in substance because it is a reproducible, timestamped, on-chain record.
+
+  mint_burn_net_1h:
+    tier: A
+    evidence_type: direct_onchain_settlement
+    claim_language: "on-chain mint/burn settlement response"
+    notes: >
+      Net USDC/USDT minted minus burned, summed to 1-hour windows from
+      on-chain Transfer events to/from null address. Sparse: typically
+      a handful of events per event window. Use event-arrival analysis,
+      not continuous lead-lag, for robust inference.
+
+  # ── Tier A (when sourced from real L2 book) ──────────────────────────────────
+  depth_10bps_bid_usd:
+    tier: A
+    evidence_type: cex_l2_depth
+    claim_language: "executable bid-side depth within 10 bps"
+    notes: >
+      Requires full L2 order-book (Tardis or Kaiko).
+      Currently NULL for all CEX nodes (no vendor key set).
+      Will remain Tier B until vendor data is sourced.
+    effective_tier_without_l2: B
+
+  depth_10bps_ask_usd:
+    tier: A
+    evidence_type: cex_l2_depth
+    claim_language: "executable ask-side depth within 10 bps"
+    effective_tier_without_l2: B
+
+  orderbook_imbalance:
+    tier: A
+    evidence_type: cex_l2_depth
+    claim_language: "order-book imbalance from full L2 depth"
+    effective_tier_without_l2: B
+
+  executable_price_10k_buy:
+    tier: A
+    evidence_type: cex_l2_depth
+    claim_language: "bookwalk executable VWAP for $10k buy"
+    effective_tier_without_l2: B
+
+  executable_price_10k_sell:
+    tier: A
+    evidence_type: cex_l2_depth
+    claim_language: "bookwalk executable VWAP for $10k sell"
+    effective_tier_without_l2: B
+
+  # ── Tier B: public BBO / OHLCV / derived ────────────────────────────────────
+  spread_bps:
+    tier: B
+    evidence_type: bbo_proxy
+    claim_language: "BBO spread proxy (Binance bookTicker or Coinbase candle)"
+    notes: >
+      Computed from best-bid-offer only; does not reflect actual trading cost
+      for any meaningful notional size. Tier B: public market context.
+
+  mid_price:
+    tier: B
+    evidence_type: ohlcv_proxy
+    claim_language: "mid-price proxy from public BBO or OHLCV"
+
+  basis_vs_usd:
+    tier: B
+    evidence_type: market_price_proxy
+    claim_language: "log-peg deviation (log mid_price or log implied_pool_price)"
+    notes: >
+      Log deviation of price from 1.0 USD. Computed from either CEX
+      mid-price (Tier B BBO) or pool implied price (Tier B derived).
+      Valid for contextual co-movement; not execution-grade.
+
+  reserve_imbalance:
+    tier: B
+    evidence_type: derived_proxy
+    claim_language: "derived AMM reserve imbalance proxy"
+    notes: >
+      Cumulative stablecoin net-sold divided by a hardcoded pool-size
+      normaliser. Approximate: true reserve ratio requires archive-RPC
+      get_balances() at each block. Use as stress-direction indicator only.
+
+  implied_pool_price:
+    tier: B
+    evidence_type: derived_proxy
+    claim_language: "derived pool implied price (1 / (1 + |reserve_imbalance|))"
+    notes: >
+      Approximate implied price from reserve imbalance. Not an actual
+      execution price; use as directional proxy only.
+
+  pool_slippage_10k:
+    tier: B
+    evidence_type: derived_proxy
+    claim_language: "derived pool slippage proxy for $10k"
+
+  virtual_price:
+    tier: B
+    evidence_type: derived_proxy
+    claim_language: "pool virtual price (LP value proxy)"
+
+  # ── Tier B: aggregate flow data ──────────────────────────────────────────────
+  exchange_netflow_1h:
+    tier: B
+    evidence_type: aggregate_flow
+    claim_language: "CoinMetrics aggregate exchange netflow"
+    notes: >
+      Pre-aggregated by CoinMetrics using heuristic exchange address
+      labelling (~80% confidence). Use as directional context only.
+
+  exchange_inflow_1h:
+    tier: B
+    evidence_type: aggregate_flow
+    claim_language: "CoinMetrics exchange inflow"
+
+  exchange_outflow_1h:
+    tier: B
+    evidence_type: aggregate_flow
+    claim_language: "CoinMetrics exchange outflow"

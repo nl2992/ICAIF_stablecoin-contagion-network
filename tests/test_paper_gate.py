@@ -26,10 +26,16 @@ from stressnet.evaluation.claim_gate import FIXTURE, decide_claim
 # ---------------------------------------------------------------------------
 
 def test_AA_is_claimable_and_directional():
+    # No layer info → high-provenance fallback
     d = decide_claim("A", "A")
     assert d.claim_allowed is True
-    assert d.claim_level == "A_A_directional_microstructure"
+    assert d.claim_level == "A_A_high_provenance"
     assert d.uses_fixture is False
+
+    # DEX/DEX with Tier-A feature → AMM-flow claim
+    d_dex = decide_claim("A", "A", "DEX", "DEX", feature_col="usdc_net_sold_1h")
+    assert d_dex.claim_level == "A_A_dex_flow"
+    assert d_dex.claim_allowed is True
 
 
 def test_AB_is_claimable_and_suggestive():

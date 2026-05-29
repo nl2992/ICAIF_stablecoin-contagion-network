@@ -25,6 +25,8 @@ def main() -> None:
     parser.add_argument("--fevd-horizon", type=int, default=10)
     parser.add_argument("--bucket-seconds", type=int, default=3600)
     parser.add_argument("--min-observations", type=int, default=50)
+    parser.add_argument("--layer-filter", default=None,
+                        help="Restrict to nodes of a single layer (e.g. DEX, CEX, mint_burn).")
     args = parser.parse_args()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
@@ -34,6 +36,11 @@ def main() -> None:
     panel = pl.read_parquet(panel_path)
     nodes = nodes_for_event(args.event)
     node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
+
+    if args.layer_filter:
+        layer_node_ids = {n.id for n in nodes if n.layer == args.layer_filter}
+        node_ids = [nid for nid in node_ids if nid in layer_node_ids]
+        logger.info("--layer-filter %s: restricting to %d nodes", args.layer_filter, len(node_ids))
 
     if len(node_ids) < 2:
         raise SystemExit("Need at least 2 nodes for VAR.")

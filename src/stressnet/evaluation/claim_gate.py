@@ -109,6 +109,12 @@ _CLAIM_SENTENCES: dict[str, str] = {
         "We find high-provenance on-chain settlement-flow evidence linking "
         "{i} to {j}."
     ),
+    # Used when the settlement edge is provenance-valid but statistically underpowered
+    "A_A_onchain_settlement_underpowered": (
+        "We document a high-provenance sparse settlement-flow response candidate "
+        "from {i} to {j}, but it is not statistically supported under the "
+        "event-arrival test."
+    ),
     "A_A_cex_microstructure": (
         "We find directional CEX microstructure transmission from {i} to {j}."
     ),
@@ -609,6 +615,19 @@ def annotate_edge_table(
         paper_ok = prov_ok and stat_ok
         strength = claim_strength(prov_ok, stat_ok, decision.claim_level)
 
+        # For sparse settlement-flow rows that are provenance-valid but
+        # not statistically supported, use the underpowered sentence so
+        # the claim language is explicit about the limitation.
+        is_sparse_table = "sparse_events" in str(table_path.name) if table_path else False
+        claim_sentence_template = decision.claim_sentence
+        if (
+            decision.claim_level == "A_A_onchain_settlement"
+            and prov_ok
+            and not stat_ok
+            and is_sparse_table
+        ):
+            claim_sentence_template = _CLAIM_SENTENCES["A_A_onchain_settlement_underpowered"]
+
         row["tier_i_actual"]            = decision.tier_i_actual
         row["tier_j_actual"]            = decision.tier_j_actual
         row["edge_tier_actual"]         = decision.edge_tier_actual
@@ -621,7 +640,7 @@ def annotate_edge_table(
         row["claim_language"]           = _CLAIM_LANGUAGE.get(decision.claim_level, "unknown")
         row["claim_reason"]             = decision.claim_reason
         row["claim_sentence"]           = (
-            decision.claim_sentence
+            claim_sentence_template
             .replace("{i}", str(row.get(source_col, "node_i")))
             .replace("{j}", str(row.get(target_col, "node_j")))
         )

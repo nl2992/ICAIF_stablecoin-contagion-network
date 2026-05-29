@@ -1,6 +1,6 @@
 table,claim_level,n_rows
 table_aa_amm_paper_edges.csv,A_A_dex_flow,2
-table_aa_amm_provenance_edges.csv,A_A_dex_flow,23
+table_aa_amm_provenance_edges.csv,A_A_dex_flow,16
 table_aa_paper_claimable_edges.csv,A_A_dex_flow,2
 table_aa_provenance_valid_edges.csv,A_A_dex_flow,8
 table_claim_language_summary.csv,A_A_dex_flow,9

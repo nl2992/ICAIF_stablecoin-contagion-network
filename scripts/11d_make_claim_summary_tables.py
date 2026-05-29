@@ -229,6 +229,24 @@ def write_aa_ab_tables(df: pl.DataFrame, out_dir: Path) -> None:
     if paper_col not in df.columns:
         df = df.with_columns(pl.lit(False).alias(paper_col))
 
+    # Resolve node_i / node_j regardless of column naming convention
+    def _resolve_edge_cols(frame: pl.DataFrame) -> pl.DataFrame:
+        """Normalise to node_i / node_j; drop self-loops."""
+        if "node_i" not in frame.columns or "node_j" not in frame.columns:
+            for src, tgt in [("causing_node", "caused_node"),
+                             ("source_node_id", "target_node_id"),
+                             ("source_node", "target_node"),
+                             ("source", "target")]:
+                if src in frame.columns and tgt in frame.columns:
+                    frame = frame.rename({src: "node_i", tgt: "node_j"})
+                    break
+        # Drop self-loops (VAR/FEVD diagonal; not cross-node propagation)
+        if "node_i" in frame.columns and "node_j" in frame.columns:
+            frame = frame.filter(pl.col("node_i") != pl.col("node_j"))
+        return frame
+
+    df = _resolve_edge_cols(df)
+
     # Table 3: A/A provenance-valid (all A/A levels, provenance gate passes)
     aa_prov = df.filter(
         pl.col("claim_level").is_in(list(_AA_LEVELS))

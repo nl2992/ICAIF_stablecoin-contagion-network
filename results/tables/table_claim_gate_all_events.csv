@@ -10,7 +10,7 @@ table_leadlag_tests_ftx_2022.csv,multi,annotated,6,0,0,6,4
 table_leadlag_tests_terra_luna_2022.csv,multi,annotated,2,0,0,2,0
 table_leadlag_tests_usdc_svb_2023.csv,multi,annotated,12,0,0,12,8
 table_leadlag_tests_usdt_curve_2023.csv,multi,annotated,2,0,0,2,2
-table_sparse_events_usdc_svb_2023.csv,multi,skipped_no_edge_columns,6,0,0,0,0
+table_sparse_events_usdc_svb_2023.csv,multi,annotated,6,0,0,6,0
 table_transfer_entropy.csv,multi,annotated,48,0,0,48,27
 table_transfer_entropy_busd_2023.csv,multi,annotated,12,0,0,12,9
 table_transfer_entropy_ftx_2022.csv,multi,annotated,6,0,0,6,5

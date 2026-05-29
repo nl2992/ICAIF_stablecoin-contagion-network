@@ -77,6 +77,7 @@ EDGE_COLUMN_CANDIDATES = [
     ("causing_node", "caused_node"),
     ("source", "target"),
     ("source_node", "target_node"),
+    ("source_node_id", "target_node_id"),  # sparse-flow event study
 ]
 
 RESULT_TABLE_PREFIXES = (

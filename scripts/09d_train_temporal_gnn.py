@@ -1,27 +1,17 @@
-"""Train a temporal GNN on the contagion prediction dataset.
+"""Train a temporal GNN on the contagion feature panel.
 
-This script is a structured stub.  The non-graph baselines in script 09 must
-be validated and their AUC/AUPRC numbers recorded before implementing this
-script; the GNN's purpose is to demonstrate a >5% lift over the best non-graph
-baseline (configs/paper.yaml: gnn_improvement_threshold).
-
-Architecture options (configs/models.yaml):
-    TGN   – Temporal Graph Network (Rossi et al., 2020)
-    DySAT – Dynamic Self-Attention Network (Sankar et al., 2020)
-
-Dependencies (optional, not in base requirements.txt):
-    torch>=2.0
-    torch-geometric>=2.3
-    torch-geometric-temporal (for TGN/DySAT)
+Architecture options:
+    SnapshotGCN – GCN over temporal snapshots + LSTM (torch-only, default)
+    TGN         – Temporal Graph Network (requires torch-geometric)
+    DySAT       – Dynamic Self-Attention Network (requires torch-geometric)
 
 Run after:
     make panel EVENT=<event>
-    make predict EVENT=<event>          # validates non-graph baselines
-    python scripts/09b_make_prediction_dataset.py --event <event>
+    make predict EVENT=<event>   # validates non-graph baselines
 
-Writes (when fully implemented):
+Writes:
     results/tables/table_gnn_metrics_{event}.csv
-    results/models/gnn_checkpoint_{event}.pt
+    results/models/gnn_checkpoint_{event}.pt   (if torch available)
 """
 
 from __future__ import annotations
@@ -32,10 +22,12 @@ from pathlib import Path
 import polars as pl
 
 from stressnet.config import gold_root, results_root
-from stressnet.models.temporal_gnn import build_tgn, train_tgn_stub
+from stressnet.models.temporal_gnn import build_gcn, build_tgn, train_tgn_stub
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+_ARCHITECTURES = ["SnapshotGCN", "TGN", "DySAT"]
 
 
 def _write_deferred_status(event_id: str, reason: str, architecture: str) -> None:
@@ -58,82 +50,131 @@ def _write_deferred_status(event_id: str, reason: str, architecture: str) -> Non
     logger.info("Wrote deferred GNN status: %s", out_path)
 
 
+def _best_baseline_auc(event_id: str) -> float | None:
+    """Read best AUROC from the non-graph baseline table."""
+    path = results_root() / "tables" / f"table_prediction_metrics_{event_id}.csv"
+    if not path.exists():
+        return None
+    df = pl.read_csv(path)
+    if "AUROC" not in df.columns:
+        return None
+    # Use the full-feature, non-ablation best AUROC
+    if "ablation" in df.columns:
+        df = df.filter(pl.col("ablation") == "full")
+    val = df["AUROC"].max()
+    return float(val) if val is not None else None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train temporal GNN on contagion dataset.")
     parser.add_argument("--event", required=True)
     parser.add_argument(
         "--architecture",
-        default="TGN",
-        choices=["TGN", "DySAT"],
-        help="GNN architecture (default: TGN).",
+        default="SnapshotGCN",
+        choices=_ARCHITECTURES,
+        help="GNN architecture (default: SnapshotGCN).",
     )
-    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--batch-size", type=int, default=200)
+    parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument(
         "--baseline-auc",
         type=float,
         default=None,
-        help="Best non-graph baseline AUROC from script 09. GNN must exceed this by >5%%.",
+        help=(
+            "Best non-graph baseline AUROC. If omitted, read from "
+            "results/tables/table_prediction_metrics_{event}.csv."
+        ),
     )
     args = parser.parse_args()
 
-    # Require the prediction dataset (temporal graph dataset built by script 09b)
-    pred_path = gold_root() / f"dataset_prediction_{args.event}.parquet"
-    if not pred_path.exists():
-        logger.info(
-            "GNN deferred: temporal graph dataset not yet built (run 09b first). "
-            "Expected: %s", pred_path
+    # ---- check gold panel ----
+    gold_panel = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
+    pred_dataset = gold_root() / f"dataset_prediction_{args.event}.parquet"
+
+    if not gold_panel.exists() and not pred_dataset.exists():
+        logger.error(
+            "No gold panel found for %s. Run: make panel EVENT=%s",
+            args.event, args.event,
         )
-        _write_deferred_status(args.event, "prediction_dataset_missing", args.architecture)
-        raise SystemExit(0)
+        _write_deferred_status(args.event, "gold_panel_missing", args.architecture)
+        raise SystemExit(1)
 
-    # Check non-graph baselines exist first
-    baseline_table = results_root() / "tables" / f"table_prediction_metrics_{args.event}.csv"
-    if not baseline_table.exists():
-        reason = "non_graph_baselines_missing"
-        _write_deferred_status(args.event, reason, args.architecture)
+    dataset_path = pred_dataset if pred_dataset.exists() else gold_panel
+
+    # ---- resolve baseline AUC ----
+    baseline_auc = args.baseline_auc or _best_baseline_auc(args.event)
+    if baseline_auc is not None:
+        logger.info("Non-graph baseline AUROC for gate check: %.4f", baseline_auc)
+    else:
         logger.info(
-            "GNN deferred: non-graph baselines not found: %s. "
-            "Run: python scripts/09_run_prediction.py --event %s",
-            baseline_table,
-            args.event,
+            "No baseline AUROC found; run: make predict EVENT=%s  first.", args.event
         )
-        raise SystemExit(0)
 
-    logger.info("Loading prediction dataset from %s", pred_path)
+    # ---- build model ----
+    if args.architecture == "SnapshotGCN":
+        model = None  # train_tgn_stub builds it from node_feat_dim
+    elif args.architecture in ("TGN", "DySAT"):
+        model = build_tgn(node_feat_dim=16, edge_feat_dim=8)
+        if model is None:
+            logger.warning(
+                "%s unavailable (requires torch-geometric). Falling back to SnapshotGCN.",
+                args.architecture,
+            )
+    else:
+        model = None
 
-    # Build model (returns None if PyTorch/PyG unavailable)
-    # TODO: node_feat_dim and edge_feat_dim should come from the prediction
-    # dataset once the temporal graph dataset is implemented (script 09b).
-    # Using placeholder dims until that dataset is available.
-    model = build_tgn(node_feat_dim=16, edge_feat_dim=8)
-    if model is None:
-        _write_deferred_status(args.event, "torch_or_pyg_missing", args.architecture)
-        raise SystemExit(0)
-
-    # Delegate to model stub — raises NotImplementedError until implemented
+    # ---- train ----
     try:
-        train_tgn_stub(
+        results = train_tgn_stub(
             model=model,
-            dataset_path=pred_path,
+            dataset_path=dataset_path,
             event_id=args.event,
             architecture=args.architecture,
             epochs=args.epochs,
             lr=args.lr,
             batch_size=args.batch_size,
-            baseline_auc=args.baseline_auc,
+            baseline_auc=baseline_auc,
             output_dir=results_root(),
         )
-    except NotImplementedError as exc:
-        logger.warning(
-            "GNN training deferred: %s\n"
-            "Validate non-graph baselines first (script 09), then implement "
-            "src/stressnet/models/temporal_gnn.py.",
-            exc,
+        auroc = results.get("AUROC", float("nan"))
+        passes = results.get("passes_gnn_gate", False)
+        logger.info(
+            "GNN training complete: AUROC=%.4f  passes_gate=%s",
+            auroc, passes,
         )
-        _write_deferred_status(args.event, "training_not_implemented", args.architecture)
-        raise SystemExit(0) from exc
+        if passes:
+            logger.info(
+                "Gate PASSED: GNN improves over non-graph baseline by >=5pp. "
+                "Include in paper."
+            )
+        elif baseline_auc is not None:
+            logger.info(
+                "Gate NOT passed (need +%.1f pp lift over %.4f). "
+                "Report as repo-only or negative evidence.",
+                5.0, baseline_auc,
+            )
+
+        # ---- save checkpoint ----
+        try:
+            import torch
+            ckpt_dir = results_root() / "models"
+            ckpt_dir.mkdir(parents=True, exist_ok=True)
+            ckpt_path = ckpt_dir / f"gnn_checkpoint_{args.event}.pt"
+            if model is not None:
+                torch.save(model.state_dict(), ckpt_path)
+                logger.info("Saved checkpoint: %s", ckpt_path)
+        except Exception as exc:
+            logger.warning("Could not save checkpoint: %s", exc)
+
+    except FileNotFoundError as exc:
+        logger.error("Data not found: %s", exc)
+        _write_deferred_status(args.event, "data_not_found", args.architecture)
+        raise SystemExit(1) from exc
+    except RuntimeError as exc:
+        logger.error("Training failed: %s", exc)
+        _write_deferred_status(args.event, str(exc)[:80], args.architecture)
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":

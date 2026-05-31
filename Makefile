@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all forbes_rigobon qvar amm_leadlag_15min
 
 setup:
 	pip install -r requirements.txt
@@ -86,6 +86,22 @@ hawkes:
 te:
 	python scripts/07_run_transfer_entropy.py --event $(EVENT)
 
+forbes_rigobon:
+	python scripts/07b_run_forbes_rigobon.py --event $(EVENT) --paper-mode
+
+qvar:
+	python scripts/08b_run_qvar.py --event $(EVENT) --paper-mode
+
+# 15-minute AMM lead-lag (finer resolution check for USDT/Curve 2023 anchor)
+amm_leadlag_15min:
+	python scripts/04_run_leadlag.py \
+		--event $(EVENT) \
+		--layer-filter DEX \
+		--feature-cols usdc_net_sold_1h \
+		--grid-seconds 900 \
+		--max-lag 12 \
+		--paper-mode
+
 network:
 	python scripts/08_build_networks.py --event $(EVENT) --edge-source te
 
@@ -166,8 +182,14 @@ empirical:
 	python scripts/12_run_event_study.py --event $(EVENT) --paper-mode
 	# AMM-only Tier-A analysis (paper narrative)
 	python scripts/04_run_leadlag.py --event $(EVENT) --layer-filter DEX --feature-cols usdc_net_sold_1h --grid-seconds 3600 --max-lag 12 --paper-mode || true
+	# 15-minute AMM lead-lag resolution check (soft-fail: fewer observations)
+	python scripts/04_run_leadlag.py --event $(EVENT) --layer-filter DEX --feature-cols usdc_net_sold_1h --grid-seconds 900 --max-lag 12 --paper-mode || true
 	# Sparse mint/burn event study (soft-fail: usdc_mint_burn not available for all events)
 	python scripts/06b_run_sparse_flow_event_study.py --event $(EVENT) --source-node usdc_mint_burn --source-feature mint_burn_net_1h --target-feature usdc_net_sold_1h --post-hours 3 --baseline-hours 12 --paper-mode || true
+	# Forbes-Rigobon contagion test (soft-fail)
+	python scripts/07b_run_forbes_rigobon.py --event $(EVENT) --paper-mode || true
+	# Quantile VAR tail-spillover (soft-fail: requires statsmodels)
+	python scripts/08b_run_qvar.py --event $(EVENT) --paper-mode || true
 	python scripts/00c_claim_gate.py --event $(EVENT)
 
 # Run all 5 events empirically then assemble claim-gated paper outputs.

@@ -2,25 +2,26 @@
 
 ## Title
 
-**Provenance-Aware Stablecoin Stress Propagation Networks: Evidence from Curve TokenExchange Logs, Public CEX Data, and On-Chain Settlement Flows**
+**Cross-Protocol Stablecoin Stress Propagation: A Provenance-Aware AMM Network Analysis of Curve Finance and Uniswap v3**
 
 ---
 
 ## Abstract
 
-Stablecoin stress episodes are usually measured as price de-pegs, but they are also liquidity-flow events. This project develops a provenance-aware network framework for studying how stress propagates across public CEX markets, on-chain AMM pools, and settlement-flow channels. The framework assigns node-level and feature-level evidence tiers, then filters every empirical edge through provenance and statistical gates before allowing paper-level claims. Across five stress events, the strongest paper-claimable A/A evidence appears in the USDT/Curve 2023 event, where Curve 3pool and Curve crvUSD/USDT exhibit statistically supported bidirectional AMM-flow linkage using Tier-A Curve TokenExchange logs. Other events provide A/A provenance-valid candidates or A/B contextual evidence but do not support the same headline claim. The project therefore demonstrates both a substantive finding about AMM-flow stress transmission and a methodological contribution: crypto contagion claims should be constrained by evidence provenance.
+Stablecoin stress episodes are usually measured as price de-pegs, but they are also liquidity-flow events. This project develops a provenance-aware network framework for studying how stress propagates across public CEX markets, on-chain AMM pools, and settlement-flow channels. The framework assigns node-level and feature-level evidence tiers, then filters every empirical edge through provenance and statistical gates before allowing paper-level claims. Across five stress events, the strongest paper-claimable A/A evidence appears in the USDT/Curve 2023 event, where Curve 3pool, Curve crvUSD/USDT, and Uniswap v3 USDC/USDT exhibit statistically supported AMM-flow linkages using Tier-A on-chain logs. The upgraded paper reports six A/A lead-lag rows: positive within-Curve co-movement and negative Curve--Uniswap counter-movement, plus a one-hour directional cross-protocol signal. A Tier-A prediction exercise shows that adding Uniswap v3 lags improves next-hour Curve stress AUROC from 0.677 to 0.711.
 
 ---
 
 ## Headline Result
 
-During the USDT/Curve 2023 event, `curve_3pool` and `curve_crvusd_usdt` exhibit Bonferroni-significant bidirectional lead-lag on Tier-A `usdc_net_sold_1h` hourly on-chain AMM flow (both directions, Bonferroni p ≤ 0.014, `claim_strength = robust`, `paper_claim_allowed = True`).
+During the USDT/Curve 2023 event, Tier-A Curve and Uniswap v3 AMM-flow logs produce six statistically supported A/A lead-lag rows. Within-Curve flow co-movement is positive (`rho = 0.386`), while Curve--Uniswap flow co-movement is negative (`rho = -0.486`), consistent with counter-flow routing during stress. Curve crvUSD/USDT leads Uniswap by one hour (`rho = -0.268`, FDR p < 0.001).
 
 **What this does and does not claim:**
-- **Does claim**: statistically supported bidirectional AMM-flow linkage between the two Curve pools during the USDT stress episode, using execution-grade on-chain data.
+- **Does claim**: statistically supported AMM-flow linkage between Curve and Uniswap v3 pools during the USDT stress episode, using execution-grade on-chain data.
 - **Does not claim**: structural causal identification. Lead-lag evidence shows directional timing correlation, not structural causality.
 - **Does not claim**: CEX microstructure transmission. Historical full-depth CEX order books are not freely available; public Binance/Kraken data are Tier B.
-- **Does not claim**: that Terra/LUNA, USDC/SVB, FTX, or BUSD events exhibit A/A paper-claimable propagation. Each provides either provenance-valid candidates (Terra, USDC/SVB) or A/B contextual evidence (FTX, BUSD).
+- **Does not claim**: structural causality; the paper reports significant directed predictive dependence and lead-lag timing evidence.
+- **Does not claim**: that Terra/LUNA, USDC/SVB, FTX, or BUSD events exhibit the same A/A paper-claimable cross-protocol pattern. Each provides either provenance-valid candidates (Terra, USDC/SVB) or A/B contextual evidence (FTX, BUSD).
 
 ---
 
@@ -28,7 +29,7 @@ During the USDT/Curve 2023 event, `curve_3pool` and `curve_crvusd_usdt` exhibit 
 
 | Tier | Definition | Examples |
 |------|-----------|---------|
-| **A** | Execution-grade on-chain logs; directly verifiable from the blockchain | Curve `TokenExchange` events, USDC mint/burn Transfer events |
+| **A** | Execution-grade on-chain logs; directly verifiable from the blockchain | Curve `TokenExchange` events, Uniswap v3 `Swap` events, USDC mint/burn Transfer events |
 | **B** | Real public market data; useful for context but not execution-grade | Binance OHLCV, BBO/bookTicker; CoinMetrics exchange netflows |
 | **Fixture** | Synthetic pipeline data for testing only; **never paper-claimable** | `usdc_kraken`, `usdt_mint_burn`, `eth_bridge_flows` |
 
@@ -52,7 +53,10 @@ Only `paper_claim_allowed = True` rows support directional paper claims. **Prove
 
 | Table | Description |
 |-------|-------------|
-| `results/paper/tables/table_aa_paper_claimable_edges.csv` | **Headline**: A/A paper-claimable edges (both gates pass) |
+| `results/paper/tables/table_cross_protocol_leadlag_usdt_curve_2023.csv` | **Headline**: Curve--Uniswap A/A cross-protocol lead-lag rows |
+| `results/paper/tables/table_prediction_cross_protocol.csv` | Tier-A prediction results comparing Curve-only and cross-protocol features |
+| `results/paper/tables/table_stress_propagation_score.csv` | Event-level stress propagation score |
+| `results/paper/tables/table_aa_paper_claimable_edges.csv` | Legacy within-Curve A/A paper-claimable rows |
 | `results/paper/tables/table_aa_provenance_valid_edges.csv` | All A/A provenance-valid candidates (may not pass statistical gate) |
 | `results/paper/tables/table_ab_suggestive_edges.csv` | A/B suggestive paper-claimable edges |
 | `results/paper/tables/table_claim_audit_summary.csv` | Per-event claim-gate counts (anti-cherry-pick audit) |

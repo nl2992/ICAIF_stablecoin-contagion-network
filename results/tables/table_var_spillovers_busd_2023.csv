@@ -1,10 +1,5 @@
-caused_node,causing_node,fevd_share,horizon,method,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason,claim_language,claim_sentence,feature_tier,provenance_claim_allowed,statistical_claim_allowed,paper_claim_allowed,claim_strength
-curve_3pool,curve_3pool,0.006887769972215035,10,fevd,A,A,A,false,true,A_A_dex_flow,Both endpoints are Tier-A DEX (AMM) nodes.,A/A directional (on-chain AMM flow),We find high-provenance on-chain AMM-flow evidence of stress propagation from curve_3pool to curve_3pool.,B,true,false,false,suggestive
-curve_3pool,busd_binance,0.11498084934155228,10,fevd,B,A,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from busd_binance to curve_3pool.,B,true,false,false,suggestive
-curve_3pool,usdc_binance,0.8781313806862325,10,fevd,B,A,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from usdc_binance to curve_3pool.,B,true,false,false,suggestive
-busd_binance,curve_3pool,0.003503121255259098,10,fevd,A,B,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from curve_3pool to busd_binance.,B,true,false,false,suggestive
-busd_binance,busd_binance,0.07766528440026722,10,fevd,B,B,B,false,true,B_B_context_only,Both endpoints are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between busd_binance and busd_binance (Tier B proxy data).,B,true,false,false,descriptive
-busd_binance,usdc_binance,0.9188315943444736,10,fevd,B,B,B,false,true,B_B_context_only,Both endpoints are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between usdc_binance and busd_binance (Tier B proxy data).,B,true,false,false,descriptive
-usdc_binance,curve_3pool,0.004971944277908668,10,fevd,A,B,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from curve_3pool to usdc_binance.,B,true,false,false,suggestive
-usdc_binance,busd_binance,0.05594155065189333,10,fevd,B,B,B,false,true,B_B_context_only,Both endpoints are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between busd_binance and usdc_binance (Tier B proxy data).,B,true,false,false,descriptive
-usdc_binance,usdc_binance,0.9390865050701979,10,fevd,B,B,B,false,true,B_B_context_only,Both endpoints are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between usdc_binance and usdc_binance (Tier B proxy data).,B,true,false,false,descriptive
+caused_node,causing_node,fevd_share,horizon,method,feature_col,bucket_seconds
+busd_binance,busd_binance,0.12921590527873575,10,fevd,basis_vs_usd,3600
+busd_binance,usdc_binance,0.8707840947212644,10,fevd,basis_vs_usd,3600
+usdc_binance,busd_binance,0.08083498857767592,10,fevd,basis_vs_usd,3600
+usdc_binance,usdc_binance,0.9191650114223241,10,fevd,basis_vs_usd,3600

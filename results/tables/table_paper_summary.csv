@@ -1,0 +1,6 @@
+event_id,ll_sig,ll_total,te_sig,te_total,granger_sig,granger_total,event_study_sig,event_study_total
+usdc_svb_2023,18,78,28,78,2,2,1,4
+terra_luna_2022,3,12,1,12,1,2,3,4
+usdt_curve_2023,12,56,20,56,1,6,3,3
+ftx_2022,2,30,13,30,2,2,3,3
+busd_2023,6,8,0,8,1,2,2,4

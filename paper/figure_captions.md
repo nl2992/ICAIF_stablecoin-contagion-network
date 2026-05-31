@@ -41,15 +41,15 @@ Cross-correlation between `curve_3pool` and `curve_crvusd_usdt` hourly `usdc_net
 
 ## Figure 6
 
-**A/A paper-claimable network (headline pairs only).**
-The only two rows that survive both the provenance gate and the statistical gate: `curve_3pool → curve_crvusd_usdt` and `curve_crvusd_usdt → curve_3pool`, both in the USDT/Curve 2023 event, `feature = usdc_net_sold_1h`, `p_bonferroni ≤ 0.014`. Both nodes are Tier A (on-chain `TokenExchange` logs). Node shapes indicate layer (square = DEX/AMM). This network does not include Terra/LUNA, USDC/SVB, FTX, or BUSD A/A rows, none of which pass the statistical gate.
+**Cross-protocol Tier-A network (headline pairs only).**
+Six rows survive both the provenance gate and the statistical gate in the USDT/Curve 2023 event: the two within-Curve rows (`curve_3pool ↔ curve_crvusd_usdt`) and four Curve--Uniswap v3 rows involving `uniswap_usdc_usdt_005`. All rows use Tier-A AMM-flow logs and `feature = usdc_net_sold_1h`. Within-Curve edges are positive; Curve--Uniswap edges are negative, consistent with counter-flow routing during stress.
 
 ---
 
 ## Figure 7
 
 **A/A provenance-valid versus A/A paper-claimable, by event.**
-Grouped bars show the number of A/A edges that pass the provenance gate (hatched green) versus those that also pass the statistical gate (amber). Several events have high-provenance A/A candidates: Terra/LUNA 2022 has 6 provenance-valid rows, USDC/SVB 2023 has 1, and USDT/Curve 2023 has 6. Only USDT/Curve 2023 produces any A/A paper-claimable rows (2). This demonstrates that provenance-valid does not imply paper-claimable; statistical support is required for the headline claim.
+Grouped bars show the number of A/A edges that pass the provenance gate (hatched green) versus those that also pass the statistical gate (amber). Several events have high-provenance A/A candidates: Terra/LUNA 2022 has 6 provenance-valid rows, USDC/SVB 2023 has 1, and USDT/Curve 2023 has 6. Only USDT/Curve 2023 produces A/A paper-claimable rows after the cross-protocol Uniswap extension (6 rows). This demonstrates that provenance-valid does not imply paper-claimable; statistical support is required for the headline claim.
 
 ---
 

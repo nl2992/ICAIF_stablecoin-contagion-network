@@ -1,0 +1,5 @@
+feature_set,model,n_features,n_train,n_test,prevalence_test,AUROC,AUROC_CI_lo,AUROC_CI_hi,AUPRC,event_id
+curve_only,LogisticRegression,6,263,113,0.18584070796460178,0.6765,0.5181,0.811,0.3405,usdt_curve_2023
+curve_only,LightGBM,6,263,113,0.18584070796460178,0.6227,0.4668,0.7728,0.3347,usdt_curve_2023
+cross_protocol,LogisticRegression,12,263,113,0.18584070796460178,0.7112,0.5683,0.839,0.3401,usdt_curve_2023
+cross_protocol,LightGBM,12,263,113,0.18584070796460178,0.648,0.522,0.7666,0.3302,usdt_curve_2023

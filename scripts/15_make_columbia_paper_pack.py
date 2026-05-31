@@ -143,13 +143,13 @@ _PAPER_MODE: bool = False   # set True via --paper-mode to omit deanonymising te
 
 
 def _watermark(ax: plt.Axes) -> None:
-    """Adds a small attribution mark.  In --paper-mode the text is blank so
-    staged paper figures do not expose the repository URL."""
-    if _PAPER_MODE:
-        return   # no watermark on blind-review figures
-    ax.text(0.99, 0.01, "nl2992 / Columbia MAFN  ·  github.com/nl2992/stablecoin-contagion-network",
-            transform=ax.transAxes, fontsize=6.5, color="#aaaaaa",
-            ha="right", va="bottom")
+    """No-op for blind-review safety.
+
+    Older diagnostic figures included a local attribution mark.  The paper
+    pipeline now omits it in every mode so regenerated figures cannot expose
+    author or repository identifiers.
+    """
+    return
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

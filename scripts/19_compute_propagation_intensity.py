@@ -37,6 +37,7 @@ def _mean_abs_effect(tables_dir: Path, event_id: str) -> float:
     candidates = [
         tables_dir / "table_aa_paper_claimable_edges.csv",
         tables_dir / f"table_leadlag_tests_{event_id}.csv",
+        tables_dir / f"table_cross_protocol_leadlag_{event_id}.csv",
     ]
     values: list[float] = []
     for path in candidates:
@@ -54,6 +55,20 @@ def _mean_abs_effect(tables_dir: Path, event_id: str) -> float:
     if not values:
         return 0.0
     return sum(values) / len(values)
+
+
+def _cross_protocol_aa_count(tables_dir: Path, event_id: str) -> int:
+    """Count statistically supported Tier-A AMM-flow cross-protocol rows."""
+    df = _read_csv(tables_dir / f"table_cross_protocol_leadlag_{event_id}.csv")
+    if df.is_empty():
+        return 0
+    if "p_bonferroni" in df.columns:
+        return df.filter(pl.col("p_bonferroni") < 0.05).height
+    if "p_value_fdr" in df.columns:
+        return df.filter(pl.col("p_value_fdr") < 0.05).height
+    if "significant_fdr" in df.columns:
+        return df.filter(pl.col("significant_fdr").fill_null(False)).height
+    return 0
 
 
 def _node_counts(tables_dir: Path, event_id: str) -> tuple[int, int]:
@@ -96,8 +111,10 @@ def build_table(paper_tables_dir: Path) -> pl.DataFrame:
         total_nodes, fixture_nodes = _node_counts(paper_tables_dir, event_id)
         true_rate, placebo_rate = _placebo_rates(event_id)
         mean_effect = _mean_abs_effect(paper_tables_dir, event_id)
+        cross_aa = _cross_protocol_aa_count(paper_tables_dir, event_id)
+        aa_edges = max(int(row.get("n_AA_paper_claimable") or 0), cross_aa)
         inputs = PropagationScoreInputs(
-            aa_paper_edges=int(row.get("n_AA_paper_claimable") or 0),
+            aa_paper_edges=aa_edges,
             ab_paper_edges=int(row.get("n_AB_paper_claimable") or 0),
             bb_context_edges=int(row.get("n_BB_context") or 0),
             mean_abs_effect=mean_effect,
@@ -108,6 +125,7 @@ def build_table(paper_tables_dir: Path) -> pl.DataFrame:
         )
         score_row = {
             **row,
+            "n_AA_paper_claimable": aa_edges,
             "total_nodes": total_nodes,
             "fixture_nodes": fixture_nodes,
             "mean_abs_effect": mean_effect,

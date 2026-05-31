@@ -80,7 +80,9 @@ _POOL_CONFIGS: dict[str, dict[str, Any]] = {
 
 def _decode_int256(data_hex: str, slot: int) -> int:
     """Decode a signed int256 from ABI-encoded data at slot index."""
-    data = data_hex.lstrip("0x") if data_hex.startswith("0x") else data_hex
+    # Use [2:] not lstrip("0x") — lstrip strips ALL leading '0'/'x' chars,
+    # which would eat meaningful zero-padding in the ABI encoding.
+    data = data_hex[2:] if data_hex.startswith("0x") else data_hex
     start = slot * 64
     chunk = data[start: start + 64].zfill(64)
     raw = int(chunk, 16)

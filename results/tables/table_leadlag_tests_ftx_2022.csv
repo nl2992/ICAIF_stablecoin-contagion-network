@@ -1,7 +1,31 @@
-node_i,node_j,peak_lag_steps,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason,claim_language,claim_sentence,feature_tier,provenance_claim_allowed,statistical_claim_allowed,paper_claim_allowed,claim_strength
-usdt_binance,busd_binance,60,-0.4528405507372991,0.0,true,0.0,true,ftx_2022,B,B,B,false,true,B_B_context_only,Both endpoints are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between usdt_binance and busd_binance (Tier B proxy data).,B,true,true,true,statistically_supported
-usdt_binance,curve_3pool,-41,0.42011018606632744,0.298,false,0.298,false,ftx_2022,B,A,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from usdt_binance to curve_3pool.,B,true,false,false,suggestive
-busd_binance,usdt_binance,-60,-0.4528405507372991,0.0,true,0.0,true,ftx_2022,B,B,B,false,true,B_B_context_only,Both endpoints are Tier B; use contextual language.,B/B context-only,We document contextual co-movement between busd_binance and usdt_binance (Tier B proxy data).,B,true,true,true,statistically_supported
-busd_binance,curve_3pool,-1,-0.6878269828110009,0.0,true,0.0,true,ftx_2022,B,A,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from busd_binance to curve_3pool.,B,true,true,true,statistically_supported
-curve_3pool,usdt_binance,41,0.42011018606632744,0.139,false,0.1668,false,ftx_2022,A,B,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from curve_3pool to usdt_binance.,B,true,false,false,suggestive
-curve_3pool,busd_binance,1,-0.6878269828110009,0.0,true,0.0,true,ftx_2022,A,B,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from curve_3pool to busd_binance.,B,true,true,true,statistically_supported
+node_i,node_j,feature_col,grid_seconds,peak_lag_steps,peak_lag_seconds,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,event_id,event_phase
+usdt_binance,busd_binance,basis_vs_usd,60,60,3600,-0.4528405507372992,0.0,true,0.0,true,0.0,true,ftx_2022,all
+usdt_binance,curve_3pool,basis_vs_usd,60,35,2100,-0.3407136252972043,0.293,false,1.0,false,1.0,false,ftx_2022,all
+usdt_binance,eth_usdc_exchange_flows,basis_vs_usd,60,44,2640,-0.5130514197456089,1.0,false,1.0,false,1.0,false,ftx_2022,all
+usdt_binance,eth_usdt_exchange_flows,basis_vs_usd,60,46,2760,-0.5097533907625921,1.0,false,1.0,false,1.0,false,ftx_2022,all
+usdt_binance,eth_bridge_flows,basis_vs_usd,60,56,3360,-0.6011851909848712,1.0,false,1.0,false,1.0,false,ftx_2022,all
+busd_binance,usdt_binance,basis_vs_usd,60,-60,-3600,-0.4528405507372991,0.0,true,0.0,true,0.0,true,ftx_2022,all
+busd_binance,curve_3pool,basis_vs_usd,60,60,3600,-0.21190857807656974,0.592,false,1.0,false,1.0,false,ftx_2022,all
+busd_binance,eth_usdc_exchange_flows,basis_vs_usd,60,44,2640,-0.7844909979102135,1.0,false,1.0,false,1.0,false,ftx_2022,all
+busd_binance,eth_usdt_exchange_flows,basis_vs_usd,60,46,2760,-0.7831468064592403,1.0,false,1.0,false,1.0,false,ftx_2022,all
+busd_binance,eth_bridge_flows,basis_vs_usd,60,54,3240,-0.7896624087517348,1.0,false,1.0,false,1.0,false,ftx_2022,all
+curve_3pool,usdt_binance,basis_vs_usd,60,-35,-2100,-0.3407136252972043,0.269,false,1.0,false,1.0,false,ftx_2022,all
+curve_3pool,busd_binance,basis_vs_usd,60,-60,-3600,-0.21190857807656974,0.579,false,1.0,false,1.0,false,ftx_2022,all
+curve_3pool,eth_usdc_exchange_flows,basis_vs_usd,60,4,240,0.9957192205478,1.0,false,1.0,false,1.0,false,ftx_2022,all
+curve_3pool,eth_usdt_exchange_flows,basis_vs_usd,60,6,360,0.9957030101819726,1.0,false,1.0,false,1.0,false,ftx_2022,all
+curve_3pool,eth_bridge_flows,basis_vs_usd,60,12,720,0.9956726726961769,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdc_exchange_flows,usdt_binance,basis_vs_usd,60,-44,-2640,-0.5130514197456089,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdc_exchange_flows,busd_binance,basis_vs_usd,60,-44,-2640,-0.7844909979102135,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdc_exchange_flows,curve_3pool,basis_vs_usd,60,-4,-240,0.9957192205478002,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdc_exchange_flows,eth_usdt_exchange_flows,basis_vs_usd,60,2,120,0.9999999999999991,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdc_exchange_flows,eth_bridge_flows,basis_vs_usd,60,8,480,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdt_exchange_flows,usdt_binance,basis_vs_usd,60,-46,-2760,-0.509753390762592,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdt_exchange_flows,busd_binance,basis_vs_usd,60,-46,-2760,-0.7831468064592402,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdt_exchange_flows,curve_3pool,basis_vs_usd,60,-6,-360,0.9957030101819727,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdt_exchange_flows,eth_usdc_exchange_flows,basis_vs_usd,60,-2,-120,0.9999999999999991,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_usdt_exchange_flows,eth_bridge_flows,basis_vs_usd,60,6,360,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_bridge_flows,usdt_binance,basis_vs_usd,60,-56,-3360,-0.6011851909848712,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_bridge_flows,busd_binance,basis_vs_usd,60,-54,-3240,-0.7896624087517349,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_bridge_flows,curve_3pool,basis_vs_usd,60,-12,-720,0.9956726726961771,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_bridge_flows,eth_usdc_exchange_flows,basis_vs_usd,60,-8,-480,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
+eth_bridge_flows,eth_usdt_exchange_flows,basis_vs_usd,60,-6,-360,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all

@@ -11,8 +11,8 @@ pipeline that restricts every empirical claim by both **data provenance** and **
 support**.
 
 The strongest current evidence layer is **Tier-A on-chain AMM flow** from Curve
-`TokenExchange` logs. Public CEX prices, BBO, and trade/candle data provide broader market
-context but are capped at Tier B because **historical full-depth CEX order books are not freely available**.
+`TokenExchange` logs and Uniswap v3 `Swap` logs. Public CEX prices, BBO, and trade/candle
+data provide broader market context but are capped at Tier B because **historical full-depth CEX order books are not freely available**.
 
 ---
 
@@ -31,13 +31,14 @@ each edge by the quality of its underlying evidence.
 
 Stablecoin de-pegs are not only price deviations; they are **observable liquidity-flow events**.
 The cleanest freely reproducible Tier-A evidence comes from on-chain AMM flow logs, especially
-Curve `TokenExchange` events. Public CEX data are useful for timing and context, but they
-cannot support historical order-book microstructure claims without vendor or live-captured L2.
+Curve `TokenExchange` events and Uniswap v3 `Swap` events. Public CEX data are useful for
+timing and context, but they cannot support historical order-book microstructure claims
+without vendor or live-captured L2.
 
 Accordingly, this project separates:
 
-- **Tier-A AMM / on-chain flow evidence**: direct logs such as Curve `TokenExchange` and
-  mint/burn events.
+- **Tier-A AMM / on-chain flow evidence**: direct logs such as Curve `TokenExchange`,
+  Uniswap v3 `Swap`, and mint/burn events.
 - **Tier-B public market context**: Binance/Coinbase/Kraken OHLCV, trades, BBO, and aggregate
   flows.
 - **Fixture/diagnostic outputs**: synthetic data used only for pipeline testing; blocked from
@@ -47,8 +48,8 @@ Accordingly, this project separates:
 
 ## Current empirical status
 
-As of 2026-05-29 the repo has Tier-A on-chain AMM-flow anchors through Curve `TokenExchange`
-logs.
+As of 2026-06-01 the repo has Tier-A on-chain AMM-flow anchors through Curve
+`TokenExchange` logs and Uniswap v3 `Swap` logs.
 
 > **Terminology**
 >
@@ -64,7 +65,8 @@ directional paper claims.
 
 | Pair | Event | Evidence type | Paper-claimable? |
 |---|---|---|---|
-| `curve_3pool` ↔ `curve_crvusd_usdt` | USDT/Curve 2023 | A/A DEX-flow | **Yes** (Bonferroni p ≤ 0.014) |
+| `curve_3pool` ↔ `curve_crvusd_usdt` | USDT/Curve 2023 | A/A Curve DEX-flow | **Yes** (Bonferroni p ≤ 0.036) |
+| Curve pools ↔ `uniswap_usdc_usdt_005` | USDT/Curve 2023 | A/A cross-protocol DEX-flow | **Yes** (Bonferroni p < 0.001 for cross-protocol rows) |
 | `curve_3pool` ↔ `curve_ust_wormhole` | Terra/LUNA 2022 | A/A DEX-flow | No (not sig. at hourly grid) |
 | `usdc_mint_burn` ↔ `curve_3pool` | USDC/SVB 2023 | A/A on-chain settlement | No (sparse; 4 events, underpowered) |
 
@@ -73,11 +75,13 @@ Binance/CoinMetrics B nodes).
 
 The verified headline result is:
 
-> In the USDT/Curve 2023 event, `curve_3pool` and `curve_crvusd_usdt` exhibit Bonferroni-
-> significant bidirectional lead-lag on Tier-A `usdc_net_sold_1h` hourly on-chain AMM flow
-> (both directions, claim_strength = robust, paper_claim_allowed = True).
+> In the USDT/Curve 2023 event, Curve and Uniswap v3 AMM-flow logs yield six statistically
+> supported A/A lead-lag rows: positive within-Curve co-movement and negative Curve--Uniswap
+> counter-movement. This is evidence of directed predictive dependence, not structural causality.
 
 See `results/paper/tables/table_aa_paper_claimable_edges.csv` for the full headline table.
+See `results/paper/tables/table_cross_protocol_leadlag_usdt_curve_2023.csv` for the
+Curve--Uniswap extension.
 See `DATA_INVENTORY.md` for the complete verified data inventory.
 
 ---
@@ -89,7 +93,7 @@ some of its derived features are Tier B.
 
 | Feature | Tier | Evidence type |
 |---|---|---|
-| `usdc_net_sold_1h` | **A** | direct hourly sum from Curve `TokenExchange` logs |
+| `usdc_net_sold_1h` | **A** | direct hourly sum from Curve `TokenExchange` or Uniswap v3 `Swap` logs |
 | `mint_burn_net_1h` | **A** | direct mint/burn settlement event flow |
 | `reserve_imbalance` | B | derived proxy using approximate pool-size normaliser |
 | `implied_pool_price` | B | derived proxy, not an actual execution price |
@@ -155,7 +159,7 @@ A/A claim levels are **layer-aware**:
 | Layer | Examples | Best free data | Tier |
 |---|---|---|---|
 | CEX market | USDC-Coinbase, USDT-Binance | public OHLCV, BBO, trades | B |
-| AMM pool | Curve 3pool, Curve crvUSD/USDT | on-chain `TokenExchange` logs | **A** |
+| AMM pool | Curve 3pool, Curve crvUSD/USDT, Uniswap v3 USDC/USDT | on-chain `TokenExchange` / `Swap` logs | **A** |
 | Settlement flow | USDC mint/burn, exchange flows | on-chain Transfer events, CoinMetrics | A / B |
 
 ---

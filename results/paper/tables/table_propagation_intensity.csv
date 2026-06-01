@@ -1,0 +1,6 @@
+event_id,n_total_edges,n_fixture_blocked,n_provenance_claimable,n_statistically_supported,n_paper_claimable,n_AA_provenance,n_AA_paper_claimable,n_AB_paper_claimable,n_BB_context,total_nodes,fixture_nodes,mean_abs_effect,true_leadlag_sig_rate,placebo_leadlag_sig_rate,propagation_intensity_score,paper_claim_tier
+usdt_curve_2023,14,0,14,3,3,6,6,1,0,8,4,0.382250874654935,0.21428571428571427,0.21428571428571427,91.411254,paper_claimable_AA
+busd_2023,36,0,36,17,17,0,0,7,18,4,0,0.9016947362732366,0.75,0.75,23.008474,suggestive_AB
+usdc_svb_2023,42,0,42,14,14,1,0,4,18,11,4,0.842494725251154,0.23076923076923078,0.1794871794871795,15.150702,suggestive_AB
+ftx_2022,18,0,18,9,9,0,0,5,6,6,1,0.5703337667741499,0.16666666666666666,0.16666666666666666,13.518336,suggestive_AB
+terra_luna_2022,26,0,26,6,6,6,0,4,4,4,0,0.0,0.25,0.25,9.0,suggestive_AB

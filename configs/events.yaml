@@ -44,23 +44,6 @@ events:
       DEX pool imbalance is the dominant mechanism; on-chain events are Tier-A.
       CEX USDT/USD depth may need Tardis or Kaiko for Tier-A.
 
-  celsius_3ac_2022:
-    name: "Celsius/3AC credit shock"
-    mechanism: "exchange_credit_liquidity"
-    description: >
-      Celsius Network halted withdrawals on 2022-06-12 amid liquidity pressure,
-      coinciding with 3AC insolvency fears. Rapid CEX stablecoin flight and
-      BTC sell-offs created significant USDC/USDT basis stress.
-    core_window_utc: ["2022-06-12", "2022-06-18"]
-    analysis_window_utc: ["2022-06-12", "2022-06-20"]
-    shock_onset_utc: "2022-06-12T00:00:00Z"
-    primary: false
-    data_quality: "medium"
-    notes: >
-      Training event for CEX arb meta-labeling (exchange-credit mechanism class).
-      BTCUSDC spot was not listed on Binance until Oct 2022; use kline proxy.
-      USDCUSDT and BTCUSDT are both available in Binance Vision daily archives.
-
   ftx_2022:
     name: "FTX collapse"
     mechanism: "exchange_credit_liquidity"

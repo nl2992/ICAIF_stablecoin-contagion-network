@@ -8,9 +8,8 @@ Real data sources (no API key unless noted):
   CEX  Binance   : Binance Vision bookTicker (Tier B: BBO only) → klines/1m (Tier B)
   CEX  Coinbase  : Coinbase Exchange public REST candles (Tier B)
   CEX  Kraken    : Kraken public REST OHLC (Tier B)
-  DEX  Curve     : Etherscan getLogs + event decode (Tier A flow, Tier B proxies; needs ETHERSCAN_API_KEY)
-  DEX  Uniswap   : Etherscan Swap logs (Tier A, needs ETHERSCAN_API_KEY)
-                   or The Graph swaps (Tier B, needs THE_GRAPH_API_KEY)
+  DEX  Curve     : Etherscan getLogs + event decode (Tier B, needs ETHERSCAN_API_KEY)
+  DEX  Uniswap   : The Graph swaps (Tier B, needs THE_GRAPH_API_KEY)
   Flow mint_burn : Etherscan tokentx to/from null address (Tier A, needs ETHERSCAN_API_KEY)
   Flow exchange  : Etherscan tokentx + known exchange addresses (Tier B, needs ETHERSCAN_API_KEY)
 
@@ -149,33 +148,8 @@ def _try_real_dex(
         pool_addr = node.metadata.get("pool_address")
         if not pool_addr:
             return None, "pool_events", "fixture_non_empirical"
-
-        # Prefer direct on-chain Swap logs: same provenance class as Curve
-        # TokenExchange logs and paper-claimable when paired with Tier-A nodes.
-        if os.environ.get("ETHERSCAN_API_KEY"):
-            from stressnet.data.etherscan import get_block_number_by_timestamp
-            from stressnet.data.uniswap_etherscan import ingest_uniswap_pool_events
-            try:
-                start_block = get_block_number_by_timestamp(int(start_utc.timestamp()))
-                end_block = get_block_number_by_timestamp(int(end_utc.timestamp()), closest="after")
-                path, tier = ingest_uniswap_pool_events(
-                    pool_addr,
-                    start_block,
-                    end_block,
-                    out_dir,
-                    event_id,
-                    node.id,
-                )
-                if path is not None:
-                    return path, "pool_events", tier
-            except Exception as exc:
-                logger.warning("Uniswap Etherscan ingest error (%s): %s", node.id, exc)
-
         if not os.environ.get("THE_GRAPH_API_KEY"):
-            logger.debug(
-                "No ETHERSCAN_API_KEY/THE_GRAPH_API_KEY; skipping Uniswap ingest for %s",
-                node.id,
-            )
+            logger.debug("THE_GRAPH_API_KEY not set; skipping Uniswap ingest for %s", node.id)
             return None, "pool_events", "fixture_non_empirical"
         from stressnet.data.uniswap import ingest_uniswap_pool_swaps
         try:

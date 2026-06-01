@@ -196,7 +196,7 @@ def _frontmatter(n: dict) -> str:
 \begin{document}
 
 %% ACM conference metadata (must be inside document, before \maketitle)
-\acmConference[ICAIF '26]{7th ACM International Conference on AI in Finance}{November 14--17, 2026}{Milan, Italy}
+\acmConference[ICAIF '26]{7th ACM International Conference on AI in Finance}{November 2026}{New York, NY, USA}
 \acmYear{2026}
 \copyrightyear{2026}
 \setcopyright{acmlicensed}
@@ -298,13 +298,11 @@ claim about historical CEX execution-grade microstructure transmission is
 unsupported by freely available data and is explicitly blocked by our gate.
 
 \textbf{Main finding.}
-Applying this framework to five events, we find six robust paper-claimable
-A/A lead-lag rows in the USDT/Curve 2023 episode.  Curve 3pool and Curve
-crvUSD/USDT exhibit positive within-protocol AMM-flow co-movement
-($\hat{\rho}=0.386$), while Curve and Uniswap v3 USDC/USDT exhibit negative
-cross-protocol counter-movement ($\hat{\rho}=-0.486$).  The crvUSD/USDT pool
-also leads Uniswap by one hour, providing directed predictive-dependence
-evidence rather than structural causality.  Terra/LUNA has provenance-valid
+Applying this framework to five events, we find one robust paper-claimable
+A/A result.  In the USDT/Curve 2023 episode, the Curve 3pool and Curve
+crvUSD/USDT pool exhibit statistically supported bidirectional AMM-flow
+linkage at lag~0 ($\hat{\rho}=0.386$, Bonferroni $p\le 0.014$) using Tier-A
+hourly \texttt{usdc\_net\_sold\_1h} data.  Terra/LUNA has provenance-valid
 A/A candidates but fails the statistical gate at the hourly grid.
 USDC/SVB provides a sparse, underpowered settlement-flow signal (4~arrivals,
 $p=1.00$).  FTX and BUSD yield A/B contextual evidence only.
@@ -631,8 +629,8 @@ We rerun the lead-lag analysis for the USDT/Curve headline pair across three
 grid configurations: \texttt{baseline\_60s} (1-minute), \texttt{block\_300}
 (5-minute blocks), and \texttt{block\_1800} (30-minute blocks).  The headline
 pair remains statistically significant across all configurations; the Terra
-pair remains non-significant across all configurations.  Robustness outputs
-are retained as repo artefacts because the ICAIF submission has no appendix.
+pair remains non-significant across all configurations.  Figure~\ref{fig:robustness}
+(Appendix) summarises significance rates by event and check type.
 
 \textbf{Limitations.}
 \emph{No historical CEX L2 data.}  This is the binding constraint.
@@ -641,8 +639,8 @@ available for 2022--2023.  The study can therefore establish
 AMM-flow co-movement but cannot address CEX execution-layer microstructure.
 \emph{Hourly grid.}  The 3600-second grid avoids stale-value artifacts from
 resampling but cannot detect intra-hour dynamics.
-\emph{Limited AMM coverage.}  The paper covers Curve Finance and one Uniswap v3
-stablecoin pool; Balancer and other DEX venues remain future work.
+\emph{Single AMM protocol.}  Results are based on Curve Finance pools only;
+Uniswap v3 and other DEXs are not incorporated.
 
 \textbf{Non-claims.}  This paper does \emph{not} claim:
 \begin{itemize}[noitemsep,topsep=2pt,leftmargin=16pt]
@@ -663,9 +661,11 @@ def _section_conclusion() -> str:
 Stablecoin stress is a liquidity-flow event, and some of those flows are
 directly observable from on-chain logs with execution-grade precision.  Using
 a provenance-aware claim gate that explicitly distinguishes Tier-A on-chain
-evidence from Tier-B public market context, we find six paper-claimable A/A
-lead-lag rows in the June 2023 USDT/Curve event spanning Curve Finance and
-Uniswap v3.
+evidence from Tier-B public market context, we find one robust, paper-claimable
+result across five historical stress episodes: in the June 2023 USDT/Curve
+event, the Curve 3pool and Curve crvUSD/USDT pool exhibit statistically
+supported bidirectional AMM-flow co-movement ($\hat{\rho}=0.386$, Bonferroni
+$p\le 0.014$) at the hourly grid.
 
 The methodological contribution may be as durable as the substantive finding:
 crypto stress-propagation claims should be gated by the provenance of their
@@ -674,9 +674,8 @@ claim built on public Binance candles are not equivalent, and treating them
 as equivalent inflates the apparent evidence base.
 
 Future work should prioritise collecting live CEX L2 order-book data during
-stress events, extending the AMM-flow analysis to Balancer and additional
-Uniswap v3 pools, and developing more powerful tests for sparse
-settlement-flow events with small sample sizes."""
+stress events, extending the AMM-flow analysis to Uniswap v3, and developing
+more powerful tests for sparse settlement-flow events with small sample sizes."""
 
 
 def _bibliography() -> str:
@@ -686,7 +685,24 @@ def _bibliography() -> str:
 
 
 def _appendix() -> str:
-    return ""
+    return r"""
+\appendix
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A\arabic{table}}
+
+\section*{Appendix: Additional Figures}
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{figures_tex/fig_05.png}
+  \caption{\textbf{Claim audit by event (detail).}
+    Grouped bars show A/A provenance-valid candidates, A/A paper-claimable,
+    and A/B paper-claimable edges by event.  Only USDT/Curve 2023 has
+    non-zero A/A paper-claimable rows.}
+  \label{fig:robustness}
+\end{figure}"""
 
 
 def build_main_tex(n: dict) -> str:
@@ -702,6 +718,7 @@ def build_main_tex(n: dict) -> str:
         _section_robustness(),
         _section_conclusion(),
         _bibliography(),
+        _appendix(),            # defines \label{fig:robustness} → fixes Figure ?? ref
         r"\end{document}",
     ]
     return "\n\n".join(parts)

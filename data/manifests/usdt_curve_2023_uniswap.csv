@@ -1,2 +1,0 @@
-event_id,node_id,tier_actual,source,path,note
-usdt_curve_2023,uniswap_usdc_usdt_005,A,etherscan_getlogs,data/bronze/usdt_curve_2023/uniswap_usdc_usdt_005_pool_events.parquet,Uniswap v3 Swap events via Etherscan; upgraded from fixture_non_empirical

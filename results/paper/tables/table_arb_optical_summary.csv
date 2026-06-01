@@ -1,6 +1,0 @@
-event,total_minutes,n_primary_fires,fire_rate_pct,oracle_positive_rate_pct,median_basis_bps_at_fire,event_id,mechanism
-Terra/LUNA,44640,22843,51.17,16.5,13.0,terra_luna_2022,Algorithmic
-Celsius/3AC,12960,12960,100.0,5.8,13.0,celsius_3ac_2022,Exchange credit
-FTX,12960,7959,61.41,62.0,17.0,ftx_2022,Exchange credit
-BUSD,23040,1587,6.89,9.5,12.0,busd_2023,Regulatory
-SVB,13560,13559,99.99,98.5,36.0,usdc_svb_2023,Fiat-reserve bank shock

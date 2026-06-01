@@ -307,8 +307,6 @@ def ingest_curve_pool_events(
     out_dir: Path,
     event_id: str,
     node_id: str,
-    grid_seconds: int = 3600,
-    save_raw: bool = False,
 ) -> tuple[Path | None, str]:
     """Download all Curve pool events and write a bronze pool-events parquet.
 
@@ -395,33 +393,24 @@ def ingest_curve_pool_events(
             "usdc_net_sold_cum": stable_net_sold_cumsum,  # running total (legacy col name)
         })
 
-    # Build DataFrame from per-event rows
+    # Build DataFrame and resample to 1-hour windows to get reserve pressure proxy
     df_raw = pl.DataFrame(rows).with_columns(
         pl.col("wall_clock_utc").cast(pl.Datetime("us", "UTC"))
     )
 
-    # Optionally save raw per-event data (block-level resolution)
-    if save_raw:
-        raw_path = out_dir / f"{node_id}_pool_events_raw.parquet"
-        df_raw.write_parquet(raw_path)
-        logger.info("Saved %d raw events to %s", df_raw.height, raw_path.name)
-
-    # Aggregate to grid_seconds buckets (default 3600 = 1h; use 300 for 5-min)
-    grid_us = grid_seconds * 1_000_000
-    feature_col = f"usdc_net_sold_{grid_seconds}s"
+    # Aggregate to 1-hour buckets
     df_agg = (
         df_raw.with_columns(
-            ((pl.col("block_ts") // grid_seconds) * grid_us).cast(pl.Datetime("us"))
+            ((pl.col("block_ts") // 3600) * 3_600_000_000).cast(pl.Datetime("us"))
             .dt.replace_time_zone("UTC").alias("wall_clock_utc"),
         )
         .group_by("wall_clock_utc")
         .agg(
-            pl.col("usdc_net_sold").sum().alias(feature_col),
+            pl.col("usdc_net_sold").sum().alias("usdc_net_sold_1h"),
             pl.col("usdc_net_sold_cum").last().alias("usdc_net_sold_cum"),
             pl.col("event_type").count().alias("n_events"),
         )
         .sort("wall_clock_utc")
-        .rename({feature_col: "usdc_net_sold_1h"})  # keep canonical column name
     )
 
     # Compute reserve_imbalance proxy: cumulative stablecoin sold / pool size
@@ -440,9 +429,9 @@ def ingest_curve_pool_events(
     out_path = out_dir / f"{node_id}_pool_events.parquet"
     df_agg.write_parquet(out_path)
     logger.info(
-        "Wrote %d %ds-grid Curve pool state rows for %s → %s "
+        "Wrote %d hourly Curve pool state rows for %s → %s "
         "(Tier A: usdc_net_sold_1h; Tier B proxy: reserve_imbalance, implied_pool_price)",
-        df_agg.height, grid_seconds, node_id, out_path.name,
+        df_agg.height, node_id, out_path.name,
     )
     return out_path, "A"
 

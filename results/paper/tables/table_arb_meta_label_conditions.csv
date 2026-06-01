@@ -1,5 +1,0 @@
-net_bps,n_trades,oracle_net_bps,oracle_trades,oracle_capture,positive_rate_pct,n_primary_fires,threshold_used,condition,training_set,n_training_events,mechanism_classes
-1251973.2,13346,1253347.5,13350,99.9,98.5,13559,0.5,A: Terra only,Terra/LUNA,1,Algorithmic
-1251975.9,13352,1253347.5,13350,99.9,98.5,13559,0.25,B: Celsius only,Celsius/3AC,1,Exchange credit
-1251968.3,13346,1253347.5,13350,99.9,98.5,13559,0.8,C: FTX only,FTX,1,Exchange credit
-1251982.4,13355,1253347.5,13350,99.9,98.5,13559,0.4,D: 4-event pool,"Terra/LUNA, Celsius/3AC, FTX, BUSD",4,"Alg., exchange, regulatory"

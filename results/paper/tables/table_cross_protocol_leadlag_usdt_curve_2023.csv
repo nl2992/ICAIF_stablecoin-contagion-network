@@ -1,7 +1,0 @@
-node_i,node_j,feature_col,grid_seconds,peak_lag_steps,peak_lag_seconds,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,event_id,protocol_src,protocol_tgt,edge_type
-curve_3pool,curve_crvusd_usdt,usdc_net_sold_1h,3600,0,0,0.38573739685614267,0.006,true,0.006000000000000001,true,0.036000000000000004,true,usdt_curve_2023,Curve,Curve,within_protocol
-curve_crvusd_usdt,curve_3pool,usdc_net_sold_1h,3600,0,0,0.3857373968561426,0.002,true,0.0024000000000000002,true,0.012,true,usdt_curve_2023,Curve,Curve,within_protocol
-curve_3pool,uniswap_usdc_usdt_005,usdc_net_sold_1h,3600,0,0,-0.48587540210546026,0.0,true,0.0,true,0.0,true,usdt_curve_2023,Curve,Uniswap,cross_protocol
-uniswap_usdc_usdt_005,curve_3pool,usdc_net_sold_1h,3600,0,0,-0.48587540210546026,0.0,true,0.0,true,0.0,true,usdt_curve_2023,Uniswap,Curve,cross_protocol
-curve_crvusd_usdt,uniswap_usdc_usdt_005,usdc_net_sold_1h,3600,-1,-3600,-0.2681667806007869,0.0,true,0.0,true,0.0,true,usdt_curve_2023,Curve,Uniswap,cross_protocol
-uniswap_usdc_usdt_005,curve_crvusd_usdt,usdc_net_sold_1h,3600,1,3600,-0.2681667806007869,0.0,true,0.0,true,0.0,true,usdt_curve_2023,Uniswap,Curve,cross_protocol

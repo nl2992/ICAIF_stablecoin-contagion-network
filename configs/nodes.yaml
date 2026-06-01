@@ -134,6 +134,48 @@ nodes:
         crvUSD/USDT StableSwap-ng pool. Contract 0x390f…BF4 deployed May 2023.
         Relevant for June 2023 USDT stress in crvUSD pools.
 
+    - id: curve_frax_usdc
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["FRAX", "USDC"]
+      contract: "0xDcEF968d416a41Cdac0ED8702fAC8128A64241A2"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [usdc_svb_2023, busd_2023]
+      notes: >
+        Curve FRAX/USDC pool (frxUSD). Peak TVL ~$300M. USDC is the fiat-backed
+        counterpart; pool imbalance during SVB shock is a clean fiat-backed
+        design-heterogeneity comparator. TokenExchange logs are Tier-A.
+
+    - id: curve_lusd_3crv
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["LUSD", "3CRV"]
+      contract: "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [usdc_svb_2023, ftx_2022]
+      notes: >
+        Liquity LUSD/3CRV pool. LUSD is overcollateralized ETH-backed; provides
+        a non-algorithmic, non-fiat comparator for design-heterogeneity analysis.
+        3CRV leg links pool stress to DAI/USDC/USDT imbalances.
+
+    - id: curve_susd_4pool
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["sUSD", "DAI", "USDC", "USDT"]
+      contract: "0xA5407eAE9Ba41422680e2e00537571bcC53efBfD"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [usdc_svb_2023, usdt_curve_2023]
+      notes: >
+        Synthetix sUSD 4-pool. sUSD is synthetically backed; pool includes
+        DAI/USDC/USDT, creating a natural cross-mechanism stress transmitter.
+        TokenExchange logs are Tier-A. sUSD tracked as the stress indicator.
+
   # ---------------------------------------------------------------------------
   # Flow nodes — settlement, bridge, and on-chain flow channels
   # ---------------------------------------------------------------------------

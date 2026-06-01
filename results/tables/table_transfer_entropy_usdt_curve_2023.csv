@@ -1,7 +1,57 @@
-node_i,node_j,te_i_to_j,p_value,p_value_block,significant_p05,p_value_fdr,significant_fdr,p_value_block_fdr,significant_block_fdr,p_bonferroni,significant_bonferroni,event_id,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,claim_allowed,claim_level,claim_reason,claim_language,claim_sentence,feature_tier,provenance_claim_allowed,statistical_claim_allowed,paper_claim_allowed,claim_strength
-curve_crvusd_usdt,curve_3pool,0.5954546117428307,0.145,0.62,false,0.43499999999999994,false,1.0,false,0.8699999999999999,false,usdt_curve_2023,A,A,A,false,true,A_A_dex_flow,Both endpoints are Tier-A DEX (AMM) nodes.,A/A directional (on-chain AMM flow),We find high-provenance on-chain AMM-flow evidence of stress propagation from curve_crvusd_usdt to curve_3pool.,B,true,false,false,suggestive
-curve_3pool,curve_crvusd_usdt,0.44379596021870915,0.915,0.98,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,A,A,A,false,true,A_A_dex_flow,Both endpoints are Tier-A DEX (AMM) nodes.,A/A directional (on-chain AMM flow),We find high-provenance on-chain AMM-flow evidence of stress propagation from curve_3pool to curve_crvusd_usdt.,B,true,false,false,suggestive
-usdt_binance,curve_3pool,0.25000004500001327,1.0,0.97,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,B,A,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from usdt_binance to curve_3pool.,B,true,false,false,suggestive
-curve_3pool,usdt_binance,0.09338308727440564,0.0,0.62,true,0.0,true,1.0,false,0.0,true,usdt_curve_2023,A,B,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from curve_3pool to usdt_binance.,B,true,true,true,statistically_supported
-usdt_binance,curve_crvusd_usdt,2.220446049250313e-16,1.0,1.0,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,B,A,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from usdt_binance to curve_crvusd_usdt.,B,true,false,false,suggestive
-curve_crvusd_usdt,usdt_binance,0.0,1.0,1.0,false,1.0,false,1.0,false,1.0,false,usdt_curve_2023,A,B,B,false,true,A_B_suggestive_directional,Edge is capped by the Tier B endpoint.,A/B suggestive,We find suggestive timing evidence of stress propagation from curve_crvusd_usdt to usdt_binance.,B,true,false,false,suggestive
+node_i,node_j,feature_col,grid_seconds,te_i_to_j,p_value,p_value_block,significant_p05,p_value_fdr,significant_fdr,p_value_block_fdr,significant_block_fdr,p_bonferroni,significant_bonferroni,te_estimator,event_id,event_phase
+uniswap_usdc_usdt_005,tron_usdt_exchange_flows,basis_vs_usd,60,0.8618092243203961,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_kraken,tron_usdt_exchange_flows,basis_vs_usd,60,0.8595040596392675,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_kraken,usdt_mint_burn,basis_vs_usd,60,0.7896215040086229,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,usdt_kraken,basis_vs_usd,60,0.7751992611559685,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,usdt_kraken,basis_vs_usd,60,0.767389587366408,0.01,0.475,true,0.02,true,1.0,false,0.56,false,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,tron_usdt_exchange_flows,basis_vs_usd,60,0.748644091256279,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_3pool,tron_usdt_exchange_flows,basis_vs_usd,60,0.7417019174275239,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,tron_usdt_exchange_flows,basis_vs_usd,60,0.7417019174275239,0.01,0.0,true,0.02,true,0.0,true,0.56,false,binned_discrete,usdt_curve_2023,all
+uniswap_usdc_usdt_005,usdt_mint_burn,basis_vs_usd,60,0.6935434786630112,0.055,0.0,false,0.09935483870967741,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,uniswap_usdc_usdt_005,basis_vs_usd,60,0.6902034499060371,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_kraken,eth_usdt_exchange_flows,basis_vs_usd,60,0.679390183413011,0.09,0.0,false,0.15272727272727274,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,eth_usdt_exchange_flows,basis_vs_usd,60,0.6774895272039378,0.06,0.0,false,0.105,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,usdt_kraken,basis_vs_usd,60,0.6649679405582671,0.465,1.0,false,0.6676923076923078,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_3pool,eth_usdt_exchange_flows,basis_vs_usd,60,0.6640096880104234,0.285,0.0,false,0.43135135135135133,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,eth_usdt_exchange_flows,basis_vs_usd,60,0.6640096880104234,0.18,0.0,false,0.28,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+uniswap_usdc_usdt_005,eth_usdt_exchange_flows,basis_vs_usd,60,0.6107796362122273,0.57,0.51,false,0.7785365853658536,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,curve_3pool,basis_vs_usd,60,0.6082055239293997,0.02,1.0,true,0.037333333333333336,true,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,curve_crvusd_usdt,basis_vs_usd,60,0.6082055239293997,0.01,1.0,true,0.02,true,1.0,false,0.56,false,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,uniswap_usdc_usdt_005,basis_vs_usd,60,0.576200912302161,0.015,1.0,true,0.02896551724137931,true,1.0,false,0.84,false,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,curve_3pool,basis_vs_usd,60,0.5718952157397137,0.125,1.0,false,0.2,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,curve_crvusd_usdt,basis_vs_usd,60,0.5718952157397137,0.115,1.0,false,0.18941176470588236,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_3pool,usdt_mint_burn,basis_vs_usd,60,0.5527452111604542,0.935,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,usdt_mint_burn,basis_vs_usd,60,0.5527452111604542,0.96,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,uniswap_usdc_usdt_005,basis_vs_usd,60,0.5012467436389375,0.405,1.0,false,0.5968421052631578,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,usdt_binance,basis_vs_usd,60,0.4653889323025566,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,curve_3pool,basis_vs_usd,60,0.44501139131469825,1.0,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,curve_crvusd_usdt,basis_vs_usd,60,0.44501139131469825,0.98,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,usdt_binance,basis_vs_usd,60,0.4351659638336123,0.0,0.0,true,0.0,true,0.0,true,0.0,true,binned_discrete,usdt_curve_2023,all
+eth_usdt_exchange_flows,usdt_mint_burn,basis_vs_usd,60,0.39683723080774724,1.0,0.45,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,tron_usdt_exchange_flows,basis_vs_usd,60,0.39683723080774724,1.0,0.0,false,1.0,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,usdt_mint_burn,basis_vs_usd,60,0.3706701486962938,1.0,0.0,false,1.0,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_mint_burn,eth_usdt_exchange_flows,basis_vs_usd,60,0.3706701486962938,1.0,0.515,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+tron_usdt_exchange_flows,usdt_binance,basis_vs_usd,60,0.33657777186615867,0.5,0.0,false,0.7,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_binance,eth_usdt_exchange_flows,basis_vs_usd,60,0.32283947973988236,0.66,0.0,false,0.88,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_binance,usdt_mint_burn,basis_vs_usd,60,0.31417497184938337,0.81,0.0,false,1.0,false,0.0,true,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_binance,tron_usdt_exchange_flows,basis_vs_usd,60,0.2964499661175508,0.895,0.515,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+usdt_kraken,curve_3pool,basis_vs_usd,60,0.1909400121892918,0.0,0.975,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_kraken,curve_crvusd_usdt,basis_vs_usd,60,0.1909400121892918,0.0,0.975,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+uniswap_usdc_usdt_005,curve_3pool,basis_vs_usd,60,0.19089415308947022,0.0,0.96,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+uniswap_usdc_usdt_005,curve_crvusd_usdt,basis_vs_usd,60,0.19089415308947022,0.0,0.985,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+uniswap_usdc_usdt_005,usdt_kraken,basis_vs_usd,60,0.190175162918633,0.0,1.0,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_3pool,usdt_kraken,basis_vs_usd,60,0.15967852279050487,0.0,1.0,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,usdt_kraken,basis_vs_usd,60,0.15967852279050487,0.0,1.0,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_3pool,usdt_binance,basis_vs_usd,60,0.12845369155450237,0.0,0.105,true,0.0,true,0.27999999999999997,false,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,usdt_binance,basis_vs_usd,60,0.12845369155450237,0.0,0.12,true,0.0,true,0.3054545454545454,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_binance,usdt_kraken,basis_vs_usd,60,0.11939644328690202,0.0,0.665,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_binance,curve_3pool,basis_vs_usd,60,0.11936254124502532,0.0,0.71,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_binance,curve_crvusd_usdt,basis_vs_usd,60,0.11936254124502532,0.0,0.73,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+uniswap_usdc_usdt_005,usdt_binance,basis_vs_usd,60,0.11507223265909294,0.0,0.355,true,0.0,true,0.8643478260869565,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_kraken,uniswap_usdc_usdt_005,basis_vs_usd,60,0.11185032102827852,0.0,1.0,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_binance,uniswap_usdc_usdt_005,basis_vs_usd,60,0.0988231769290635,0.0,0.94,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+usdt_kraken,usdt_binance,basis_vs_usd,60,0.08877432939671503,0.0,0.805,true,0.0,true,1.0,false,0.0,true,binned_discrete,usdt_curve_2023,all
+curve_3pool,uniswap_usdc_usdt_005,basis_vs_usd,60,0.036100327699087664,0.995,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,uniswap_usdc_usdt_005,basis_vs_usd,60,0.036100327699087664,1.0,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_3pool,curve_crvusd_usdt,basis_vs_usd,60,0.0,1.0,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all
+curve_crvusd_usdt,curve_3pool,basis_vs_usd,60,0.0,1.0,1.0,false,1.0,false,1.0,false,1.0,false,binned_discrete,usdt_curve_2023,all

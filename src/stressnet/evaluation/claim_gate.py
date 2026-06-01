@@ -93,6 +93,8 @@ RESULT_TABLE_PREFIXES = (
     "table_edges",
     "table_amm_leadlag",
     "table_sparse_events",
+    "table_forbes_rigobon",
+    "table_qvar",
 )
 
 # ---------------------------------------------------------------------------

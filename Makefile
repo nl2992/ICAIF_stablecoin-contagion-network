@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all centrality pool_verify grid_sensitivity block_shuffle loeo robustness_full
 
 setup:
 	pip install -r requirements.txt
@@ -95,6 +95,11 @@ predict:
 predset:
 	python scripts/09b_make_prediction_dataset.py --event $(EVENT)
 
+# GNN is EXPLORATORY — not included in paper_gate or empirical_all.
+# Five events are insufficient for generalizable GNN learning; fixture-trained
+# SnapshotGCN yields AUROC ≈ 0.18 (at-chance), confirming provenance gate
+# correctness.  Include in primary analysis only when ≥20 events with Tier-A
+# panels are available.  See paper limitations section (TODO 2.5).
 gnn:
 	python scripts/09d_train_temporal_gnn.py --event $(EVENT)
 
@@ -103,6 +108,42 @@ eventstudy:
 
 robustness:
 	python scripts/10_run_robustness.py --event $(EVENT)
+
+# ── Robustness checks for the primary USDT/Curve 2023 A/A result ──────────
+
+# TODO 5.1: Grid sensitivity — run AMM lead-lag at 30min / 1h / 2h grids
+grid_sensitivity:
+	@echo "Grid sensitivity check for usdt_curve_2023 A/A pair"
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 1800 --max-lag 24 --paper-mode
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 --max-lag 12 --paper-mode
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 7200 --max-lag 6 --paper-mode
+
+# TODO 5.2: Block-shuffle test — 24-hour block permutations, 10k reps
+block_shuffle:
+	@echo "Block-shuffle robustness for usdt_curve_2023 A/A pair"
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 --max-lag 12 --paper-mode \
+		--bootstrap-reps 10000 --block-shuffle
+
+# TODO 5.3: LOEO — leave-one-event-out for each of the 5 events
+loeo:
+	@echo "Leave-one-event-out robustness check"
+	for excluded in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
+		python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+			--layer-filter DEX --feature-cols usdc_net_sold_1h \
+			--grid-seconds 3600 --max-lag 12 --paper-mode \
+			--loeo $$excluded || true; \
+	done
+
+# Run all robustness checks in sequence
+robustness_full: grid_sensitivity block_shuffle loeo
 
 summary:
 	python scripts/11b_summarise_real_only_results.py
@@ -137,12 +178,19 @@ validate_paper:
 paper_gate:
 	python scripts/00c_claim_gate.py --all-events --strict
 	python scripts/11d_make_claim_summary_tables.py
+	python scripts/08b_run_centrality.py
 	python scripts/99_make_paper_outputs.py --strict
 	python scripts/98_make_narrative_figures.py
 	python scripts/13_make_paper_figures.py
 	python scripts/15_make_columbia_paper_pack.py
 	python scripts/16_make_extended_figures.py
 	python scripts/14_validate_paper_package.py
+
+centrality:
+	python scripts/08b_run_centrality.py $(if $(EVENT),--event $(EVENT),)
+
+pool_verify:
+	python scripts/00e_verify_pool_size_estimates.py
 
 # run an empirical paper-claim pipeline for one event.
 # Disables fixture fallback; gates result edges by provenance; uses --paper-mode
@@ -159,7 +207,10 @@ empirical:
 	python scripts/05_run_var_granger.py --event $(EVENT)
 	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode --window-size 168 --step-size 24
 	python scripts/06_run_hawkes.py --event $(EVENT) || true
-	python scripts/07_run_transfer_entropy.py --event $(EVENT) --paper-mode
+	# TE at AMM-only hourly grid (aligns with primary lead-lag for direct comparison)
+	python scripts/07_run_transfer_entropy.py --event $(EVENT) \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 --paper-mode
 	python scripts/08_build_networks.py --event $(EVENT) --edge-source te
 	python scripts/09_run_prediction.py --event $(EVENT)
 	python scripts/10_run_robustness.py --event $(EVENT)

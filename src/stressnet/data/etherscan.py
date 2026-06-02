@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,36 @@ import requests
 from stressnet.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+# ---------------------------------------------------------------------------
+# Tether (USDT) Issue/Redeem configuration
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class TetherMintConfig:
+    """Configuration for Tether-style Issue/Redeem event decoding.
+
+    Tether emits Issue(uint256) and Redeem(uint256) rather than standard
+    ERC-20 Transfer events.  All parameters are immutable once set.
+    """
+    contract: str          # checksummed contract address (case-insensitive match)
+    issue_topic: str       # keccak256("Issue(uint256)")
+    redeem_topic: str      # keccak256("Redeem(uint256)")
+    decimals: int          # token decimals (USDT = 6)
+    description: str       # human-readable label for logs
+
+# Registry: add additional Tether-style contracts here.
+TETHER_MINT_CONFIGS: dict[str, TetherMintConfig] = {
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": TetherMintConfig(
+        contract   = "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        # keccak256("Issue(uint256)") — verified against Etherscan event ABI
+        issue_topic  = "0xcb8241adb0c3fdb35b70c24ce35c5eb0c17af7431c99f827d44a445ca624176a",
+        # keccak256("Redeem(uint256)")
+        redeem_topic = "0x702d5967f45f6513a38ffc42d6ba9bf230bd40e8f53b16363c7eb4fd2deb9a44",
+        decimals     = 6,
+        description  = "Tether USDT mainnet",
+    ),
+}
 
 _BASE         = "https://api.etherscan.io/v2/api"
 _PAGE_SIZE    = 10_000  # max offset supported by Etherscan
@@ -457,3 +488,118 @@ def ingest_exchange_flows(
     df_agg.write_parquet(out_path)
     logger.info("Wrote %d flow rows for %s → %s (Tier B)", df_agg.height, node_id, out_path.name)
     return out_path, "B"
+
+
+def ingest_tether_issue_redeem(
+    token_contract: str,
+    start_block: int,
+    end_block: int,
+    out_dir: Path,
+    event_id: str,
+    node_id: str,
+) -> tuple[Path | None, str]:
+    """Download Tether USDT Issue/Redeem events and aggregate to hourly mint_burn_net_1h.
+
+    Tether emits ``Issue(uint256 amount)`` and ``Redeem(uint256 amount)`` rather
+    than standard ERC-20 Transfer events.  Both topics are fetched via
+    ``eth_getLogs``; the uint256 amount is decoded from the log's ``data`` field.
+
+    Uses ``TETHER_MINT_CONFIGS`` keyed by contract address, so additional
+    Tether-style contracts can be added to that registry without changing this
+    function.
+
+    Args:
+        token_contract: The token contract address (case-insensitive).
+        start_block:    First block to include.
+        end_block:      Last block to include.
+        out_dir:        Directory to write the output parquet.
+        event_id:       Event identifier (for logging).
+        node_id:        Node identifier (used in the output filename).
+
+    Returns:
+        ``(parquet_path, 'A')`` on success — on-chain log events are Tier A.
+        ``(None, 'fixture_non_empirical')`` when the API key is absent or no
+        events are found.
+    """
+    if not os.environ.get("ETHERSCAN_API_KEY"):
+        logger.info(
+            "ETHERSCAN_API_KEY not set; skipping Tether Issue/Redeem ingest for %s", node_id
+        )
+        return None, "fixture_non_empirical"
+
+    cfg = TETHER_MINT_CONFIGS.get(token_contract.lower())
+    if cfg is None:
+        logger.warning(
+            "No TetherMintConfig for contract %s — add it to TETHER_MINT_CONFIGS.", token_contract
+        )
+        return None, "fixture_non_empirical"
+
+    rows: list[dict[str, Any]] = []
+
+    # ── Issue events ────────────────────────────────────────────────────────
+    logger.info(
+        "Fetching %s Issue events blocks %d–%d", cfg.description, start_block, end_block
+    )
+    issue_logs = get_all_logs(cfg.contract, cfg.issue_topic, start_block, end_block)
+    for log in issue_logs:
+        try:
+            block_ts = int(log.get("timeStamp", "0x0"), 16)
+            amount   = int(log.get("data", "0x0"), 16) / (10 ** cfg.decimals)
+            rows.append({"block_ts": block_ts, "amount_usd": amount, "is_issue": True})
+        except (ValueError, TypeError):
+            continue
+
+    # ── Redeem events ───────────────────────────────────────────────────────
+    logger.info(
+        "Fetching %s Redeem events blocks %d–%d", cfg.description, start_block, end_block
+    )
+    redeem_logs = get_all_logs(cfg.contract, cfg.redeem_topic, start_block, end_block)
+    for log in redeem_logs:
+        try:
+            block_ts = int(log.get("timeStamp", "0x0"), 16)
+            amount   = int(log.get("data", "0x0"), 16) / (10 ** cfg.decimals)
+            rows.append({"block_ts": block_ts, "amount_usd": amount, "is_issue": False})
+        except (ValueError, TypeError):
+            continue
+
+    if not rows:
+        logger.warning(
+            "No decodable Issue/Redeem events found for %s (blocks %d–%d)",
+            node_id, start_block, end_block,
+        )
+        return None, "fixture_non_empirical"
+
+    df = pl.DataFrame({
+        "block_ts":   [r["block_ts"]   for r in rows],
+        "amount_usd": [r["amount_usd"] for r in rows],
+        "is_issue":   [r["is_issue"]   for r in rows],
+    })
+
+    df_agg = (
+        df.with_columns(
+            # Truncate to 1-hour bucket (microsecond Datetime)
+            ((pl.col("block_ts") // 3600) * 3_600_000_000)
+            .cast(pl.Datetime("us"))
+            .dt.replace_time_zone("UTC")
+            .alias("wall_clock_utc"),
+        )
+        .group_by("wall_clock_utc")
+        .agg(
+            (pl.col("amount_usd") * pl.col("is_issue").cast(pl.Float64)).sum().alias("issue_usd"),
+            (pl.col("amount_usd") * (~pl.col("is_issue")).cast(pl.Float64)).sum().alias("redeem_usd"),
+        )
+        .with_columns(
+            # Issue = positive (supply increases), Redeem = negative (supply shrinks)
+            (pl.col("issue_usd") - pl.col("redeem_usd")).alias("mint_burn_net_1h"),
+        )
+        .sort("wall_clock_utc")
+    )
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{node_id}_flows.parquet"
+    df_agg.write_parquet(out_path)
+    logger.info(
+        "Wrote %d Issue/Redeem hourly rows for %s → %s (Tier A)",
+        df_agg.height, node_id, out_path.name,
+    )
+    return out_path, "A"

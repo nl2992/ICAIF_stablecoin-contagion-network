@@ -201,8 +201,16 @@ nodes:
       asset: USDT
       issuer: "Tether"
       token_contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-      sources: ["etherscan", "the_graph"]
+      # Tether emits Issue(uint256) and Redeem(uint256) rather than standard
+      # ERC-20 Transfer events.  The issue_redeem encoding dispatches to
+      # ingest_tether_issue_redeem() in etherscan.py (uses eth_getLogs).
+      event_encoding: "issue_redeem"
+      sources: ["etherscan"]
       provenance_best: "onchain_event"
       tier: A
       events_covered: [usdt_curve_2023]
-      notes: "Mint/burn from Issue/Redeem events on Tether ERC20 contract."
+      notes: >
+        Mint/burn from Issue(uint256)/Redeem(uint256) events on the Tether
+        mainnet ERC-20 contract.  Decoded via eth_getLogs with topic hashes
+        from TETHER_MINT_CONFIGS in etherscan.py.  Tier A: directly observable
+        on-chain events with no off-chain intermediary.

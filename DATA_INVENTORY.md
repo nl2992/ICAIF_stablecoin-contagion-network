@@ -79,7 +79,7 @@ may be downgraded to Tier B in robustness checks. `reserve_imbalance` is Tier B 
 | `curve_crvusd_usdt` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 285 hourly rows; decimal bug **fixed** (was ~1e10, now -0.41 to +0.02) |
 | `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
 | `eth_usdt_exchange_flows` | ⚠️ B | CoinMetrics | `exchange_netflow_1h` | |
-| `usdt_mint_burn` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic mint/burn data | USDT uses `Issue`/`Redeem` events, not standard ERC-20 Transfer; Etherscan approach insufficient |
+| `usdt_mint_burn` | ✅ **A** | Etherscan `eth_getLogs` (Issue/Redeem) | `mint_burn_net_1h` | USDT uses `Issue(uint256)`/`Redeem(uint256)` events; decoded via `ingest_tether_issue_redeem()` in `etherscan.py`; `TETHER_MINT_CONFIGS` registry used |
 | `usdt_kraken` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | |
 | `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic pool state | |
 | `tron_usdt_exchange_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flows | TronGrid not implemented |
@@ -91,8 +91,11 @@ may be downgraded to Tier B in robustness checks. `reserve_imbalance` is Tier B 
 lead-lag analysis. `claim_strength = robust`, `paper_claim_allowed = True`. These 2 rows are in
 `results/paper/tables/table_aa_paper_claimable_edges.csv`.
 
+**A/A settlement pair newly available**: `usdt_mint_burn (A) ↔ curve_3pool (A)` via `mint_burn_net_1h` and
+`usdc_net_sold_1h`.  The settlement-layer Tether Issue/Redeem events can now be fetched; run
+`make empirical EVENT=usdt_curve_2023` with `ETHERSCAN_API_KEY` set to populate the real data.
+
 **Limitations**: `reserve_imbalance` and `implied_pool_price` are Tier-B derived proxies.
-`usdt_mint_burn` is not real (Tether Issue/Redeem not yet decoded).
 
 ---
 

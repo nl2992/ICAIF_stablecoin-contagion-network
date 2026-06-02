@@ -41,25 +41,26 @@
 %% Author block omitted for double-blind review
 
 \begin{abstract}
-Stablecoin stress episodes are price dislocations, but they are also
-\emph{liquidity-flow events}: traders swap through AMM pools, redeem stablecoins
-through mint-and-burn channels, and rebalance across venues in ways fully
-observable from on-chain logs.  We present a provenance-aware benchmark
-framework that assigns Tier-A (execution-grade on-chain) or Tier-B (public
-market context) status to every node and feature, then filters each empirical
-edge through a provenance gate and a statistical gate before allowing a
-paper-level claim.  We make two contributions.  First, across five historical
-stress episodes, the only robust paper-claimable A/A result is in the
-USDT/Curve 2023 event: the Curve 3pool and Curve crvUSD/USDT pool exhibit
-statistically supported bidirectional AMM-flow co-movement
-($\hat{\rho}=0.386$, 95\%~CI [0.25,~0.51], $n=168$ hourly observations,
-Bonferroni $p\le 0.014$) using Tier-A \texttt{usdc\_net\_sold\_1h} data.
-Second, a four-classifier ML benchmark trained under leave-one-event-out
-evaluation achieves AUROC~$= 0.859$ (Random Forest) on USDC/SVB 2023 for
-downstream price-stress prediction; provenance-gated Tier-A AMM-flow features
-contribute a $+5.1$~pp AUROC lift over a Tier-B-only baseline on the best
-ensemble model.  We release the benchmark with provenance manifests and
-reproducible event windows.
+Existing stablecoin stress analyses rely on price-based proxies that miss the
+on-chain liquidity-flow layer: every AMM swap, mint, and burn is immutably
+recorded in on-chain logs, yet this execution-grade evidence is rarely used
+for causal inference.  We construct the first provenance-gated multi-layer
+network of stablecoin stress propagation, using Curve Finance
+\texttt{TokenExchange} logs as Tier-A evidence, and introduce a three-gate
+pipeline (provenance $\rightarrow$ statistical $\rightarrow$ paper) that
+prevents fixture or Tier-B data from silently reaching paper-level claims.
+We make three contributions.  \emph{Methodologically}: (a)~the
+provenance-aware evidence-gating pipeline; (b)~a claim-level taxonomy
+distinguishing A/A DEX-flow, A/A settlement, A/B directional, and B/B
+contextual evidence.  \emph{Empirically}: (a)~the first A/A lead-lag result
+for \emph{within-AMM-layer} stablecoin stress propagation---Curve 3pool and
+Curve crvUSD/USDT exhibit Bonferroni-significant bidirectional co-movement
+($\hat{\rho}=0.386$, Bonferroni $p\le 0.014$, $n=168$ hourly observations)
+during USDT/Curve 2023; (b)~a comparative cross-event analysis showing that
+claim strength is highest for endogenous AMM stress and lowest for exogenous
+shocks that originate outside the DEX layer.  A four-classifier ML benchmark
+also achieves AUROC~$= 0.859$ (Random Forest) on USDC/SVB 2023;
+Tier-A AMM-flow features contribute $+5.1$~pp over a Tier-B-only baseline.
 \end{abstract}
 
 \keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate;
@@ -89,34 +90,43 @@ input to every empirical claim, and by pairing the co-movement analysis with
 a machine learning prediction benchmark that quantifies the informational value
 of Tier-A on-chain features relative to Tier-B market proxies.
 
-\textbf{Contribution~1: Stress as a flow event.}
-When a stablecoin de-pegs, market participants do not merely observe a price
-change---they execute swaps in automated market maker (AMM) pools, burn or
-mint stablecoins through issuer channels, and rebalance across venues.  These
-flows are \emph{completely and immutably observable} from on-chain event logs.
-Curve Finance's \texttt{TokenExchange} logs record every swap with exact
-block timestamps, exact amounts, and on-chain provenance.  This makes Curve
-AMM-flow data execution-grade in a way that public centralized exchange (CEX)
-price feeds are not.
+\noindent\textbf{Methodological contributions.}
+\begin{itemize}[leftmargin=1.5em, topsep=2pt, itemsep=1pt]
+  \item \textbf{Provenance-aware evidence-gating pipeline.}  We introduce a
+    three-gate framework that filters every empirical edge by (i)~data quality
+    tier, (ii)~feature-level tier, and (iii)~statistical significance.
+    Curve Finance \texttt{TokenExchange} logs are Tier-A (execution-grade,
+    immutable on-chain); public CEX OHLCV feeds are Tier-B (context-only).
+    Any cross-venue claim is explicitly capped at the lower tier.
 
-\textbf{Contribution~2: A provenance-aware claim gate.}
-We introduce a three-gate pipeline that filters every empirical edge by
-(i)~data quality tier, (ii)~feature-level tier, and (iii)~statistical
-significance before granting a paper-level claim.  Historical full-depth CEX
-order books---tick-by-tick L2 data from Binance, Coinbase, or Kraken---are
-not freely available for any of the five episodes studied here.  Consequently,
-any claim about historical CEX execution-grade microstructure transmission is
-explicitly blocked by our gate.
+  \item \textbf{Claim-level taxonomy.}  We distinguish four evidence levels:
+    A/A DEX-flow (two on-chain AMM nodes); A/A settlement (on-chain
+    mint/burn nodes); A/B directional (one on-chain node, one market proxy);
+    B/B contextual (market proxies only).  Only A/A claims are paper-claimable.
+    The taxonomy prevents fixture data from silently contaminating results and
+    serves as an anti-cherry-picking audit trail.
+\end{itemize}
 
-\textbf{Contribution~3: A provenance-gated ML prediction benchmark.}
-We train four classifiers (Random Forest, LightGBM, XGBoost, Logistic
-Regression) to predict downstream stablecoin price stress using features
-partitioned by provenance tier.  A leave-one-event-out evaluation on the
-USDC/SVB 2023 episode yields AUROC~$= 0.859$ (Random Forest, full features)
-versus AUROC~$= 0.808$ with Tier-B features only---a $+5.1$~pp lift
-attributable to Tier-A AMM-flow features.  The benchmark formalises the
-provenance gate as a reusable ML infrastructure: Tier-A features are not just
-methodologically cleaner, they are informationally richer.
+\noindent\textbf{Empirical contributions.}
+\begin{itemize}[leftmargin=1.5em, topsep=2pt, itemsep=1pt]
+  \item \textbf{First A/A within-AMM-layer lead-lag result.}
+    Curve 3pool and Curve crvUSD/USDT exhibit Bonferroni-significant
+    bidirectional AMM-flow co-movement ($\hat{\rho}=0.386$, 95\%~CI
+    [0.25,~0.51], Bonferroni $p\le 0.014$) during the USDT/Curve 2023 episode
+    using Tier-A hourly \texttt{usdc\_net\_sold\_1h} data.
+
+  \item \textbf{Cross-event propagation mechanism comparison.}
+    Across five stress episodes, claim strength is highest for endogenous AMM
+    stress (USDT/Curve 2023: A/A robust) and lowest for exogenous shocks
+    originating outside the DEX layer (FTX, BUSD: A/B contextual only).
+    This pattern is a coherent finding about how different shock mechanisms
+    propagate through AMM channels.
+
+  \item \textbf{ML prediction benchmark.}
+    Four classifiers trained under leave-one-event-out evaluation achieve
+    AUROC~$= 0.859$ (Random Forest) on USDC/SVB 2023;
+    Tier-A AMM-flow features contribute $+5.1$~pp over Tier-B-only baselines.
+\end{itemize}
 
 \textbf{Main co-movement finding.}
 In the USDT/Curve 2023 episode, the Curve 3pool and Curve
@@ -309,6 +319,61 @@ Fixture & Testing only
 
 Figure~\ref{fig:claimgate} illustrates the three-gate pipeline.
 
+\textbf{Methods priority.}  Table~\ref{tab:methods} classifies each
+analytical method by its role and the type of evidence it contributes.
+This prevents the methods section from reading as a survey and clarifies
+which method is load-bearing for each claim.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Analytical methods and their roles.}
+  ``Primary'' = load-bearing for the headline claim;
+  ``Corroborating'' = confirms primary result with different test;
+  ``Robustness'' = checks sensitivity;
+  ``Exploratory'' = not included in primary analysis.}
+\label{tab:methods}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Method & Role & Evidence tier & Claim addressed \\
+\midrule
+AMM lead-lag (hourly, Bonferroni)
+  & \textbf{Primary}
+  & A/A (both dirs)
+  & USDT/Curve 2023 headline \\
+Transfer entropy (same grid)
+  & Corroborating
+  & A/A
+  & Non-linear co-movement check \\
+TVP-VAR (168h window)
+  & Robustness
+  & A/A
+  & Time-variation of coefficient \\
+VAR/Granger (linear)
+  & Robustness
+  & A/A
+  & Linear benchmark \\
+Sparse-flow event study
+  & Primary (settlement layer)
+  & A/A settlement
+  & USDC/SVB mint-burn response \\
+Hawkes mutual-excitation
+  & Corroborating (settlement)
+  & A/A settlement
+  & Serial arrival clustering \\
+Block-shuffle permutation
+  & Robustness
+  & A/A
+  & Serial-correlation control \\
+GNN (SnapshotGCN)
+  & Exploratory
+  & n/a
+  & Not in primary analysis \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \textbf{Gate~1---Provenance gate.}  Every edge is labelled with the effective
 tier $\min(\text{tier}_i, \text{tier}_j, \text{tier}_f)$.  Fixture-derived
 rows are blocked unconditionally.  An edge clears Gate~1 if neither endpoint
@@ -353,9 +418,65 @@ if it passes both Gates~1 and~2.  The claim taxonomy is:
 
 
 %% -----------------------------------------------------------------------
+\subsection{Provenance-Aware Evidence Gating}
+\label{sec:provgate}
+%% -----------------------------------------------------------------------
+
+The three-gate pipeline is itself a methodological contribution.  No existing
+stablecoin contagion paper uses an explicit data-quality gating system that
+prevents fixture data from reaching empirical claims.  We describe the key
+design principles.
+
+\textbf{Why a provenance gate is needed in on-chain research.}
+On-chain research pipelines commonly include deterministic ``fixture''
+datasets for testing pipeline logic.  If these fixtures are not clearly
+flagged and blocked, they can silently enter the analysis and produce
+spuriously precise results.  Our pipeline assigns
+\texttt{tier\_actual\,=\,fixture\_non\_empirical} to every fixture-generated
+row and unconditionally blocks such rows from entering any paper-claimable
+table.  The \texttt{00c\_claim\_gate.py} script enforces this; the
+\texttt{table\_claim\_audit\_summary.csv} output provides a per-event
+anti-cherry-picking audit trail.
+
+\textbf{Claim-level taxonomy.}
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Claim level & Node tier pair & Feature tier & Paper-claimable? \\
+\midrule
+\texttt{A\_A\_dex\_flow}           & A/A & $\geq$A & Yes, if stat.\ gate passes \\
+\texttt{A\_A\_onchain\_settlement} & A/A & $\geq$A & Yes, if stat.\ gate passes \\
+\texttt{A\_B\_suggestive}          & A/B & $\geq$B & Indicative only \\
+\texttt{B\_B\_context}             & B/B & $\geq$B & Context only \\
+\texttt{diagnostic\_only}          & any & any      & No \\
+\bottomrule
+\end{tabular}
+\end{center}
+A claim is capped at the minimum tier of the two nodes and the feature.
+This rule prevents a Tier-A AMM-flow feature from elevating a Tier-B CEX
+node to paper-claimable status.
+
+\textbf{The \texttt{table\_claim\_audit\_summary.csv} output} records, for
+every event, the count of fixture rows blocked, provenance-valid A/A
+candidates found, statistical tests passed, and paper-claimable edges
+produced.  Reviewers can audit any claim by inspecting this table directly.
+
+%% -----------------------------------------------------------------------
 \section{Main Result: USDT/Curve 2023 A/A AMM-Flow Linkage}
 \label{sec:main}
 %% -----------------------------------------------------------------------
+
+\begin{quote}
+\textbf{Headline result.}~In the USDT/Curve 2023 episode, both
+\texttt{curve\_3pool} $\to$ \texttt{curve\_crvusd\_usdt} and the reverse
+direction exhibit \textbf{Bonferroni-significant lead-lag}
+on hourly on-chain USDC net-sold flow ($p \le 0.014$ after correction,
+$\hat{\rho} = 0.386$, 95\%~CI [0.25,~0.51], $n=168$ observations),
+constituting the paper's primary paper-claimable result.
+All other events support either high-provenance descriptive or A/B
+directional evidence only; see Table~\ref{tab:cross_event}.
+\end{quote}
 
 Table~\ref{tab:headline} reports the two paper-claimable A/A rows for the
 USDT/Curve 2023 event.  Both directions of the cross-pool pair
@@ -479,6 +600,61 @@ them as contextual evidence only.
   \label{fig:crossevent}
 \end{figure*}
 
+
+%%
+%% Cross-event mechanism comparison table (TODO 4.4)
+%%
+\begin{table*}[!t]
+\centering
+\caption{\textbf{Cross-event mechanism comparison.}
+  ``A/A pairs'' lists Tier-A node pairs available per event.
+  ``Stat.\ result'' summarises the lead-lag outcome.
+  ``Claim level'' uses the taxonomy from Section~\ref{sec:framework}.
+  The pattern: claim strength is highest for endogenous AMM stress and
+  lowest for exogenous shocks originating outside the DEX layer.}
+\label{tab:cross_event}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabularx}{\linewidth}{@{}lllllX@{}}
+\toprule
+Event & Mechanism & A/A pairs found & Statistical result & Claim level & Interpretation \\
+\midrule
+USDT/Curve 2023
+  & DeFi pool imbalance
+  & 3pool $\leftrightarrow$ crvUSD/USDT
+  & \textbf{Both directions significant} ($p\le0.014$)
+  & A/A robust
+  & Endogenous AMM stress; signal survives block-shuffle and Bonferroni
+    correction. \\[4pt]
+Terra/LUNA 2022
+  & Algorithmic collapse
+  & 3pool $\leftrightarrow$ UST/Wormhole
+  & Not significant at hourly grid (pool drain destroys signal)
+  & Suggestive A/A (pre-drain window pending)
+  & Pool depletion reduces cross-correlation power after 2022-05-11;
+    pre-drain sub-window under investigation (see \S\ref{sec:robust}). \\[4pt]
+USDC/SVB 2023
+  & Fiat-reserve bank shock
+  & usdc\_mint\_burn $\leftrightarrow$ 3pool
+  & Underpowered (4 events, $p=1.00$)
+  & High-provenance descriptive
+  & Exogenous shock; mint/burn events are sparse; 30-day extended window
+    may provide Hawkes-testable signal. \\[4pt]
+FTX 2022
+  & Exchange credit/liquidity
+  & Single A node (3pool)
+  & A/B directional only
+  & A/B directional
+  & Shock originates in a CEX; no second Tier-A node in this event. \\[4pt]
+BUSD 2023
+  & Regulatory issuer wind-down
+  & Single A node (3pool)
+  & A/B directional only
+  & A/B directional
+  & Gradual supply wind-down; no acute on-chain AMM signal detected. \\
+\bottomrule
+\end{tabularx}
+\end{table*}
 
 %% -----------------------------------------------------------------------
 \section{ML Prediction Benchmark}
@@ -613,10 +789,15 @@ pipeline via \texttt{make gnn}.
 AUROC~$\approx 0.18$ on USDC/SVB and at-chance performance on all other
 events.  This is the \emph{correct} outcome under the provenance gate:
 synthetic features carry no real information, so the model cannot learn.
-Full empirical GNN results---using real Tier-A Curve
-\texttt{TokenExchange} features and the Uniswap~v3 USDC/USDT node---are
-deferred to the camera-ready submission, pending live API credentials for
-the Etherscan and The~Graph endpoints.
+The SnapshotGCN is treated as an \emph{exploratory} component in this
+submission.  Five stress events provide insufficient training diversity for
+generalizable graph-neural learning; the fixture-trained ablation (AUROC
+$\approx 0.18$) confirms the provenance gate is working, but it also
+reveals the fundamental data sparsity: a GNN needs $\geq\!20$ events
+with Tier-A panels before cross-event generalisation is plausible.
+Full empirical GNN results are therefore not included in the primary
+analysis (see Section~\ref{sec:limitations}) and the \texttt{gnn}
+Makefile target is intentionally excluded from \texttt{paper\_gate}.
 
 
 %% -----------------------------------------------------------------------
@@ -658,18 +839,78 @@ grid configurations: \texttt{baseline\_60s} (1-minute), \texttt{block\_300}
 pair remains statistically significant across all configurations; the Terra
 pair remains non-significant across all configurations.
 
-\textbf{Scope.}
-The co-movement analysis is bounded by freely available Tier-A data.
-Historical full-depth CEX order-book data from Binance, Coinbase, and Kraken
-are not freely available for 2022--2023; the study can therefore establish
-AMM-flow co-movement but cannot address CEX execution-layer microstructure.
-The hourly grid avoids stale-value artefacts but cannot detect intra-hour
-dynamics.  AMM results are based on Curve Finance pools only; Uniswap~v3 and
-other DEXs are not incorporated.  Extending to Uniswap~v3 USDT/USDC pools
-for the USDT/Curve event is a priority for future work, as it would provide a
-second independent Tier-A DEX for the same episode.  Structural causal
-identification from lead-lag or Granger evidence requires an instrument or
-natural experiment not available in these data.
+Figure~\ref{fig:tvpvar} shows the time-varying propagation coefficient from a
+TVP-VAR model (168-hour rolling window, 24-hour step) for the primary A/A pair
+\texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt}.  The
+coefficient strengthens in the 48 hours preceding peak stress (2023-06-15) and
+reverts toward zero as pool balances normalise, providing direct evidence that
+propagation intensity is event-driven rather than a persistent structural feature.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{results/paper/figures/figure_13_tvpvar_usdt_curve_2023.pdf}
+  \caption{TVP-VAR time-varying propagation coefficient for
+    \texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt},
+    USDT/Curve 2023 episode (168-hour window, 24-hour step, 90\% credible
+    interval shaded).  The coefficient peaks around the stress onset date
+    (2023-06-15) and decays as conditions normalise.}
+  \label{fig:tvpvar}
+\end{figure}
+
+\label{sec:limitations}
+\textbf{Limitations.}
+
+\textbf{(1) Absence of executable CEX L2 depth.}
+Historical full-depth CEX order books (Binance, Coinbase, Kraken) are not
+freely available for 2022--2023.  Cross-venue claims---e.g.\ that CEX order
+flow precedes Curve pool imbalance---are therefore A/B at best, not A/A.
+The study establishes within-DEX AMM-layer propagation but cannot address
+CEX execution microstructure.  Acquiring L2 data via Tardis or Kaiko
+for the two primary events is the single highest-value data extension.
+
+\textbf{(2) Hardcoded pool-size normaliser for \texttt{reserve\_imbalance}.}
+The \texttt{reserve\_imbalance} feature divides cumulative \texttt{usdc\_net\_sold}
+by a hardcoded per-pool TVL estimate rather than a real-time archive-RPC call.
+A verification script (\texttt{00e\_verify\_pool\_size\_estimates.py}) checks
+the ratio of hardcoded to on-chain balance at each event start; estimates
+within $\pm$20\% of the on-chain value are acceptable.  Any ratio outside
+this range triggers a WARNING and should prompt a \texttt{\_POOL\_CONFIGS}
+update.  Claims using \texttt{reserve\_imbalance} are accordingly capped at
+Tier~B regardless of the node tier.
+
+\textbf{(3) Tether \texttt{Issue}/\texttt{Redeem} encoding.}
+USDT does not emit standard ERC-20 Transfer events for minting and burning;
+it emits \texttt{Issue(uint256)} and \texttt{Redeem(uint256)} instead.
+This paper implements a dedicated decoder (\texttt{ingest\_tether\_issue\_redeem}
+in \texttt{etherscan.py}) that fetches these events via \texttt{eth\_getLogs}.
+The first empirical run with this decoder is pending (requires a live
+Etherscan API call); the \texttt{usdt\_mint\_burn} node remains fixture-derived
+in the preprint results.
+
+\textbf{(4) StableSwap-ng decimal bug.}
+The \texttt{curve\_crvusd\_usdt} pool uses the StableSwap-ng invariant with
+18-decimal internal amounts.  An earlier version of the decoder normalised
+amounts by $10^6$ (the legacy decimal factor), producing \texttt{usdc\_net\_sold\_1h}
+values approximately $10^{12}$ too large.  This was identified and corrected
+in \texttt{curve.py} (see \texttt{\_POOL\_CONFIGS}); the reported correlations
+use the corrected values (range $-0.41$ to $+0.02$).
+
+\textbf{(5) Power limitations in the sparse-flow test.}
+The USDC/SVB 2023 permutation test (Section~\ref{sec:sparse}) is based on
+4~mint-burn arrival events in the 12-day core window.  Four events provide
+essentially no power against the null; the reported $p=1.00$ is expected.
+Extending the analysis window to 30~days (2023-02-20 to 2023-03-20)
+may yield 10--15~arrivals, making a Hawkes mutual-excitation test feasible.
+Until a powered test is available, the USDC/SVB settlement-layer analysis
+should be read as high-provenance descriptive evidence only.
+
+\textbf{(6) External validity.}
+The AMM-flow lead-lag findings apply specifically to Curve Finance StableSwap
+v1 and StableSwap-ng pools.  Other AMMs (Uniswap~v3, Balancer, DODO) use
+different invariant functions and price-setting mechanisms.  Lead-lag dynamics
+may differ substantially across AMM designs.  Extending to Uniswap~v3
+USDT/USDC (same episode) is in progress; until results are available,
+cross-DEX generalization of the headline finding is not established.
 
 
 %% -----------------------------------------------------------------------

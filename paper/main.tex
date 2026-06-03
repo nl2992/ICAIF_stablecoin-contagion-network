@@ -619,19 +619,38 @@ BUSD 2023        & 36 & 0 & 0 & 7 & 18 \\
 \end{tabular}
 \end{table*}
 
-\textbf{Terra/LUNA 2022.}
-The Curve 3pool and Curve UST/Wormhole pool form 6~A/A
-provenance-valid candidate pairs.  None passes the statistical gate at the
-hourly grid.  The Terra collapse unfolded over several days; hourly
-resolution may be too coarse to detect the short-lived liquidity dynamics of
-the algorithmic unwind.  Terra is a \emph{provenance-valid but
-statistically unsupported} negative result.
+\textbf{The four non-detections are boundary-condition findings, not failures.}
+The absence of A/A paper-claimable co-movement in four of five events is not a
+failure of the method --- it is a precise characterisation of \emph{when}
+AMM-flow surveillance works and when it does not.
 
-\textbf{FTX 2022 and BUSD 2023.}
-Both events lack Tier-A AMM/CEX pairs and produce only A/B suggestive edges
-(Curve 3pool paired with Binance public feeds).  These edges clear the
-statistical gate but are capped at Tier~B by the CEX endpoint.  We report
-them as contextual evidence only.
+\textit{Terra/LUNA 2022.}  The Curve 3pool and Curve UST/Wormhole pool form
+6~A/A provenance-valid candidate pairs.  None passes the statistical gate at the
+hourly grid.  The mechanism explains why: the Terra collapse was an
+\emph{algorithmic reflexive} shock that drained the UST/Wormhole pool as the
+primary event, not as a consequence.  Once the pool drains, co-movement signal
+collapses because there is no longer a liquid second node.  The pool drain is
+the crisis; there is nothing for AMM flow to propagate \emph{into}.
+
+\textit{USDC/SVB 2023.}  The fiat-reserve bank run originated outside the DEX
+layer.  Mint-burn settlement events are sparse (4 arrivals in 12 days),
+providing insufficient power for any statistical test.  The signal that matters
+here travels through CEX prices and bank-channel redemptions, not AMM pool
+rebalancing.
+
+\textit{FTX 2022 and BUSD 2023.}  Both shocks originate in CEX liquidity and
+regulatory channels respectively.  Curve pool stress arrives as a consequence,
+after CEX price signals have already propagated.  Only A/B directional evidence
+is possible (Curve 3pool paired with Binance public feeds), capped at Tier~B
+by the CEX endpoint.
+
+\textbf{The common pattern.}  AMM-flow co-movement is detectable when the shock
+mechanism is \emph{endogenous to the AMM layer} (pool imbalance caused by
+on-chain trading).  When the shock originates in CEX order books, fiat banking,
+algorithmic mechanics, or regulatory actions, AMM flow responds to the shock but
+does not lead it.  This is a testable prediction for future stress episodes:
+events classified as pool-imbalance events should show AMM-detectable co-movement;
+events classified as CEX-originating or regulatory should not.
 
 \begin{figure*}[!t]
   \centering

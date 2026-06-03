@@ -482,6 +482,21 @@ every event, the count of fixture rows blocked, provenance-valid A/A
 candidates found, statistical tests passed, and paper-claimable edges
 produced.  Reviewers can audit any claim by inspecting this table directly.
 
+\textbf{Regulatory context.}
+The Financial Stability Board's 2023 crypto-asset monitoring framework
+identifies data quality as the primary barrier to consistent DeFi contagion
+surveillance~\cite{FSB2023}.  Our three-gate pipeline provides a replicable,
+machine-readable response to this barrier: every paper-level claim carries a
+\texttt{tier\_actual} tag, a provenance manifest, and a gate-log that
+independent verifiers --- including regulators --- can audit without re-running
+the pipeline.  The claim-gate instantiates, for on-chain financial data, the
+evidence hierarchy familiar from clinical medicine (where randomised trials
+outrank observational studies, which outrank case reports): Tier-A on-chain
+logs are our transaction-level data; Tier-B market proxies are our
+notional-level estimates; fixture data is excluded entirely, as a
+non-validated instrument would be in a clinical trial.  No existing stablecoin
+contagion study provides this audit trail.
+
 %% -----------------------------------------------------------------------
 \section{Main Result: USDT/Curve 2023 A/A AMM-Flow Linkage}
 \label{sec:main}

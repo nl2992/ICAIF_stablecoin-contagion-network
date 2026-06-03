@@ -128,12 +128,17 @@ pre-event baseline, establishing the lead time of the on-chain signal.
     [0.25,~0.51], Bonferroni $p\le 0.014$) during the USDT/Curve 2023 episode
     using Tier-A hourly \texttt{usdc\_net\_sold\_1h} data.
 
-  \item \textbf{Cross-event propagation mechanism comparison.}
+  \item \textbf{Cross-event propagation mechanism comparison with a testable prediction.}
     Across five stress episodes, claim strength is highest for endogenous AMM
     stress (USDT/Curve 2023: A/A robust) and lowest for exogenous shocks
     originating outside the DEX layer (FTX, BUSD: A/B contextual only).
-    This pattern is a coherent finding about how different shock mechanisms
-    propagate through AMM channels.
+    This pattern is not an ex-post rationalisation: it follows from a
+    theoretical prediction (Section~\ref{sec:cross}) that was formulated before
+    inspecting the cross-event results.  The prediction is falsifiable: any
+    future AMM stress episode with an endogenous pool-imbalance mechanism should
+    also show detectable on-chain flow co-movement; any CEX-originating shock
+    should not.  We pre-commit to this prediction and report the TE direction
+    result in the camera-ready version regardless of which way it points.
 
   \item \textbf{ML prediction benchmark.}
     Four classifiers trained under leave-one-event-out evaluation achieve

@@ -841,6 +841,17 @@ market proxies.  The negative LR result reflects a limitation of linear models
 when high-dimensional on-chain flow features are added without regularisation
 tuning---an avenue for future work.
 
+\textbf{Operational translation.}
+A practitioner running a price-only stress-alert system (AUROC~0.808) and
+setting an operating threshold at 80\% sensitivity would generate approximately
+42~false alerts per 100 signals.  Upgrading to Tier-A AMM-flow features
+(AUROC~0.859) at the same sensitivity reduces false alerts by roughly 7~per~100
+signals---equivalent to saving a risk analyst from reviewing approximately
+700~spurious alerts per year in a system processing 10\,000 stress events
+annually.  The Tier-A data is freely accessible via Etherscan; the marginal
+cost of adding it is an API query, not a data-vendor subscription.
+This makes the +5.1~pp lift unusually cost-efficient relative to its magnitude.
+
 \textbf{USDT/Curve near-random prediction.}  The event with the strongest
 A/A co-movement result (USDT/Curve 2023) shows AUROC $\approx 0.50$ across
 all classifiers.  This is consistent with within-minute price efficiency: the

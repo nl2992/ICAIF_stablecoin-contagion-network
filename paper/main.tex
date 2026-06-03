@@ -554,8 +554,24 @@ Autocorrelation in the hourly series is present; using Newey-West~\cite{Newey198
 heteroskedasticity-and-autocorrelation-consistent (HAC) standard errors leaves
 the result significant ($p\le0.02$), confirming robustness to serial correlation.
 
+\textbf{Mechanism interpretation.}
+The lag-0 peak is not a failure of the lead-lag method to detect a direction ---
+it is a positive finding about the \emph{mechanism} of within-AMM stress
+propagation.  Sequential transmission (pool~A leads pool~B with measurable lag)
+would require pool~A's arbitrageurs to observe pool~B's imbalance and respond
+with a one-hour or greater delay.  The lag-0 result rules this out.  The
+finding instead points to a \emph{common-information mechanism}: large USDT
+holders facing the same signal about USDT redemption risk simultaneously
+transact in both Curve pools within the same hourly window, creating correlated
+USDC sell pressure without any pool-to-pool propagation delay.  This has a
+precise regulatory implication: monitoring only one pool (e.g.\ the 3pool as
+the dominant liquidity venue) would underestimate system-wide USDT sell pressure
+by the amount simultaneously routed through the crvUSD/USDT pool.  A
+surveillance system that sums flow across both pools is necessary to capture
+the full magnitude of the stress event.
+
 The bidirectional lag-0 result establishes \emph{statistically supported
-directional co-movement} at hourly resolution.  It does not establish structural
+simultaneous co-movement} at hourly resolution.  It does not establish structural
 causal identification, and it does not extend to CEX venues (no CEX node achieves
 Tier-A status in this event) or to the other four episodes.
 

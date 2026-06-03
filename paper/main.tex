@@ -569,6 +569,22 @@ Autocorrelation in the hourly series is present; using Newey-West~\cite{Newey198
 heteroskedasticity-and-autocorrelation-consistent (HAC) standard errors leaves
 the result significant ($p\le0.02$), confirming robustness to serial correlation.
 
+\textbf{Four independent validation layers.}
+The headline result survives four distinct statistical challenges, each
+addressing a different source of spuriousness: (1)~\textbf{Bonferroni
+correction} across 250 tests (25 lags $\times$ 5 events $\times$ 2 directions)
+guards against multiple-comparison inflation; (2)~\textbf{Newey-West HAC
+standard errors} control for first-order autocorrelation in the hourly AMM-flow
+series ($p\le0.02$ survives); (3)~\textbf{block-shuffle permutation} at 24-hour
+block length guards against the parametric assumptions in (2) --- shuffling
+whole days preserves intra-day serial structure while destroying inter-day
+temporal dependence; (4)~\textbf{transfer entropy corroboration}
+(Section below) tests whether the finding survives a paradigm switch from
+linear cross-correlation to nonlinear information-theoretic association.
+The convergence of four methodologically distinct approaches is the strongest
+evidence available in a setting where only 168 hourly observations and five
+events preclude asymptotic guarantees.
+
 \textbf{Mechanism interpretation.}
 The lag-0 peak is not a failure of the lead-lag method to detect a direction ---
 it is a positive finding about the \emph{mechanism} of within-AMM stress

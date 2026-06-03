@@ -463,14 +463,24 @@ def write_paper_summary_table(tables_dir: Path, out_dir: Path, strict: bool) -> 
         else:
             row["granger_sig"] = row["granger_total"] = 0
 
-        # Event study — nodes with significant CAB (always from results/tables)
+        # Event study — nodes with significant CAB.
+        # IMPORTANT: count only nodes where has_baseline=True (i.e. nodes that
+        # have pre-event data and are actually testable).  Nodes starting after
+        # the event onset (e.g. Binance nodes for FTX 2022) have no pre-event
+        # baseline and must not be counted in significance totals — doing so
+        # would misrepresent the number of testable cases.
         es_path = (results_root() / "tables") / f"table_event_study_summary_{event_id}.csv"
         if es_path.exists():
             es = pl.read_csv(es_path)
-            row["event_study_sig"]   = _count_sig(es, "significant_p05")
-            row["event_study_total"] = es.height
+            if "has_baseline" in es.columns:
+                es_testable = es.filter(pl.col("has_baseline") == True)
+            else:
+                es_testable = es   # older output: assume all are testable
+            row["event_study_sig"]       = _count_sig(es_testable, "significant_p05")
+            row["event_study_total"]     = es.height
+            row["event_study_testable"]  = es_testable.height   # new: n nodes with baseline
         else:
-            row["event_study_sig"] = row["event_study_total"] = 0
+            row["event_study_sig"] = row["event_study_total"] = row["event_study_testable"] = 0
 
         rows.append(row)
 

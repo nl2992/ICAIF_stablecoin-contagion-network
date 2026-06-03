@@ -206,7 +206,16 @@ empirical:
 	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT) --paper-mode
 	python scripts/05_run_var_granger.py --event $(EVENT)
 	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode --window-size 168 --step-size 24
-	python scripts/06_run_hawkes.py --event $(EVENT) || true
+	# DEX-layer TVP-VAR: uses usdc_net_sold_1h so usdt_curve_2023 (2 real DEX nodes)
+	# is never skipped.  Result saved with _dex suffix.
+	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode \
+		--layer-filter DEX --feature-col usdc_net_sold_1h \
+		--window-size 168 --step-size 24 || true
+	# Hawkes: soft-fail only if tick library is genuinely absent (not a bug).
+	# Install tick with: pip install -r requirements-optional.txt
+	python -c "import tick" 2>/dev/null \
+		&& python scripts/06_run_hawkes.py --event $(EVENT) \
+		|| echo "WARNING: tick not installed — Hawkes skipped. Run: pip install -r requirements-optional.txt"
 	# TE at AMM-only hourly grid (aligns with primary lead-lag for direct comparison)
 	python scripts/07_run_transfer_entropy.py --event $(EVENT) \
 		--layer-filter DEX --feature-cols usdc_net_sold_1h \
@@ -229,6 +238,9 @@ empirical_all:
 	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
 		python scripts/09_run_prediction.py --event $$event --loeo --ablation; \
 	done
+	# Build the combined 287K-row cross-event panel AFTER all individual events
+	# are processed.  Required by any cross-event analysis in paper_gate.
+	python scripts/03c_combine_panels.py
 	$(MAKE) paper_gate
 
 # MVP demo: fixture-allowed, single event, no claim gate (for orchestration testing only)

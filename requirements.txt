@@ -32,10 +32,7 @@ pytest-cov>=5.0
 jupyter>=1.0
 nbformat>=5.9
 
-# Optional: point process / Hawkes
-# tick>=0.7          # requires gcc; install separately
-# hawkeslib>=0.1     # older package
-
-# Optional: temporal graph models (install separately with CUDA if available)
-# torch>=2.2
-# torch-geometric>=2.5
+# Optional dependencies (Hawkes process and GNN) are in requirements-optional.txt.
+# Install with: pip install -r requirements-optional.txt
+# Note: tick requires a C++ compiler.  torch requires CUDA for efficient GNN training.
+# The primary paper results (lead-lag, TE, VAR, event study) do NOT require these.

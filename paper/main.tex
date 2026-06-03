@@ -358,6 +358,10 @@ Sparse-flow event study
   & Primary (settlement layer)
   & A/A settlement
   & USDC/SVB mint-burn response \\
+AB/CAB event study$^\dagger$
+  & Corroborating (timing)
+  & A or B
+  & Reaction timing \& magnitude \\
 Hawkes mutual-excitation
   & Corroborating (settlement)
   & A/A settlement
@@ -371,6 +375,9 @@ GNN (SnapshotGCN)
   & n/a
   & Not in primary analysis \\
 \bottomrule
+\multicolumn{4}{@{}l@{}}{\footnotesize $^\dagger$ AB/CAB significance restricted
+  to nodes with \texttt{has\_baseline=True} (pre-event data available).  Nodes whose
+  archive begins after shock onset are excluded from significance counts.} \\
 \end{tabular}
 \end{table}
 
@@ -538,6 +545,19 @@ The bidirectional lag-0 result establishes \emph{statistically supported
 directional co-movement} at hourly resolution.  It does not establish structural
 causal identification, and it does not extend to CEX venues (no CEX node achieves
 Tier-A status in this event) or to the other four episodes.
+
+\textbf{Transfer entropy corroboration.}
+Transfer entropy (TE) on the same feature, grid, and node pair provides a
+non-linear, model-free corroboration of the lead-lag finding.  If both TE
+directions are significant, the bidirectional framing is retained.  If TE
+reveals asymmetry (one direction significantly stronger than the other), the
+dominant direction should be reported as the primary co-movement claim with the
+weaker direction as secondary context.  The TE analysis uses the same AMM-only
+hourly grid (\texttt{--layer-filter DEX --grid-seconds 3600}) established in
+Section~\ref{sec:method}; compare \texttt{table\_transfer\_entropy\_usdt\_curve\_2023.csv}
+against \texttt{table\_leadlag\_tests\_usdt\_curve\_2023.csv} to determine whether
+the directions align.  Results will be finalised in the camera-ready version once
+the empirical pipeline is run with live API credentials.
 
 
 %% -----------------------------------------------------------------------

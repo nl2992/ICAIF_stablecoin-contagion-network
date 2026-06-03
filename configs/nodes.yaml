@@ -134,6 +134,37 @@ nodes:
         crvUSD/USDT StableSwap-ng pool. Contract 0x390f…BF4 deployed May 2023.
         Relevant for June 2023 USDT stress in crvUSD pools.
 
+    - id: curve_fraxusdc
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["FRAX", "USDC"]
+      contract: "0xDcEF968d416a41Cdac0ED8702fAC8128A64241A"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [ftx_2022, busd_2023]
+      notes: >
+        Curve FRAX/USDC plain pool, deployed April 2022.  Active during both the
+        FTX collapse (November 2022) and BUSD wind-down (February 2023).  Provides
+        a second Tier-A DEX node for these events, enabling A/A lead-lag claims.
+        Contract: 0xDcEF…41A.
+
+    - id: curve_lusd_3crv
+      venue: Curve
+      layer: DEX
+      chain: Ethereum
+      assets: ["LUSD", "3CRV"]
+      contract: "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0CA"
+      provenance_best: "dex_pool_onchain"
+      tier: A
+      events_covered: [ftx_2022, busd_2023]
+      notes: >
+        Curve LUSD/3CRV metapool, deployed March 2021.  Active during FTX 2022
+        and BUSD 2023.  LUSD is Liquity's USD-denominated stablecoin backed by ETH
+        collateral; its pool activity reflects ETH-backed stablecoin stress dynamics
+        distinct from fiat-backed USDC/USDT mechanics.  Second A/A pair candidate
+        for FTX 2022 and BUSD 2023.  Contract: 0xEd27…CA.
+
   # ---------------------------------------------------------------------------
   # Flow nodes — settlement, bridge, and on-chain flow channels
   # ---------------------------------------------------------------------------

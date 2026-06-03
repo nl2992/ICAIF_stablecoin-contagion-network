@@ -423,6 +423,47 @@ def check_K(verbose: bool) -> _Check:
     return c
 
 
+def check_L(verbose: bool) -> _Check:
+    """L. Granger output tables contain FDR and Bonferroni correction columns.
+
+    PR #5 added p_value_fdr, significant_fdr, p_bonferroni, significant_bonferroni
+    to the Granger output.  This check verifies those columns are present in at
+    least one Granger table so that paper outputs can read them correctly.
+    """
+    c = _Check("L – Granger FDR/Bonferroni columns present")
+    granger_tables = list(RAW_TBL.glob("table_granger*.csv")) + \
+                     list(RAW_TBL.glob("table_var_granger*.csv"))
+
+    if not granger_tables:
+        c.ok("no Granger result tables found (not yet generated — run make empirical)")
+        return c
+
+    required_cols = {"p_value_fdr", "p_bonferroni"}
+    found_any = False
+    for path in granger_tables:
+        try:
+            df = pl.read_csv(path)
+        except Exception:
+            continue
+        present = required_cols & set(df.columns)
+        missing = required_cols - set(df.columns)
+        if missing:
+            c.fail(
+                f"{path.name}: missing correction columns {missing}. "
+                "Re-run scripts/05_run_var_granger.py after merging the FDR patch."
+            )
+        else:
+            found_any = True
+            c.ok(f"{path.name}: FDR and Bonferroni columns present")
+
+    if not found_any and granger_tables:
+        c.fail(
+            "All Granger tables are missing p_value_fdr / p_bonferroni columns. "
+            "Check that scripts/05_run_var_granger.py outputs these columns."
+        )
+    return c
+
+
 def check_J(verbose: bool) -> _Check:
     """J. Compact summary report of key counts."""
     c = _Check("J – key counts summary")
@@ -494,6 +535,7 @@ def main() -> None:
         check_A, check_B, check_C, check_D,
         check_E, check_F, check_G, check_H,
         check_I, check_I_paper_md, check_J, check_K,
+        check_L,  # Granger FDR/Bonferroni columns
     ]
 
     results: list[_Check] = []

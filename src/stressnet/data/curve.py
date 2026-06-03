@@ -39,6 +39,9 @@ logger = get_logger(__name__)
 CURVE_3POOL_ADDRESS    = "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7"
 CURVE_UST_WORMHOLE     = "0xCEAF7747579696A2F0bb206a14210e3c9e6fB269"
 CURVE_CRVUSD_USDT      = "0x390f3595bCa2Df7d23783dFd126427CCeb997BF4"
+# New pools for FTX 2022 and BUSD 2023 A/A pairs (B4)
+CURVE_FRAXUSDC         = "0xDcEF968d416a41Cdac0ED8702fAC8128A64241A"
+CURVE_LUSD_3CRV        = "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0CA"
 
 # Event topic0 hashes
 TOPIC_TOKEN_EXCHANGE = "0x8b3e96f2b889fa771c53c981b40daf005f63f637f1869f707052d15a3dd97140"
@@ -104,6 +107,19 @@ _POOL_CONFIGS: dict[str, PoolConfig] = {
         stablecoin_symbol = "USDT",
         pool_size_usd    = 30_000_000,    # ~$30M TVL in June 2023
         ng_scaled        = True,
+    ),
+    # B4: new pools for FTX 2022 and BUSD 2023 A/A pair candidates
+    CURVE_FRAXUSDC.lower(): PoolConfig(
+        tokens           = {0: ("FRAX", 18), 1: ("USDC", 6)},
+        stablecoin_symbol = "USDC",
+        pool_size_usd    = 200_000_000,   # ~$200M TVL at FTX collapse onset
+        ng_scaled        = False,
+    ),
+    CURVE_LUSD_3CRV.lower(): PoolConfig(
+        tokens           = {0: ("LUSD", 18), 1: ("3CRV", 18)},
+        stablecoin_symbol = "LUSD",
+        pool_size_usd    = 50_000_000,    # ~$50M TVL (smaller pool)
+        ng_scaled        = False,
     ),
 }
 

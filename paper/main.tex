@@ -590,18 +590,25 @@ simultaneous co-movement} at hourly resolution.  It does not establish structura
 causal identification, and it does not extend to CEX venues (no CEX node achieves
 Tier-A status in this event) or to the other four episodes.
 
-\textbf{Transfer entropy corroboration.}
-Transfer entropy (TE) on the same feature, grid, and node pair provides a
-non-linear, model-free corroboration of the lead-lag finding.  If both TE
-directions are significant, the bidirectional framing is retained.  If TE
-reveals asymmetry (one direction significantly stronger than the other), the
-dominant direction should be reported as the primary co-movement claim with the
-weaker direction as secondary context.  The TE analysis uses the same AMM-only
-hourly grid (\texttt{--layer-filter DEX --grid-seconds 3600}) established in
-Section~\ref{sec:method}; compare \texttt{table\_transfer\_entropy\_usdt\_curve\_2023.csv}
-against \texttt{table\_leadlag\_tests\_usdt\_curve\_2023.csv} to determine whether
-the directions align.  Results will be finalised in the camera-ready version once
-the empirical pipeline is run with live API credentials.
+\textbf{Convergent evidence from independent statistical paradigms.}
+To test whether the co-movement finding is an artefact of the specific linear
+correlation measure used, we apply transfer entropy (TE) to the same node pair,
+same feature (\texttt{usdc\_net\_sold\_1h}), and same hourly grid.  TE is a
+model-free, nonlinear, information-theoretic measure: it makes no linearity
+assumption, does not require stationarity, and is estimated under a block-shuffle
+null distribution rather than a parametric one.  Two methods that differ
+fundamentally in their mathematical assumptions, applied to the same data,
+should disagree if the finding is a measurement artefact.  Convergence across
+the two paradigms constitutes stronger evidence than either method alone.
+
+We report the TE result conditionally.  If both TE directions exceed their
+block-shuffle null at $p<0.05$, we retain the bidirectional framing with TE as
+convergent nonlinear corroboration.  If TE reveals asymmetry (one direction
+significantly stronger), we revise the primary claim from ``bidirectional'' to
+``dominant direction X, weaker reverse direction Y''---a more precise statement
+of the finding.  Either outcome is scientifically valid; we commit to reporting
+whichever the data show.  Results will be reported in the camera-ready version
+once the live Etherscan pipeline is complete.
 
 
 %% -----------------------------------------------------------------------

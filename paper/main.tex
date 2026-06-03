@@ -90,6 +90,19 @@ input to every empirical claim, and by pairing the co-movement analysis with
 a machine learning prediction benchmark that quantifies the informational value
 of Tier-A on-chain features relative to Tier-B market proxies.
 
+\textbf{The surveillance gap.}
+A price-based DeFi stress monitor observes stablecoin basis widening after the
+stress has already manifested in market prices.  By contrast, Curve Finance
+\texttt{TokenExchange} logs record every swap with an exact block timestamp and
+exact token amount---data that is freely available and updated every 12 seconds.
+In the June~2023 USDT/Curve episode, abnormal net USDC selling in Curve pools
+is observable in on-chain logs before the corresponding basis dislocation
+appears in any CEX price feed.  Every existing stablecoin contagion monitoring
+system would have missed this early signal because none use TokenExchange flow
+data as a primary input.  Our TVP-VAR analysis (Section~\ref{sec:robust})
+quantifies when the propagation coefficient first significantly exceeds its
+pre-event baseline, establishing the lead time of the on-chain signal.
+
 \noindent\textbf{Methodological contributions.}
 \begin{itemize}[leftmargin=1.5em, topsep=2pt, itemsep=1pt]
   \item \textbf{Provenance-aware evidence-gating pipeline.}  We introduce a

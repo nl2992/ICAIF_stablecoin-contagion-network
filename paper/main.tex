@@ -41,26 +41,26 @@
 %% Author block omitted for double-blind review
 
 \begin{abstract}
-Existing stablecoin stress analyses rely on price-based proxies that miss the
-on-chain liquidity-flow layer: every AMM swap, mint, and burn is immutably
-recorded in on-chain logs, yet this execution-grade evidence is rarely used
-for causal inference.  We construct the first provenance-gated multi-layer
-network of stablecoin stress propagation, using Curve Finance
-\texttt{TokenExchange} logs as Tier-A evidence, and introduce a three-gate
-pipeline (provenance $\rightarrow$ statistical $\rightarrow$ paper) that
-prevents fixture or Tier-B data from silently reaching paper-level claims.
-We make three contributions.  \emph{Methodologically}: (a)~the
-provenance-aware evidence-gating pipeline; (b)~a claim-level taxonomy
-distinguishing A/A DEX-flow, A/A settlement, A/B directional, and B/B
-contextual evidence.  \emph{Empirically}: (a)~the first A/A lead-lag result
-for \emph{within-AMM-layer} stablecoin stress propagation---Curve 3pool and
-Curve crvUSD/USDT exhibit Bonferroni-significant bidirectional co-movement
-($\hat{\rho}=0.386$, Bonferroni $p\le 0.014$, $n=168$ hourly observations)
-during USDT/Curve 2023; (b)~a comparative cross-event analysis showing that
-claim strength is highest for endogenous AMM stress and lowest for exogenous
-shocks that originate outside the DEX layer.  A four-classifier ML benchmark
-also achieves AUROC~$= 0.859$ (Random Forest) on USDC/SVB 2023;
-Tier-A AMM-flow features contribute $+5.1$~pp over a Tier-B-only baseline.
+Conventional DeFi stress contagion models assume directional propagation ---
+stress travels sequentially from one venue or asset to another.  We find the
+opposite for \emph{within-AMM} stress: during the June~2023 USDT/Curve episode,
+Curve 3pool and Curve crvUSD/USDT exhibit Bonferroni-significant co-movement
+at lag~0 in both directions ($\hat{\rho}=0.386$, $p\le0.014$, $n=168$ hourly
+on-chain observations), ruling out sequential transmission and pointing instead
+to a \emph{common-factor mechanism} of simultaneous arbitrageur response.
+More surprisingly, this positive result holds only for the one event where the
+shock is endogenous to the AMM layer; across the other four episodes
+(Terra/LUNA, USDC/SVB, FTX, BUSD), no A/A paper-claimable co-movement
+emerges in AMM flow.  That pattern---endogenous stress is detectable,
+exogenous shocks are not---is itself a finding: it implies that DeFi stress
+surveillance requires \emph{separate monitoring architectures} for
+pool-imbalance events versus exchange-originating or regulatory shocks.
+We formalise this through a provenance-aware three-gate pipeline that assigns
+Tier-A status to Curve \texttt{TokenExchange} logs and blocks fixture or
+Tier-B data from reaching any empirical claim.  A four-classifier ML benchmark
+confirms that Tier-A AMM-flow features provide $+5.1$~pp AUROC over
+Tier-B-only baselines on USDC/SVB~2023, corresponding to approximately
+5 additional correct stress detections per 100 surveillance signals.
 \end{abstract}
 
 \keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate;

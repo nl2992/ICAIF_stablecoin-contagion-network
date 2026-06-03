@@ -447,6 +447,23 @@ stablecoin contagion paper uses an explicit data-quality gating system that
 prevents fixture data from reaching empirical claims.  We describe the key
 design principles.
 
+\textbf{Evidence hierarchy analogy.}
+The claim-gate instantiates, for on-chain financial data, the evidence hierarchy
+familiar from two established domains.  In \emph{clinical medicine}, randomised
+controlled trials outrank observational studies, which outrank case reports;
+meta-analyses weight studies by their design tier, not by their sample size
+alone.  In \emph{OTC derivatives reporting}, the FSB and IOSCO distinguish
+transaction-level data (execution-grade) from notional-level data (aggregate
+estimates) from position-level data (inferred); regulatory claims about systemic
+exposure must cite transaction-level data wherever available.  Our Tier-A
+on-chain logs (Curve \texttt{TokenExchange} records with block timestamps and
+exact amounts) correspond to transaction-level evidence in both analogies.
+Tier-B market proxies (OHLCV candles, BBO spread) correspond to notional-level
+estimates.  Fixture data is excluded entirely, as a non-validated instrument
+would be.  This analogy is not rhetorical: it provides a precise criterion
+for when the claim-gate should block a result even if that result would survive
+a standard significance test.
+
 \textbf{Why a provenance gate is needed in on-chain research.}
 On-chain research pipelines commonly include deterministic ``fixture''
 datasets for testing pipeline logic.  If these fixtures are not clearly

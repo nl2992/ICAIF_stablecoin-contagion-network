@@ -14,3 +14,6 @@ tick>=0.7
 # See https://pytorch.org/get-started/ for CUDA-specific wheels
 torch>=2.2
 torch-geometric>=2.5
+
+# Hidden Markov Model for unsupervised stress-regime detection (script 27)
+hmmlearn>=0.3

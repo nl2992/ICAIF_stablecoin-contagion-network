@@ -792,10 +792,12 @@ USDT/Curve 2023
 Terra/LUNA 2022
   & Algorithmic collapse
   & 3pool $\leftrightarrow$ UST/Wormhole
-  & Not significant at hourly grid (pool drain destroys signal)
-  & Suggestive A/A (pre-drain window pending)
-  & Pool depletion reduces cross-correlation power after 2022-05-11;
-    pre-drain sub-window under investigation (see \S\ref{sec:robust}). \\[4pt]
+  & Not significant ($\hat{\rho}=-0.07$ full; $-0.28$ pre-drain; both $p=1.0$)
+  & Provenance-valid, not paper-claimable
+  & Pre-drain split (\texttt{--split-at 2022-05-11}) \emph{strengthens} the
+    magnitude ($-0.07\!\to\!-0.28$) but does not reach significance; the
+    negative sign is consistent with USDC draining \emph{out} of one pool
+    into the other during the de-peg. \\[4pt]
 USDC/SVB 2023
   & Fiat-reserve bank shock
   & usdc\_mint\_burn $\leftrightarrow$ 3pool
@@ -1073,14 +1075,15 @@ this range triggers a WARNING and should prompt a \texttt{\_POOL\_CONFIGS}
 update.  Claims using \texttt{reserve\_imbalance} are accordingly capped at
 Tier~B regardless of the node tier.
 
-\textbf{(3) Tether \texttt{Issue}/\texttt{Redeem} encoding.}
+\textbf{(3) Tether \texttt{Issue}/\texttt{Redeem} sparsity.}
 USDT does not emit standard ERC-20 Transfer events for minting and burning;
-it emits \texttt{Issue(uint256)} and \texttt{Redeem(uint256)} instead.
-This paper implements a dedicated decoder (\texttt{ingest\_tether\_issue\_redeem}
-in \texttt{etherscan.py}) that fetches these events via \texttt{eth\_getLogs}.
-The first empirical run with this decoder is pending (requires a live
-Etherscan API call); the \texttt{usdt\_mint\_burn} node remains fixture-derived
-in the preprint results.
+it emits \texttt{Issue(uint256)} and \texttt{Redeem(uint256)} instead.  Our
+dedicated decoder (\texttt{ingest\_tether\_issue\_redeem} in
+\texttt{etherscan.py}, via \texttt{eth\_getLogs}) recovers these as genuine
+Tier-A data.  In the USDT/Curve 2023 window it yields only 5~hourly
+Issue/Redeem events, however --- too sparse for a settlement-layer lead-lag
+test on this event.  The node is real Tier-A but contributes context, not a
+paper-claimable settlement edge, for this episode.
 
 \textbf{(4) StableSwap-ng decimal bug.}
 The \texttt{curve\_crvusd\_usdt} pool uses the StableSwap-ng invariant with

@@ -189,6 +189,18 @@ qualified before submission. This does not affect the co-movement results
 three empirical contributions as currently stated. *The abstract and ML
 section have been updated in this commit to drop the unsupported lift.*
 
+**Second ML framing also null.** We additionally tested the more on-thesis
+task — detect the stress regime (`panic` vs rest) from Tier-A flow features
+alone, leave-one-event-out — to see whether on-chain flow is a free stress
+detector. It is not: mean LOEO AUROC ≈ 0.60 (flow-only 0.605 vs price-only
+0.607, no Tier-A advantage), with extreme cross-event variance (e.g. BUSD 0.11
+— a model trained on four events does not transfer to the fifth). The ML null
+is an **n=5 generalization limit**: five events are too few for cross-event ML,
+and hourly flow carries no transferable predictive edge over higher-frequency
+price data. We report ML as a cautionary null, not a contribution; the paper's
+results rest on the provenance gate, the regime-switching contagion finding,
+and the stabilizing→amplifying arbitrage flip.
+
 ### Strengthened headline — regime-switching contagion (2026-06-04)
 
 The static full-window correlation (ρ=0.386) understates the story. Splitting

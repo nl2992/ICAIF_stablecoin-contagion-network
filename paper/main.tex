@@ -222,11 +222,25 @@ this literature~\cite{Granger1969,Diebold2014}.
 Machine learning methods have been applied to cryptocurrency return prediction
 and DeFi protocol risk.
 Random Forests~\cite{Breiman2001} and gradient boosting~\cite{ChenGuestrin2016}
-are the dominant ensemble methods in structured financial data tasks.  Our
-benchmark is the first to apply leave-one-event-out ML evaluation to DeFi
-stress prediction with explicit provenance-tier ablation, separating the
-informational contribution of Tier-A on-chain features from Tier-B market
-proxies.
+are the dominant ensemble methods in structured financial data tasks.  We use a
+leave-one-event-out benchmark not to claim predictive performance but as a
+\emph{provenance-ablation harness}; as we report in
+Section~\ref{sec:prediction}, this harness exposes that an apparent lift from
+Tier-A features is not robust to the evaluation window---a result in the spirit
+of recent work showing that evaluation and modelling choices systematically
+reshape conclusions in financial ML~\cite{LeeDFL2025,LeeBias2025}.
+
+\textbf{Methodological rigour in financial AI.}
+A recent thread at the AI-in-finance venue foregrounds \emph{trustworthiness}
+over raw performance.  Faloughi et al.~\cite{Faloughi2025} argue that
+black-box models impede adoption and audit in finance and build interpretability
+in as a first-class objective; Lee et al.~\cite{LeeBias2025} show that
+systematic scrutiny reveals apparent model signal to be artefactual bias; and
+Lee et al.~\cite{LeeDFL2025} show that the choice of learning/evaluation
+objective reshapes which conclusions hold.  Our provenance gate sits in this
+lineage: it is an auditable, claim-blocking discipline whose value is measured
+not by how many findings it produces but by how reliably it rejects ones that
+should not be trusted.
 
 
 %% -----------------------------------------------------------------------

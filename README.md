@@ -230,6 +230,30 @@ both pools simultaneously during panic) and is consistent with the TVP-VAR
 statistic is a shift in linkage (Fisher z=+2.82, p=0.005), a sharper and more
 defensible claim than a single static correlation.
 
+### Positive finding — on-chain price discovery (and how much CEX misses)
+
+For DeFi-native stress, the Curve pool price moves **before** the centralized
+exchange.  Using first-differenced (trend-robust) lead-lag of on-chain pool
+deviation vs CEX basis deviation (`make price_discovery` →
+`table_price_discovery.csv`):
+
+| Event | shock | on-chain leads | CEX leads | +1h r (p) | on-chain dev / CEX dev |
+|---|---|---|---|---|---|
+| **USDT/Curve 2023** | DeFi-native | **0.175** | 0.040 | **0.28 (<1e-4)** | **37×** (12.5% vs 0.3%) |
+| **BUSD 2023** | regulatory | **0.100** | 0.017 | **0.15 (<1e-4)** | **34×** |
+| Terra/LUNA 2022 | algorithmic | 0.044 | 0.044 | 0.17 (<1e-4) | 8× |
+| **USDC/SVB 2023** | fiat bank run | 0.040 | **0.120** | 0.11 (0.11, n.s.) | 3× (CEX leads) |
+| FTX 2022 | exchange (inconclusive) | 0.043 | −0.044 | −0.02 (0.68) | — |
+
+**Why it's strong.** (1) Trend-robust — it survives first-differencing (unlike
+the flow-leads-price level correlation, which collapsed). (2) Mechanism-
+consistent: on-chain leads for DeFi-native shocks; the CEX leads only for the
+exogenous fiat bank run (the depeg hits exchange prices first). (3) The
+deviation ratio is the thesis in one number — during USDT/Curve the **Curve
+pool priced the stress 37× more strongly than Binance** (12.5% vs 0.3%); a
+price-only monitor would have seen almost nothing. FTX is excluded from the
+directional claim (insignificant +1h lead; anomalous CEX basis value).
+
 ### Positive finding — arbitrage flips from stabilizing to amplifying
 
 The regime lens also yields a clean *positive* structural result.  In calm

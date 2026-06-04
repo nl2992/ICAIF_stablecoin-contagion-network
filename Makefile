@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all centrality pool_verify grid_sensitivity block_shuffle loeo robustness_full regime_contagion arbitrage_regime
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all centrality pool_verify grid_sensitivity block_shuffle loeo robustness_full regime_contagion arbitrage_regime price_discovery
 
 setup:
 	pip install -r requirements.txt
@@ -199,6 +199,10 @@ regime_contagion:
 # Stabilizing->amplifying arbitrage regime flip (flow vs CEX price by regime)
 arbitrage_regime:
 	python scripts/25_run_arbitrage_regime.py
+
+# On-chain vs CEX price discovery (does the Curve pool price lead the exchange?)
+price_discovery:
+	python scripts/26_run_price_discovery.py
 
 # run an empirical paper-claim pipeline for one event.
 # Disables fixture fallback; gates result edges by provenance; uses --paper-mode

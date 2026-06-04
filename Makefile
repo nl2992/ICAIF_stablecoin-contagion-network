@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all centrality pool_verify grid_sensitivity block_shuffle loeo robustness_full regime_contagion arbitrage_regime price_discovery hmm_regime
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all centrality pool_verify grid_sensitivity block_shuffle loeo robustness_full regime_contagion arbitrage_regime price_discovery hmm_regime ml_diagnostics
 
 setup:
 	pip install -r requirements.txt
@@ -207,6 +207,10 @@ price_discovery:
 # Unsupervised HMM stress-regime detection from on-chain pool state (AI method)
 hmm_regime:
 	python scripts/27_run_hmm_regime.py
+
+# Diagnose WHY supervised cross-event ML fails (concept shift) vs HMM
+ml_diagnostics:
+	python scripts/28_run_ml_diagnostics.py
 
 # run an empirical paper-claim pipeline for one event.
 # Disables fixture fallback; gates result edges by provenance; uses --paper-mode

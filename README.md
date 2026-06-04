@@ -164,6 +164,31 @@ The 94% peak occurs in a **single rolling window centred ≈ +140 h
 > it provides early warning. The paper's TVP-VAR narrative (N7.2) must be
 > revised to remove the early-warning framing.
 
+### ML benchmark — does NOT replicate on corrected window (must fix paper)
+
+Re-running the prediction benchmark for USDC/SVB 2023 (LOEO, with provenance
+ablation) on the corrected 30-day window **contradicts the paper's headline ML
+claim**:
+
+| Model | Full features | Tier-B only (no graph) | Δ (Tier-A lift) |
+|---|---|---|---|
+| LogisticRegression | 0.8342 | 0.8334 | **+0.1 pp** (flat) |
+| RandomForest | 0.6659 | 0.7640 | **−9.8 pp** (Tier-A *hurts*) |
+
+- Test-set prevalence is now **0.59** (the paper assumed 0.89); the 30-day
+  window correction (TODO 2.2) changed the label balance and with it the
+  ablation result.
+- The paper currently claims **RF AUROC 0.859 with a +5.1 pp Tier-A lift**.
+  Neither figure reproduces: best AUROC is now LogisticRegression at 0.834, and
+  the Tier-A feature lift is flat (LR) or negative (RF).
+
+**Implication:** the ML "Tier-A features are informationally richer" claim is
+**not robust to the window correction** and must be removed or heavily
+qualified before submission. This does not affect the co-movement results
+(which are independent of the ML benchmark), but it does remove one of the
+three empirical contributions as currently stated. *The abstract and ML
+section have been updated in this commit to drop the unsupported lift.*
+
 ### What this run establishes
 
 1. The headline A/A result is **real and reproducible** (ρ̂ = 0.386, Bonferroni

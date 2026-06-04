@@ -57,10 +57,13 @@ surveillance requires \emph{separate monitoring architectures} for
 pool-imbalance events versus exchange-originating or regulatory shocks.
 We formalise this through a provenance-aware three-gate pipeline that assigns
 Tier-A status to Curve \texttt{TokenExchange} logs and blocks fixture or
-Tier-B data from reaching any empirical claim.  A four-classifier ML benchmark
-confirms that Tier-A AMM-flow features provide $+5.1$~pp AUROC over
-Tier-B-only baselines on USDC/SVB~2023, corresponding to approximately
-5 additional correct stress detections per 100 surveillance signals.
+Tier-B data from reaching any empirical claim.  A four-classifier prediction
+benchmark provides a provenance-ablation harness; we find that the predictive
+value of Tier-A AMM-flow features is \emph{not robust} to the evaluation
+window---the apparent lift on a narrow window vanishes once the window is
+extended to capture the full stress period---which we report as a cautionary
+finding about over-reading on-chain features in short, prevalence-imbalanced
+samples.
 \end{abstract}
 
 \keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate;
@@ -141,10 +144,12 @@ flow as its primary evidence layer.
     should not.  We pre-commit to this prediction and report the TE direction
     result in the camera-ready version regardless of which way it points.
 
-  \item \textbf{ML prediction benchmark.}
-    Four classifiers trained under leave-one-event-out evaluation achieve
-    AUROC~$= 0.859$ (Random Forest) on USDC/SVB 2023;
-    Tier-A AMM-flow features contribute $+5.1$~pp over Tier-B-only baselines.
+  \item \textbf{A cautionary ML ablation result.}
+    Using a four-classifier prediction task as a provenance-ablation harness,
+    we show that the apparent predictive lift from Tier-A AMM-flow features on a
+    narrow evaluation window \emph{does not survive} extending the window to
+    cover the full stress period --- a caution against over-reading on-chain
+    features in short, prevalence-imbalanced samples.
 \end{itemize}
 
 \textbf{Main co-movement finding.}
@@ -862,52 +867,22 @@ report in-event held-out results.
 XGBoost~\cite{ChenGuestrin2016}, and Logistic Regression (LR), each
 trained with default hyperparameters and class-weight balancing.
 
-\subsection{Results}
+\subsection{Provenance Ablation: a Cautionary Negative Result}
 
-Table~\ref{tab:pred} reports best-model AUROC by event.  The strongest
-generalisation is on USDC/SVB 2023 (LOEO): RF achieves AUROC~$= 0.859$,
-LightGBM $= 0.831$, and XGBoost $= 0.826$.  FTX 2022 shows
-near-perfect in-event separation (LR AUROC~$= 0.964$), driven by the
-structural break in CEX volatility.  The USDT/Curve 2023 event---the one
-with the strongest A/A co-movement signal---shows near-random prediction
-(best AUROC~$= 0.51$), indicating that despite the observable cross-pool
-co-movement, within-hour price dynamics are efficient at the 1-minute horizon.
+We use the prediction task purely as a \emph{provenance-ablation harness}: the
+question is not whether we can predict stress well, but whether adding Tier-A
+on-chain AMM-flow features to a Tier-B market-proxy baseline improves
+prediction.  Table~\ref{tab:ablation} reports the LOEO ablation on USDC/SVB
+2023 (train on the other four events, test on SVB) using the corrected 30-day
+window (test-set prevalence $0.59$).
 
 \begin{table}[!t]
 \centering
-\caption{\textbf{ML benchmark: best-model AUROC by event.}
-  LOEO = leave-one-event-out; IE = in-event held-out.}
-\label{tab:pred}
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lllcc}
-\toprule
-Event & Best model & Eval & AUROC & AUPRC \\
-\midrule
-USDC/SVB 2023   & Random Forest   & LOEO & 0.859 & 0.975 \\
-FTX 2022        & Logistic Reg.   & IE   & 0.964 & 0.982 \\
-Terra/LUNA 2022 & Random Forest   & IE   & 0.736 & 0.349 \\
-BUSD 2023       & Logistic Reg.   & IE   & 0.647 & 0.762 \\
-USDT/Curve 2023 & Logistic Reg.   & IE   & 0.509 & 0.017 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Provenance Ablation}
-
-Table~\ref{tab:ablation} shows the provenance-feature ablation on the
-USDC/SVB LOEO evaluation.  Removing Tier-A AMM-flow features reduces
-RF AUROC from 0.859 to 0.808 ($-5.1$~pp) and LightGBM from 0.831 to
-0.818 ($-1.2$~pp).  XGBoost is insensitive to the ablation; Logistic
-Regression shows a slight decrease when Tier-A features are added (likely
-due to high dimensionality and feature collinearity without regularisation
-tuning).
-
-\begin{table}[!t]
-\centering
-\caption{\textbf{Provenance-feature ablation on USDC/SVB 2023 (LOEO).}
-  ``Full'' = Tier-A + Tier-B features; ``No-graph'' = Tier-B only.
-  $\Delta$ = AUROC lift from adding Tier-A features.}
+\caption{\textbf{Provenance-feature ablation on USDC/SVB 2023 (LOEO,
+  30-day window).}  ``Full'' = Tier-A + Tier-B features; ``No-graph'' = Tier-B
+  only.  $\Delta$ = change from adding Tier-A features.  The Tier-A lift is
+  flat (LR) or negative (RF): the apparent benefit on a narrow window does not
+  survive window extension.}
 \label{tab:ablation}
 \small
 \setlength{\tabcolsep}{5pt}
@@ -915,30 +890,26 @@ tuning).
 \toprule
 Model & AUROC (full) & AUROC (Tier-B) & $\Delta$ \\
 \midrule
-Random Forest      & 0.859 & 0.808 & $+5.1$~pp \\
-LightGBM           & 0.831 & 0.818 & $+1.2$~pp \\
-XGBoost            & 0.826 & 0.826 & $+0.0$~pp \\
-Logistic Reg.      & 0.723 & 0.801 & $-7.8$~pp \\
+Logistic Reg.      & 0.834 & 0.833 & $+0.1$~pp \\
+Random Forest      & 0.666 & 0.764 & $-9.8$~pp \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The +5.1~pp RF lift is consistent with the provenance-gate hypothesis:
-Tier-A AMM-flow features carry informational content not captured by Tier-B
-market proxies.  The negative LR result reflects a limitation of linear models
-when high-dimensional on-chain flow features are added without regularisation
-tuning---an avenue for future work.
-
-\textbf{Operational translation.}
-A practitioner running a price-only stress-alert system (AUROC~0.808) and
-setting an operating threshold at 80\% sensitivity would generate approximately
-42~false alerts per 100 signals.  Upgrading to Tier-A AMM-flow features
-(AUROC~0.859) at the same sensitivity reduces false alerts by roughly 7~per~100
-signals---equivalent to saving a risk analyst from reviewing approximately
-700~spurious alerts per year in a system processing 10\,000 stress events
-annually.  The Tier-A data is freely accessible via Etherscan; the marginal
-cost of adding it is an API query, not a data-vendor subscription.
-This makes the +5.1~pp lift unusually cost-efficient relative to its magnitude.
+\textbf{The Tier-A predictive lift is not robust.}
+On a narrow 12-day window (test prevalence $0.89$) an earlier configuration
+showed a $+5.1$~pp Random-Forest lift from Tier-A features.  Once the window is
+extended to 30~days to capture the full SVB stress period --- a strictly more
+honest evaluation --- that lift vanishes: the best model is Logistic Regression
+at AUROC~$0.834$ with no Tier-A benefit ($+0.1$~pp), and Random Forest is
+actually \emph{hurt} by the Tier-A features ($-9.8$~pp).  We report this as a
+\textbf{cautionary negative result}: on short, prevalence-imbalanced samples,
+on-chain features can appear predictive for reasons that do not generalise.
+The provenance-gating contribution stands independently of any predictive
+claim --- indeed, a disciplined gate is exactly what surfaces such fragilities.
+We therefore make no claim that Tier-A AMM-flow features improve downstream
+price-stress prediction; establishing that would require more events and a
+pre-registered evaluation window.
 
 \textbf{USDT/Curve near-random prediction.}  The event with the strongest
 A/A co-movement result (USDT/Curve 2023) shows AUROC $\approx 0.50$ across
@@ -1135,14 +1106,13 @@ AMM-flow co-movement ($\hat{\rho}=0.386$, 95\%~CI [0.28, 0.48],
 Bonferroni $p\le 0.014$) at the hourly grid.  This is the only robust
 paper-claimable A/A result across five episodes.
 
-\textbf{(ii)~Prediction.}  A four-classifier ML benchmark achieves AUROC
-$= 0.859$ (Random Forest) on USDC/SVB 2023 under leave-one-event-out
-evaluation.  Tier-A AMM-flow features contribute a $+5.1$~pp AUROC lift
-over Tier-B-only baselines on the best ensemble model, showing that
-execution-grade on-chain data is informationally richer, not just
-methodologically cleaner.  The USDT/Curve event---where the A/A co-movement
-is strongest---shows near-random prediction at 1-minute resolution,
-indicating hourly co-movement without minute-level predictability.
+\textbf{(ii)~Prediction (cautionary).}  A four-classifier provenance-ablation
+harness shows that the predictive value of Tier-A AMM-flow features is
+\emph{not robust} to the evaluation window: an apparent lift on a narrow
+12-day window disappears (and reverses for Random Forest) once the window is
+extended to 30~days to cover the full SVB stress period.  We therefore make no
+predictive-lift claim; the result stands as a caution against over-reading
+on-chain features in short, prevalence-imbalanced samples.
 
 The methodological contribution may be as durable as the empirical findings:
 crypto stress-propagation claims should be gated by the provenance of their

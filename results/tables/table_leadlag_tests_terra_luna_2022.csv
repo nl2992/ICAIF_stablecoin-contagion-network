@@ -1,13 +1,3 @@
-node_i,node_j,feature_col,grid_seconds,peak_lag_steps,peak_lag_seconds,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,event_id,event_phase
-usdt_binance,ust_binance,basis_vs_usd,60,5,300,-0.2512346249383384,0.001,true,0.004,true,0.012,true,terra_luna_2022,all
-usdt_binance,curve_3pool,basis_vs_usd,60,-60,-3600,0.3053175364012199,0.393,false,0.571,false,1.0,false,terra_luna_2022,all
-usdt_binance,curve_ust_wormhole,basis_vs_usd,60,-60,-3600,0.3053175364012199,0.429,false,0.571,false,1.0,false,terra_luna_2022,all
-ust_binance,usdt_binance,basis_vs_usd,60,-5,-300,-0.2512346249383385,0.019,false,0.056999999999999995,false,0.22799999999999998,false,terra_luna_2022,all
-ust_binance,curve_3pool,basis_vs_usd,60,-60,-3600,-0.19998708439120108,0.499,false,0.571,false,1.0,false,terra_luna_2022,all
-ust_binance,curve_ust_wormhole,basis_vs_usd,60,-60,-3600,-0.19998708439120108,0.504,false,0.571,false,1.0,false,terra_luna_2022,all
-curve_3pool,usdt_binance,basis_vs_usd,60,60,3600,0.3053175364012199,0.461,false,0.571,false,1.0,false,terra_luna_2022,all
-curve_3pool,ust_binance,basis_vs_usd,60,60,3600,-0.19998708439120108,0.565,false,0.571,false,1.0,false,terra_luna_2022,all
-curve_3pool,curve_ust_wormhole,basis_vs_usd,60,0,0,1.0,0.0,true,0.0,true,0.0,true,terra_luna_2022,all
-curve_ust_wormhole,usdt_binance,basis_vs_usd,60,60,3600,0.3053175364012199,0.45,false,0.571,false,1.0,false,terra_luna_2022,all
-curve_ust_wormhole,ust_binance,basis_vs_usd,60,60,3600,-0.19998708439120108,0.571,false,0.571,false,1.0,false,terra_luna_2022,all
-curve_ust_wormhole,curve_3pool,basis_vs_usd,60,0,0,1.0,0.0,true,0.0,true,0.0,true,terra_luna_2022,all
+node_i,node_j,feature_col,grid_seconds,peak_lag_steps,peak_lag_seconds,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,event_id,event_phase,sub_window_end,block_shuffle_used,loeo_excluded
+curve_3pool,curve_ust_wormhole,usdc_net_sold_1h,3600,3,10800,-0.06953396745338508,1.0,false,1.0,false,1.0,false,terra_luna_2022,all,,false,
+curve_ust_wormhole,curve_3pool,usdc_net_sold_1h,3600,-3,-10800,-0.06953396745338507,1.0,false,1.0,false,1.0,false,terra_luna_2022,all,,false,

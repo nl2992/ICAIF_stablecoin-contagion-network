@@ -1,31 +1,3 @@
-node_i,node_j,feature_col,grid_seconds,peak_lag_steps,peak_lag_seconds,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,event_id,event_phase
-usdt_binance,busd_binance,basis_vs_usd,60,60,3600,-0.4528405507372992,0.0,true,0.0,true,0.0,true,ftx_2022,all
-usdt_binance,curve_3pool,basis_vs_usd,60,35,2100,-0.3407136252972043,0.293,false,1.0,false,1.0,false,ftx_2022,all
-usdt_binance,eth_usdc_exchange_flows,basis_vs_usd,60,44,2640,-0.5130514197456089,1.0,false,1.0,false,1.0,false,ftx_2022,all
-usdt_binance,eth_usdt_exchange_flows,basis_vs_usd,60,46,2760,-0.5097533907625921,1.0,false,1.0,false,1.0,false,ftx_2022,all
-usdt_binance,eth_bridge_flows,basis_vs_usd,60,56,3360,-0.6011851909848712,1.0,false,1.0,false,1.0,false,ftx_2022,all
-busd_binance,usdt_binance,basis_vs_usd,60,-60,-3600,-0.4528405507372991,0.0,true,0.0,true,0.0,true,ftx_2022,all
-busd_binance,curve_3pool,basis_vs_usd,60,60,3600,-0.21190857807656974,0.592,false,1.0,false,1.0,false,ftx_2022,all
-busd_binance,eth_usdc_exchange_flows,basis_vs_usd,60,44,2640,-0.7844909979102135,1.0,false,1.0,false,1.0,false,ftx_2022,all
-busd_binance,eth_usdt_exchange_flows,basis_vs_usd,60,46,2760,-0.7831468064592403,1.0,false,1.0,false,1.0,false,ftx_2022,all
-busd_binance,eth_bridge_flows,basis_vs_usd,60,54,3240,-0.7896624087517348,1.0,false,1.0,false,1.0,false,ftx_2022,all
-curve_3pool,usdt_binance,basis_vs_usd,60,-35,-2100,-0.3407136252972043,0.269,false,1.0,false,1.0,false,ftx_2022,all
-curve_3pool,busd_binance,basis_vs_usd,60,-60,-3600,-0.21190857807656974,0.579,false,1.0,false,1.0,false,ftx_2022,all
-curve_3pool,eth_usdc_exchange_flows,basis_vs_usd,60,4,240,0.9957192205478,1.0,false,1.0,false,1.0,false,ftx_2022,all
-curve_3pool,eth_usdt_exchange_flows,basis_vs_usd,60,6,360,0.9957030101819726,1.0,false,1.0,false,1.0,false,ftx_2022,all
-curve_3pool,eth_bridge_flows,basis_vs_usd,60,12,720,0.9956726726961769,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdc_exchange_flows,usdt_binance,basis_vs_usd,60,-44,-2640,-0.5130514197456089,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdc_exchange_flows,busd_binance,basis_vs_usd,60,-44,-2640,-0.7844909979102135,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdc_exchange_flows,curve_3pool,basis_vs_usd,60,-4,-240,0.9957192205478002,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdc_exchange_flows,eth_usdt_exchange_flows,basis_vs_usd,60,2,120,0.9999999999999991,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdc_exchange_flows,eth_bridge_flows,basis_vs_usd,60,8,480,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdt_exchange_flows,usdt_binance,basis_vs_usd,60,-46,-2760,-0.509753390762592,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdt_exchange_flows,busd_binance,basis_vs_usd,60,-46,-2760,-0.7831468064592402,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdt_exchange_flows,curve_3pool,basis_vs_usd,60,-6,-360,0.9957030101819727,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdt_exchange_flows,eth_usdc_exchange_flows,basis_vs_usd,60,-2,-120,0.9999999999999991,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_usdt_exchange_flows,eth_bridge_flows,basis_vs_usd,60,6,360,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_bridge_flows,usdt_binance,basis_vs_usd,60,-56,-3360,-0.6011851909848712,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_bridge_flows,busd_binance,basis_vs_usd,60,-54,-3240,-0.7896624087517349,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_bridge_flows,curve_3pool,basis_vs_usd,60,-12,-720,0.9956726726961771,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_bridge_flows,eth_usdc_exchange_flows,basis_vs_usd,60,-8,-480,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
-eth_bridge_flows,eth_usdt_exchange_flows,basis_vs_usd,60,-6,-360,1.0,1.0,false,1.0,false,1.0,false,ftx_2022,all
+node_i,node_j,feature_col,grid_seconds,peak_lag_steps,peak_lag_seconds,peak_corr,p_value,significant_p01,p_value_fdr,significant_fdr,p_bonferroni,significant_bonferroni,event_id,event_phase,sub_window_end,block_shuffle_used,loeo_excluded,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,feature_tier,provenance_claim_allowed,claim_allowed,claim_level,claim_language,claim_reason,claim_sentence,statistical_claim_allowed,paper_claim_allowed,claim_strength,window_start_override,window_end_override,sub_window
+curve_3pool,curve_lusd_3crv,usdc_net_sold_1h,3600,7,25200,0.40055171876349605,1.0,false,1.0,false,1.0,false,ftx_2022,all,,false,,A,A,A,false,A,true,true,A_A_dex_flow,A/A directional (on-chain AMM flow),Both endpoints are Tier-A DEX (AMM) nodes.,We find high-provenance on-chain AMM-flow evidence of stress propagation from curve_3pool to curve_lusd_3crv.,false,false,suggestive,,,ftx_2022 [full]
+curve_lusd_3crv,curve_3pool,usdc_net_sold_1h,3600,-7,-25200,0.4005517187634961,1.0,false,1.0,false,1.0,false,ftx_2022,all,,false,,A,A,A,false,A,true,true,A_A_dex_flow,A/A directional (on-chain AMM flow),Both endpoints are Tier-A DEX (AMM) nodes.,We find high-provenance on-chain AMM-flow evidence of stress propagation from curve_lusd_3crv to curve_3pool.,false,false,suggestive,,,ftx_2022 [full]

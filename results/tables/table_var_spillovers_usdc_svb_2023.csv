@@ -1,5 +1,5 @@
-caused_node,causing_node,fevd_share,horizon,method,feature_col,bucket_seconds
-usdc_coinbase,usdc_coinbase,0.0470229220758573,10,fevd,basis_vs_usd,3600
-usdc_coinbase,usdc_binance,0.9529770779241429,10,fevd,basis_vs_usd,3600
-usdc_binance,usdc_coinbase,0.08951537959609504,10,fevd,basis_vs_usd,3600
-usdc_binance,usdc_binance,0.9104846204039051,10,fevd,basis_vs_usd,3600
+caused_node,causing_node,fevd_share,horizon,method,feature_col,bucket_seconds,tier_i_actual,tier_j_actual,edge_tier_actual,uses_fixture,feature_tier,provenance_claim_allowed,claim_allowed,claim_level,claim_language,claim_reason,claim_sentence,statistical_claim_allowed,paper_claim_allowed,claim_strength,window_start_override,window_end_override,sub_window
+usdc_coinbase,usdc_coinbase,0.0470229220758573,10,fevd,basis_vs_usd,3600,B,B,B,false,B,true,true,B_B_context_only,B/B context-only,Both endpoints are Tier B; use contextual language.,We document contextual co-movement between usdc_coinbase and usdc_coinbase (Tier B proxy data).,false,false,descriptive,,, [full]
+usdc_coinbase,usdc_binance,0.9529770779241429,10,fevd,basis_vs_usd,3600,B,B,B,false,B,true,true,B_B_context_only,B/B context-only,Both endpoints are Tier B; use contextual language.,We document contextual co-movement between usdc_binance and usdc_coinbase (Tier B proxy data).,false,false,descriptive,,, [full]
+usdc_binance,usdc_coinbase,0.08951537959609504,10,fevd,basis_vs_usd,3600,B,B,B,false,B,true,true,B_B_context_only,B/B context-only,Both endpoints are Tier B; use contextual language.,We document contextual co-movement between usdc_coinbase and usdc_binance (Tier B proxy data).,false,false,descriptive,,, [full]
+usdc_binance,usdc_binance,0.9104846204039051,10,fevd,basis_vs_usd,3600,B,B,B,false,B,true,true,B_B_context_only,B/B context-only,Both endpoints are Tier B; use contextual language.,We document contextual co-movement between usdc_binance and usdc_binance (Tier B proxy data).,false,false,descriptive,,, [full]

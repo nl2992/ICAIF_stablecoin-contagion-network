@@ -1,7 +1,7 @@
-table,event_id,status,rows,blocked_rows,fixture_or_missing_rows,claimable_rows
-table_granger_busd_2023.csv,busd_2023,annotated,6,0,0,6
-table_leadlag_tests_busd_2023.csv,busd_2023,annotated,12,0,0,12
-table_transfer_entropy_busd_2023.csv,busd_2023,annotated,12,0,0,12
-table_tvp_var_spillovers_busd_2023.csv,busd_2023,annotated,80,0,0,80
-table_tvp_var_summary_busd_2023.csv,busd_2023,annotated,12,0,0,12
-table_var_spillovers_busd_2023.csv,busd_2023,annotated,9,0,0,9
+table,event_id,status,rows,blocked_rows,fixture_or_missing_rows,claimable_rows,paper_claimable_rows
+table_granger_busd_2023.csv,busd_2023,annotated,2,0,0,2,1
+table_leadlag_tests_busd_2023.csv,busd_2023,annotated,2,0,0,2,0
+table_transfer_entropy_busd_2023.csv,busd_2023,annotated,8,0,0,8,6
+table_tvp_var_spillovers_busd_2023.csv,busd_2023,annotated,80,0,0,80,0
+table_tvp_var_summary_busd_2023.csv,busd_2023,annotated,12,0,0,12,0
+table_var_spillovers_busd_2023.csv,busd_2023,annotated,4,0,0,4,0

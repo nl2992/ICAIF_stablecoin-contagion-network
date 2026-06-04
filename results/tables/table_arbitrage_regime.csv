@@ -1,0 +1,6 @@
+event_id,cex_node,n_calm,r_calm,n_panic,r_panic,fisher_z,p_shift,stabilizing_to_amplifying_flip
+usdt_curve_2023,usdt_binance,117,-0.218,66,0.3634,3.8364,0.0001,True
+terra_luna_2022,usdt_binance,476,0.0097,62,0.0375,0.2017,0.8401,False
+ftx_2022,usdt_binance,120,-0.1274,64,-0.5159,-2.8027,0.0051,False
+busd_2023,busd_binance,168,-0.0669,66,0.4462,3.6931,0.0002,True
+usdc_svb_2023,usdc_binance,0,,40,0.0108,,,False

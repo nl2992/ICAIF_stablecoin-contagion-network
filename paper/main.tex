@@ -728,16 +728,19 @@ collapses because there is no longer a liquid second node.  The pool drain is
 the crisis; there is nothing for AMM flow to propagate \emph{into}.
 
 \textit{USDC/SVB 2023.}  The fiat-reserve bank run originated outside the DEX
-layer.  Mint-burn settlement events are sparse (4 arrivals in 12 days),
-providing insufficient power for any statistical test.  The signal that matters
-here travels through CEX prices and bank-channel redemptions, not AMM pool
-rebalancing.
+layer.  Even after extending the analysis window to 30~days, the on-chain
+mint-burn settlement channel yields only 7~arrivals, providing insufficient
+power for any statistical test.  The signal that matters here travels through
+CEX prices and bank-channel redemptions, not AMM pool rebalancing.
 
-\textit{FTX 2022 and BUSD 2023.}  Both shocks originate in CEX liquidity and
-regulatory channels respectively.  Curve pool stress arrives as a consequence,
-after CEX price signals have already propagated.  Only A/B directional evidence
-is possible (Curve 3pool paired with Binance public feeds), capped at Tier~B
-by the CEX endpoint.
+\textit{FTX 2022 and BUSD 2023.}  Crucially, both events now have a genuine
+A/A DEX pair (Curve 3pool paired with the Curve LUSD/3CRV pool, both Tier-A
+on-chain nodes).  Neither pair shows significant co-movement (FTX:
+$\hat{\rho}=+0.40$ at a 7-hour lag, $p=1.00$; BUSD: $\hat{\rho}=-0.15$,
+$p=1.00$).  This is a stronger null than a data gap: with real A/A pairs
+available, the absence of co-movement is evidence that the CEX-origin and
+regulatory shocks do not transmit through the AMM layer, rather than a
+limitation of node coverage.
 
 \textbf{The common pattern.}  AMM-flow co-movement is detectable when the shock
 mechanism is \emph{endogenous to the AMM layer} (pool imbalance caused by
@@ -800,23 +803,26 @@ Terra/LUNA 2022
     into the other during the de-peg. \\[4pt]
 USDC/SVB 2023
   & Fiat-reserve bank shock
-  & usdc\_mint\_burn $\leftrightarrow$ 3pool
-  & Underpowered (4 events, $p=1.00$)
+  & usdc\_mint\_burn $\leftrightarrow$ 3pool (settlement)
+  & Underpowered ($n=7$ arrivals, $p=1.00$)
   & High-provenance descriptive
-  & Exogenous shock; mint/burn events are sparse; 30-day extended window
-    may provide Hawkes-testable signal. \\[4pt]
+  & Exogenous shock; even the 30-day window yields only 7~mint/burn arrivals,
+    insufficient for a powered settlement test. \\[4pt]
 FTX 2022
   & Exchange credit/liquidity
-  & Single A node (3pool)
-  & A/B directional only
-  & A/B directional
-  & Shock originates in a CEX; no second Tier-A node in this event. \\[4pt]
+  & 3pool $\leftrightarrow$ LUSD/3CRV
+  & Not significant ($\hat{\rho}=+0.40$ at +7\,h, $p=1.00$)
+  & Provenance-valid, not paper-claimable
+  & A genuine A/A DEX pair \emph{is} available (LUSD/3CRV), yet shows no
+    significant co-movement: the CEX-origin shock does not transmit through
+    the AMM layer. \\[4pt]
 BUSD 2023
   & Regulatory issuer wind-down
-  & Single A node (3pool)
-  & A/B directional only
-  & A/B directional
-  & Gradual supply wind-down; no acute on-chain AMM signal detected. \\
+  & 3pool $\leftrightarrow$ LUSD/3CRV
+  & Not significant ($\hat{\rho}=-0.15$, $p=1.00$)
+  & Provenance-valid, not paper-claimable
+  & A/A DEX pair available; gradual wind-down produces no acute AMM-flow
+    co-movement. \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -990,12 +996,12 @@ sample size, not the provenance gate.
 
 We apply a sparse event-arrival test that identifies mint-burn arrival events
 and measures the 3-hour post-arrival change in Curve 3pool
-\texttt{usdc\_net\_sold\_1h} relative to a 12-hour pre-arrival baseline.  We
-identify 4~mint-burn arrival events in the USDC/SVB window.  The mean
-3-hour post-arrival response is $+$28,956~USDC ($+$10.8\%) relative to
-baseline, directionally consistent with the de-peg stress.  With only
-4~arrivals, however, the permutation test yields $p=1.00$: the result is
-severely underpowered.
+\texttt{usdc\_net\_sold\_1h} relative to a 12-hour pre-arrival baseline.  After
+extending the analysis window to 30~days (2023-02-20 to 2023-03-20), we identify
+7~real Issue/Redeem arrival events --- still a small sample.  The mean 3-hour
+post-arrival response is $-$33,858~USDC ($-$70.0\%) relative to baseline, but
+the permutation test yields $p=0.52$: the result remains underpowered and not
+statistically supported.
 
 This A/A underpowered candidate is included in the paper package as a
 documented provenance-valid result that fails the statistical gate---not as a
@@ -1095,12 +1101,14 @@ use the corrected values (range $-0.41$ to $+0.02$).
 
 \textbf{(5) Power limitations in the sparse-flow test.}
 The USDC/SVB 2023 permutation test (Section~\ref{sec:sparse}) is based on
-4~mint-burn arrival events in the 12-day core window.  Four events provide
-essentially no power against the null; the reported $p=1.00$ is expected.
-Extending the analysis window to 30~days (2023-02-20 to 2023-03-20)
-may yield 10--15~arrivals, making a Hawkes mutual-excitation test feasible.
-Until a powered test is available, the USDC/SVB settlement-layer analysis
-should be read as high-provenance descriptive evidence only.
+mint-burn (Tether-style Issue/Redeem) arrival events.  Extending the analysis
+window from 12 to 30~days (2023-02-20 to 2023-03-20) increased the count from
+4 to 7~arrivals and improved the permutation $p$-value from $1.00$ to $0.52$,
+but 7~events still provide little power; the result is not statistically
+supported.  A powered settlement-layer test would require either a
+substantially longer window or a higher-frequency settlement channel.  Until
+then, the USDC/SVB settlement-layer analysis is high-provenance descriptive
+evidence only.
 
 \textbf{(6) External validity.}
 The AMM-flow lead-lag findings apply specifically to Curve Finance StableSwap

@@ -171,12 +171,54 @@ The 94% peak occurs in a **single rolling window centred ≈ +140 h
 2. Three methods (lead-lag, TE, TVP-VAR) **converge on one mechanism**:
    contemporaneous, transient cross-pool co-movement driven by a common USDT
    shock — *not* directional/sequential contagion.
-3. Two paper claims need correction before submission: `n = 168 → 281`, and
-   removal of the TVP-VAR early-warning framing.
+3. The cross-event pattern is now **confound-free**: all five events have a
+   genuine A/A pair, and only the endogenous pool-imbalance event is
+   paper-claimable. The four exogenous-shock nulls are mechanism findings, not
+   data gaps.
+4. Two paper claims that the data contradicted have been **corrected in this
+   commit set**: `n = 168 → 281` (CI [0.28, 0.48]) and removal of the TVP-VAR
+   early-warning framing.
 
-Cross-event results (Terra pre-drain, USDC/SVB extended window, FTX/BUSD second
-Tier-A pools) are being regenerated and will be appended here once their
-real-data ingestion completes.
+### Cross-event results — all five events, real data (2026-06-04)
+
+All five events were re-ingested and analysed end-to-end on real on-chain data.
+**Every event now has a genuine A/A pair** — including FTX and BUSD, which
+gained a second Tier-A DEX node (`curve_lusd_3crv`) via the B4 pool additions.
+This removes the earlier "missing data" confound: FTX and BUSD are no longer
+A/B-only because of a data gap; they have real A/A pairs that *still* show no
+significant co-movement.
+
+| Event | Mechanism | A/A pair tested | ρ̂ (lag) | p (Bonf.) | Paper-claimable? |
+|---|---|---|---|---|---|
+| **USDT/Curve 2023** | DeFi pool imbalance | `curve_3pool ↔ curve_crvusd_usdt` | **+0.386 (lag 0)** | **0.014** | **Yes — robust** |
+| Terra/LUNA 2022 | Algorithmic collapse | `curve_3pool ↔ curve_ust_wormhole` | −0.07 full / −0.28 pre-drain | 1.00 | No |
+| USDC/SVB 2023 | Fiat-reserve bank run | `usdc_mint_burn ↔ curve_3pool` (settlement) | n=7 arrivals | 1.00 | No (underpowered) |
+| FTX 2022 | Exchange credit/liquidity | `curve_3pool ↔ curve_lusd_3crv` | +0.40 (lag +7 h) | 1.00 | No |
+| BUSD 2023 | Regulatory wind-down | `curve_3pool ↔ curve_lusd_3crv` | −0.15 (lag −11 h) | 1.00 | No |
+
+Node coverage (Tier-A nodes per event, real data):
+
+| Event | Tier-A nodes | curve_3pool rows |
+|---|---|---|
+| USDT/Curve 2023 | `curve_3pool`, `curve_crvusd_usdt`, `usdt_mint_burn` | 379 |
+| Terra/LUNA 2022 | `curve_3pool`, `curve_ust_wormhole` (189) | 1,045 |
+| USDC/SVB 2023 | `curve_3pool`, `usdc_mint_burn` (7) | 696 |
+| FTX 2022 | `curve_3pool`, `curve_lusd_3crv` (92) | 718 |
+| BUSD 2023 | `curve_3pool`, `curve_lusd_3crv` (160) | 864 |
+
+**The strengthened finding.** Only the one event whose shock is *endogenous to
+the AMM layer* (USDT/Curve 2023, a pool-imbalance event) produces a
+paper-claimable A/A co-movement result. The four exogenous shocks
+(algorithmic, bank-run, exchange-credit, regulatory) do not — even when a
+genuine A/A pair is available to test. This is a cleaner version of the
+"endogenous detectable / exogenous not" thesis than the draft had, because the
+nulls are no longer attributable to missing data.
+
+**Known issue.** `curve_fraxusdc` (a B4 pool intended as a 3rd Tier-A node for
+FTX/BUSD) failed ingestion with `'str' object does not support item assignment`
+— a malformed contract address / config bug in the Curve ingest path. It is
+flagged for a fix; `curve_lusd_3crv` already provides the A/A pair for both
+events, so the cross-event conclusion is unaffected.
 
 ---
 

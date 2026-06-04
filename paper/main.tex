@@ -1162,6 +1162,71 @@ but past flows contain no exploitable predictive signal at the 1-minute
 horizon.  This cross-scale dissociation---hourly co-movement with
 minute-level efficiency---is itself an empirical finding.
 
+\subsection{Diagnosis: Why Cross-Event Prediction Fails}
+\label{sec:ml-diagnosis}
+
+Two supervised approaches failed: (1) the 1-minute price-stress classifier
+above, where Tier-A features add no robust lift, and (2) a leave-one-event-out
+regime classifier (predict the \texttt{panic} hours of a held-out event from
+flow features), which reaches only mean AUROC $\approx 0.60$ with one held-out
+event at $0.11$.  Rather than assert ``too few events'', we diagnose the cause
+directly with four tests on the on-chain pool-state features
+($|\texttt{flow}|$, $|\texttt{price\,dev}|$, $|\texttt{imbalance}|$).
+
+\emph{The signal exists within events.}  A 5-fold within-event logistic
+classifier reaches a mean AUROC of $0.82$ (USDT/Curve $0.92$, Terra $0.97$,
+USDC/SVB $0.91$).  So the features \emph{do} separate stress from calm --- when
+the model is trained and tested on the same event.
+
+\emph{But it does not transfer.}  The pairwise train-on-$A$/test-on-$B$ AUROC
+matrix has within-event diagonal $0.92$--$0.97$ but an \textbf{off-diagonal
+(cross-event) mean of $0.50$ --- exactly chance} (Table~\ref{tab:mldiag}).  The
+matrix is block-structured: the three pool-stress events (USDT/Curve, Terra,
+SVB) transfer to one another at $0.76$--$0.97$, but transfer to and from FTX and
+BUSD is at or below chance ($0.03$--$0.46$).
+
+\emph{The cause is concept shift, not covariate shift.}  A domain classifier
+that tries to identify which event a sample came from reaches only $0.30$
+accuracy (chance $0.20$): the feature \emph{distributions} are broadly similar
+across events.  What differs is the feature-to-label \emph{mapping}.  The ratio
+of mean price-deviation in panic versus calm is $2.0$, $1.9$, and $2.9$ for the
+three pool-stress events --- panic means the pool is stressed --- but
+$0.84$ and $0.54$ for FTX and BUSD, where panic coincides with \emph{lower}
+pool deviation.  The relationship literally \textbf{inverts}: a rule that learns
+``high pool deviation $\Rightarrow$ stress'' from one cluster predicts the other
+backwards.  With only five heterogeneous events, no single cross-event decision
+rule can exist, and leave-one-event-out is doomed whenever the held-out event
+belongs to the minority mechanism class.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Diagnosing the cross-event ML failure.}  The signal is strong
+  within events but does not transfer; covariate shift is mild, so the cause is
+  \emph{concept shift} --- the panic/calm price-deviation ratio inverts between
+  pool-stress events and CEX-borne events.}
+\label{tab:mldiag}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcc}
+\toprule
+Diagnostic & Value & Reading \\
+\midrule
+Within-event AUROC (CV)        & $0.82$ & signal exists \\
+Cross-event transfer AUROC     & $0.50$ & does not transfer (chance) \\
+Domain-classifier accuracy     & $0.30$ & covariate shift only mild \\
+\midrule
+\multicolumn{3}{@{}l@{}}{\emph{Concept shift --- panic/calm price-dev ratio:}} \\
+\quad USDT/Curve, Terra, USDC  & $2.0$/$1.9$/$2.9$ & panic $=$ pool stressed \\
+\quad FTX, BUSD                & $0.84$/$0.54$ & inverted \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This diagnosis motivates the alternative.  If a transferable cross-event rule
+cannot exist, the model must not rely on cross-event supervision at all --- it
+should learn each event's regime structure from that event alone, without
+labels.  That is exactly what the next subsection does.
+
 \subsection{Unsupervised Regime Detection Succeeds Where Prediction Fails}
 \label{sec:hmm}
 

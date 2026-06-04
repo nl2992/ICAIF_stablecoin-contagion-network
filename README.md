@@ -194,6 +194,27 @@ rest) from flow features *cross-event* (LOEO) also fails: mean AUROC ≈ 0.60,
 extreme variance (BUSD 0.11). Both ML nulls share a root cause — they are
 **supervised cross-event** tasks, and n=5 cannot teach a transferable mapping.
 
+### Diagnosis — *why* cross-event prediction fails (concept shift, not n=5 alone)
+
+We don't just assert "too few events" — we test it (`make ml_diagnostics` →
+`table_ml_diagnostics.csv`, `table_transfer_matrix.csv`):
+
+| Diagnostic | Value | Reading |
+|---|---|---|
+| Within-event AUROC (5-fold CV) | **0.82** | the signal *exists* per event |
+| Cross-event transfer (pairwise off-diagonal) | **0.50** | does **not** transfer (chance) |
+| Domain-classifier accuracy | 0.30 (chance 0.20) | covariate shift only *mild* |
+| Concept shift — panic/calm price-dev ratio | **2.0 / 1.9 / 2.9** (USDT, Terra, USDC) vs **0.84 / 0.54** (FTX, BUSD) | the mapping **inverts** |
+
+The transfer matrix is block-structured: the three pool-stress events transfer
+to *each other* (0.76–0.97) but to/from FTX/BUSD it's chance-or-inverted
+(0.03–0.46). **The cause is concept shift, not covariate shift** — the features
+look similar across events (domain classifier barely above chance), but "high
+pool price-deviation → stress" holds for pool-stress events and *reverses* for
+the CEX-borne shocks. With n=5 heterogeneous events, no single cross-event rule
+can exist, so leave-one-event-out is doomed whenever the held-out event is in
+the minority mechanism class. This is *why* you must detect, not predict.
+
 ### Positive AI finding — unsupervised HMM detects the regime (detect, don't predict)
 
 The fix is to change the AI framing entirely: not supervised cross-event

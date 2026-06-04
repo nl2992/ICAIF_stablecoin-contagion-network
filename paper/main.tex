@@ -783,8 +783,18 @@ BUSD 2023       & regulatory             & $+0.09$ & $-0.60$ & $-1.93$ $(0.05)$ 
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:regime} shows the pattern is mechanism-specific.  Only the
-endogenous event activates; Terra/LUNA stays flat (the UST/Wormhole pool is
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{results/paper/figures/fig_regime_switch.png}
+  \caption{\textbf{Regime-switching contagion.}  Cross-pool flow correlation in
+    the calm versus acute regime.  For the endogenous USDT/Curve shock the
+    coupling activates from $0.09$ to $0.53$ (significant calm$\to$panic shift,
+    marked $*$); the exogenous events stay flat (Terra) or decouple (FTX, BUSD).}
+  \label{fig:regime}
+\end{figure}
+
+Table~\ref{tab:regime} and Figure~\ref{fig:regime} show the pattern is
+mechanism-specific.  Only the endogenous event activates; Terra/LUNA stays flat (the UST/Wormhole pool is
 draining, so there is no liquid counterparty to couple with), while FTX and
 BUSD --- shocks that originate in exchange credit and regulation --- show if
 anything a \emph{decoupling} during panic.  Because every event now carries a
@@ -846,7 +856,20 @@ USDC/SVB 2023   & bank reserve     & n/a & $+0.01$ & --- \\
 \end{tabular}
 \end{table}
 
-This is one of the paper's clearest \emph{positive} mechanism findings: the
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{results/paper/figures/fig_arbitrage_flip.png}
+  \caption{\textbf{Arbitrage flips from stabilizing to amplifying.}
+    Contemporaneous correlation of on-chain flow intensity with CEX
+    price-deviation magnitude, by regime.  Calm-market coupling is negative
+    (arbitrage dampens dislocations); acute stress flips it positive for the
+    supply and regulatory shocks (USDT/Curve, BUSD) where arbitrage capacity is
+    overwhelmed, and strengthens the negative coupling for the exchange-credit
+    shock (FTX).}
+  \label{fig:arbflip}
+\end{figure}
+
+This is one of the paper's clearest \emph{positive} mechanism findings (Figure~\ref{fig:arbflip}): the
 sign of the flow--price relationship is a regime indicator, and the direction
 in which acute stress bends it is informative about the shock --- amplifying
 for supply and regulatory shocks where on-chain arbitrage is overrun, more
@@ -900,7 +923,18 @@ FTX 2022        & exchange (incon.) & $0.043$ & $-0.044$ & --- \\
 \end{tabular}
 \end{table}
 
-The deviation magnitudes make the surveillance case concrete.  During the
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{results/paper/figures/fig_price_discovery.png}
+  \caption{\textbf{On-chain price discovery.}  Mean first-differenced lead-lag
+    correlation at on-chain-leads versus CEX-leads lags.  The Curve pool price
+    leads the exchange for the DeFi-native shocks (USDT/Curve, BUSD) and lags
+    only for the exogenous SVB bank run.  Annotations give the ratio of peak
+    on-chain to peak CEX price deviation.}
+  \label{fig:disco}
+\end{figure}
+
+The deviation magnitudes (Figure~\ref{fig:disco}) make the surveillance case concrete.  During the
 USDT/Curve episode the Curve pool price fell to $0.875$ --- a $12.5\%$
 deviation --- while the matched Binance USDT price moved only $0.3\%$: the pool
 priced the stress \textbf{37$\times$ more strongly} than the exchange, and a
@@ -1178,7 +1212,7 @@ classifier reaches a mean AUROC of $0.82$ (USDT/Curve $0.92$, Terra $0.97$,
 USDC/SVB $0.91$).  So the features \emph{do} separate stress from calm --- when
 the model is trained and tested on the same event.
 
-\emph{But it does not transfer.}  The pairwise train-on-$A$/test-on-$B$ AUROC
+\emph{But it does not transfer} (Figure~\ref{fig:mldiag}).  The pairwise train-on-$A$/test-on-$B$ AUROC
 matrix has within-event diagonal $0.92$--$0.97$ but an \textbf{off-diagonal
 (cross-event) mean of $0.50$ --- exactly chance} (Table~\ref{tab:mldiag}).  The
 matrix is block-structured: the three pool-stress events (USDT/Curve, Terra,
@@ -1221,6 +1255,19 @@ Domain-classifier accuracy     & $0.30$ & covariate shift only mild \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.82\linewidth]{results/paper/figures/fig_ml_diagnosis.png}
+  \caption{\textbf{Concept shift, visualized.}  Pairwise transfer AUROC ---
+    train a supervised regime classifier on the row event, test on the column
+    event.  The diagonal (within-event) is high ($0.92$--$0.97$) but the
+    off-diagonal (cross-event transfer) averages chance.  The block structure is
+    the mechanism boundary: the three pool-stress events transfer to one another,
+    while transfer to and from the CEX-borne FTX/BUSD shocks is at or below
+    chance --- the feature$\to$label map inverts.}
+  \label{fig:mldiag}
+\end{figure}
 
 This diagnosis motivates the alternative.  If a transferable cross-event rule
 cannot exist, the model must not rely on cross-event supervision at all --- it
@@ -1270,7 +1317,18 @@ FTX 2022        & exchange credit    & $0.389$ & $0.342$ \\
 \end{tabular}
 \end{table}
 
-The unsupervised HMM recovers the stress regime at AUROC~$0.92$--$0.95$ for the
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{results/paper/figures/fig_hmm_detection.png}
+  \caption{\textbf{Unsupervised stress detection.}  Posterior probability of the
+    HMM ``stress'' latent state over the USDT/Curve 2023 window; the model is fit
+    on on-chain pool state with \emph{no} labels.  The shaded band is the true
+    \texttt{panic} regime.  The detector activates during panic and is near zero
+    in calm conditions (AUROC $0.93$).}
+  \label{fig:hmm}
+\end{figure}
+
+The unsupervised HMM (Figure~\ref{fig:hmm}) recovers the stress regime at AUROC~$0.92$--$0.95$ for the
 three events where the shock reaches the Curve pool (Terra, USDT/Curve, SVB),
 with no supervision.  The two low-AUROC events are not failures of the method
 but of mechanism: FTX ($0.39$) and BUSD ($0.62$) are shocks whose stress is
@@ -1381,7 +1439,7 @@ requires events with a slower build-up than the abrupt USDT/Curve episode.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.95\linewidth]{results/paper/figures/figure_13_tvpvar_usdt_curve_2023.pdf}
+  \includegraphics[width=0.95\linewidth]{results/paper/figures/fig_tvpvar.png}
   \caption{TVP-VAR forecast-error-variance decomposition for the
     \texttt{curve\_crvusd\_usdt} $\rightarrow$ \texttt{curve\_3pool} spillover,
     USDT/Curve 2023 (168-hour window, 24-hour step).  The spillover share is

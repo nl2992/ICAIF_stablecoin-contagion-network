@@ -163,6 +163,32 @@ def fig_hmm_detection():
     _save(fig, "fig_hmm_detection")
 
 
+def fig_tvpvar():
+    # Per-window FEVD share for crvUSD/USDT -> 3pool, showing post-onset concentration
+    p = TABLES / "table_tvp_var_spillovers_usdt_curve_2023.csv"
+    if not p.exists():
+        logger.warning("TVP-VAR spillovers table missing; skipping.")
+        return
+    df = pl.read_csv(p)
+    sub = df.filter((pl.col("caused_node") == "curve_3pool") &
+                    (pl.col("causing_node") == "curve_crvusd_usdt")).sort("window_center")
+    if sub.height == 0:
+        logger.warning("no crvUSD->3pool rows; skipping TVP-VAR fig.")
+        return
+    x = (sub["window_center"].to_numpy() / 3600.0)   # seconds -> hours rel. onset
+    yv = sub["fevd_share"].to_numpy()
+    fig, ax = plt.subplots(figsize=(5.6, 2.8))
+    ax.axvline(0, color=C_PANIC, ls="--", lw=0.9, label="shock onset")
+    ax.plot(x, yv, "-o", color="#222", lw=1.4, ms=4)
+    ax.set_xlabel("rolling-window centre (hours rel. onset)")
+    ax.set_ylabel("FEVD share\n(crvUSD/USDT $\\to$ 3pool)")
+    ax.set_ylim(-0.03, 1.0)
+    ax.set_title("TVP-VAR: cross-pool spillover is transient and post-onset\n"
+                 "(94\\% concentrated $\\approx$+140h after onset, not before)")
+    ax.legend(frameon=False, loc="upper left")
+    _save(fig, "fig_tvpvar")
+
+
 def fig_ml_diagnosis():
     df = pl.read_csv(TABLES / "table_transfer_matrix.csv")
     ev = [c for c in df.columns if c != "train_event"]
@@ -185,7 +211,7 @@ def fig_ml_diagnosis():
 
 def main():
     for fn in (fig_regime_switch, fig_arbitrage_flip, fig_price_discovery,
-               fig_hmm_detection, fig_ml_diagnosis):
+               fig_hmm_detection, fig_ml_diagnosis, fig_tvpvar):
         try:
             fn()
         except Exception as exc:

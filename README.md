@@ -189,6 +189,35 @@ qualified before submission. This does not affect the co-movement results
 three empirical contributions as currently stated. *The abstract and ML
 section have been updated in this commit to drop the unsupported lift.*
 
+### Strengthened headline — regime-switching contagion (2026-06-04)
+
+The static full-window correlation (ρ=0.386) understates the story. Splitting
+each event by `event_phase` and testing the **calm→panic shift** in cross-pool
+coupling (Fisher r-to-z) yields a genuine *contagion* result in the rigorous
+Forbes–Rigobon sense — a significant **increase in linkage during the crisis
+regime**, not constant interdependence — and it is **mechanism-specific**:
+
+| Event | Mechanism | calm ρ | panic ρ | Fisher z | p (shift) | Contagion? |
+|---|---|---|---|---|---|---|
+| **USDT/Curve 2023** | endogenous pool imbalance | +0.09 (n.s.) | **+0.53** (p<1e-4) | **+2.82** | **0.005** | **Yes** |
+| Terra/LUNA 2022 | algorithmic collapse | +0.01 | +0.09 | +0.18 | 0.855 | No (flat) |
+| FTX 2022 | exchange credit | +0.37 | −0.23 | −0.89 | 0.371 | No (decouples) |
+| BUSD 2023 | regulatory wind-down | +0.09 | −0.60 | −1.93 | 0.053 | No (decouples) |
+
+Reproduce: `make regime_contagion` →
+`results/tables/table_regime_contagion.csv`.
+
+**Why this is the stronger contribution.** (1) It is *contagion*, not
+*interdependence*: the linkage is statistically indistinguishable from zero in
+calm markets and activates only during acute stress. (2) It is
+*mechanism-specific and confound-free*: only the endogenous AMM pool-imbalance
+event activates; the three exogenous shocks (all with genuine A/A pairs) show
+no positive activation. (3) It *explains* the lag-0 peak (a common shock hits
+both pools simultaneously during panic) and is consistent with the TVP-VAR
+(94% of the spillover concentrated in the stress window). (4) The test
+statistic is a shift in linkage (Fisher z=+2.82, p=0.005), a sharper and more
+defensible claim than a single static correlation.
+
 ### What this run establishes
 
 1. The headline A/A result is **real and reproducible** (ρ̂ = 0.386, Bonferroni

@@ -192,6 +192,10 @@ centrality:
 pool_verify:
 	python scripts/00e_verify_pool_size_estimates.py
 
+# Regime-switching contagion test (Forbes-Rigobon) across all events' A/A pairs
+regime_contagion:
+	python scripts/24_run_regime_contagion.py
+
 # run an empirical paper-claim pipeline for one event.
 # Disables fixture fallback; gates result edges by provenance; uses --paper-mode
 # for all analysis scripts so only real nodes enter the model.

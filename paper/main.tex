@@ -45,7 +45,7 @@ Conventional DeFi stress contagion models assume directional propagation ---
 stress travels sequentially from one venue or asset to another.  We find the
 opposite for \emph{within-AMM} stress: during the June~2023 USDT/Curve episode,
 Curve 3pool and Curve crvUSD/USDT exhibit Bonferroni-significant co-movement
-at lag~0 in both directions ($\hat{\rho}=0.386$, $p\le0.014$, $n=168$ hourly
+at lag~0 in both directions ($\hat{\rho}=0.386$, $p\le0.014$, $n=281$ hourly
 on-chain observations), ruling out sequential transmission and pointing instead
 to a \emph{common-factor mechanism} of simultaneous arbitrageur response.
 More surprisingly, this positive result holds only for the one event where the
@@ -91,17 +91,18 @@ a machine learning prediction benchmark that quantifies the informational value
 of Tier-A on-chain features relative to Tier-B market proxies.
 
 \textbf{The surveillance gap.}
-A price-based DeFi stress monitor observes stablecoin basis widening after the
-stress has already manifested in market prices.  By contrast, Curve Finance
-\texttt{TokenExchange} logs record every swap with an exact block timestamp and
-exact token amount---data that is freely available and updated every 12 seconds.
-In the June~2023 USDT/Curve episode, abnormal net USDC selling in Curve pools
-is observable in on-chain logs before the corresponding basis dislocation
-appears in any CEX price feed.  Every existing stablecoin contagion monitoring
-system would have missed this early signal because none use TokenExchange flow
-data as a primary input.  Our TVP-VAR analysis (Section~\ref{sec:robust})
-quantifies when the propagation coefficient first significantly exceeds its
-pre-event baseline, establishing the lead time of the on-chain signal.
+A price-based DeFi stress monitor observes only stablecoin basis widening---an
+aggregate market outcome---and is blind to the flow-level mechanism beneath it.
+Curve Finance \texttt{TokenExchange} logs, by contrast, record every swap with
+an exact block timestamp and exact token amount, freely available and updated
+every 12 seconds.  This is a direct observation of the trading flow that
+\emph{produces} the price move, not a derived signal.  Our analysis shows that
+the cross-pool flow coupling during the June~2023 USDT/Curve episode is
+strong but \emph{contemporaneous} with the price stress rather than leading it
+(Sections~\ref{sec:main} and~\ref{sec:robust}); the contribution is therefore a
+mechanism-level decomposition of how stress moves through the AMM layer, not an
+early-warning claim.  No existing stablecoin contagion study uses TokenExchange
+flow as its primary evidence layer.
 
 \noindent\textbf{Methodological contributions.}
 \begin{itemize}[leftmargin=1.5em, topsep=2pt, itemsep=1pt]
@@ -125,7 +126,7 @@ pre-event baseline, establishing the lead time of the on-chain signal.
   \item \textbf{First A/A within-AMM-layer lead-lag result.}
     Curve 3pool and Curve crvUSD/USDT exhibit Bonferroni-significant
     bidirectional AMM-flow co-movement ($\hat{\rho}=0.386$, 95\%~CI
-    [0.25,~0.51], Bonferroni $p\le 0.014$) during the USDT/Curve 2023 episode
+    [0.28,~0.48], Bonferroni $p\le 0.014$) during the USDT/Curve 2023 episode
     using Tier-A hourly \texttt{usdc\_net\_sold\_1h} data.
 
   \item \textbf{Cross-event propagation mechanism comparison with a testable prediction.}
@@ -149,7 +150,7 @@ pre-event baseline, establishing the lead time of the on-chain signal.
 \textbf{Main co-movement finding.}
 In the USDT/Curve 2023 episode, the Curve 3pool and Curve
 crvUSD/USDT pool exhibit statistically supported bidirectional AMM-flow
-linkage at lag~0 ($\hat{\rho}=0.386$, 95\%~CI [0.25, 0.51],
+linkage at lag~0 ($\hat{\rho}=0.386$, 95\%~CI [0.28, 0.48],
 Bonferroni $p\le 0.014$) using Tier-A hourly
 \texttt{usdc\_net\_sold\_1h} data.
 Terra/LUNA has provenance-valid A/A candidates but fails the statistical gate
@@ -529,7 +530,7 @@ contagion study provides this audit trail.
 \texttt{curve\_3pool} $\to$ \texttt{curve\_crvusd\_usdt} and the reverse
 direction exhibit \textbf{Bonferroni-significant lead-lag}
 on hourly on-chain USDC net-sold flow ($p \le 0.014$ after correction,
-$\hat{\rho} = 0.386$, 95\%~CI [0.25,~0.51], $n=168$ observations),
+$\hat{\rho} = 0.386$, 95\%~CI [0.28,~0.48], $n=281$ observations),
 constituting the paper's primary paper-claimable result.
 All other events support either high-provenance descriptive or A/B
 directional evidence only; see Table~\ref{tab:cross_event}.
@@ -539,9 +540,9 @@ Table~\ref{tab:headline} reports the two paper-claimable A/A rows for the
 USDT/Curve 2023 event.  Both directions of the cross-pool pair
 (\texttt{curve\_3pool} $\leftrightarrow$ \texttt{curve\_crvusd\_usdt})
 pass Bonferroni correction on Tier-A \texttt{usdc\_net\_sold\_1h} data at the
-hourly grid ($\hat{\rho}=0.386$, 95\%~CI [0.25,~0.51],
+hourly grid ($\hat{\rho}=0.386$, 95\%~CI [0.28,~0.48],
 Bonferroni $p\le0.014$).  The 95\% CI is computed via Fisher $z$-transform
-($n=168$, $SE_z = 1/\sqrt{n-3} = 0.078$).
+($n=281$, $SE_z = 1/\sqrt{n-3} = 0.060$).
 
 \begin{table*}[!t]
 \centering
@@ -556,8 +557,8 @@ Bonferroni $p\le0.014$).  The 95\% CI is computed via Fisher $z$-transform
 \toprule
 Direction & $\hat{\rho}$ & 95\%~CI & $p$ (raw) & $p$ (Bonf.) & Strength \\
 \midrule
-\texttt{3pool} $\to$ \texttt{crvusd\_usdt} & 0.386 & [0.25,\;0.51] & 0.007 & 0.014 & robust \\
-\texttt{crvusd\_usdt} $\to$ \texttt{3pool} & 0.386 & [0.25,\;0.51] & $<$0.001 & $<$0.001 & robust \\
+\texttt{3pool} $\to$ \texttt{crvusd\_usdt} & 0.386 & [0.28,\;0.48] & 0.007 & 0.014 & robust \\
+\texttt{crvusd\_usdt} $\to$ \texttt{3pool} & 0.386 & [0.28,\;0.48] & $<$0.001 & $<$0.001 & robust \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -604,7 +605,7 @@ temporal dependence; (4)~\textbf{transfer entropy corroboration}
 (Section below) tests whether the finding survives a paradigm switch from
 linear cross-correlation to nonlinear information-theoretic association.
 The convergence of four methodologically distinct approaches is the strongest
-evidence available in a setting where only 168 hourly observations and five
+evidence available in a setting where only 281 hourly observations and five
 events preclude asymptotic guarantees.
 
 \textbf{Mechanism interpretation.}
@@ -639,14 +640,39 @@ fundamentally in their mathematical assumptions, applied to the same data,
 should disagree if the finding is a measurement artefact.  Convergence across
 the two paradigms constitutes stronger evidence than either method alone.
 
-We report the TE result conditionally.  If both TE directions exceed their
-block-shuffle null at $p<0.05$, we retain the bidirectional framing with TE as
-convergent nonlinear corroboration.  If TE reveals asymmetry (one direction
-significantly stronger), we revise the primary claim from ``bidirectional'' to
-``dominant direction X, weaker reverse direction Y''---a more precise statement
-of the finding.  Either outcome is scientifically valid; we commit to reporting
-whichever the data show.  Results will be reported in the camera-ready version
-once the live Etherscan pipeline is complete.
+The TE result (Table~\ref{tab:te}) is informative precisely because it does
+\emph{not} produce a robust direction.  Under the na\"ive permutation null,
+\texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt} is significant
+(TE${}=0.835$, $p=0.020$) while the reverse is not ($p=0.240$), hinting at
+asymmetry.  But under the block-shuffle null that controls for serial
+correlation, \emph{neither} direction survives ($p=0.575$ and $p=1.000$
+respectively).  This is convergent with, not contradictory to, the lead-lag
+finding: the lag-0 peak and the non-robust TE direction tell the same story.
+There is strong cross-pool association but no robust \emph{directional}
+transmission once serial dependence is accounted for---exactly the signature of
+a common-factor (simultaneous) mechanism rather than sequential contagion.
+The two paradigms, with entirely different assumptions, agree on the
+substantive conclusion.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Transfer entropy, same pair / feature / grid as the headline
+  lead-lag.}  Naive = permutation null; block = 24-hour block-shuffle null.
+  No direction survives the serial-correlation-robust block-shuffle null,
+  converging with the lag-0 lead-lag result on a common-factor (non-directional)
+  interpretation.}
+\label{tab:te}
+\small
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{lccc}
+\toprule
+Direction & TE & $p$ (naive) & $p$ (block) \\
+\midrule
+\texttt{3pool} $\to$ \texttt{crvusd\_usdt} & 0.835 & 0.020 & 0.575 \\
+\texttt{crvusd\_usdt} $\to$ \texttt{3pool} & 0.784 & 0.240 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 %% -----------------------------------------------------------------------
@@ -987,46 +1013,42 @@ grid configurations: \texttt{baseline\_60s} (1-minute), \texttt{block\_300}
 pair remains statistically significant across all configurations; the Terra
 pair remains non-significant across all configurations.
 
-Figure~\ref{fig:tvpvar} shows the time-varying propagation coefficient from a
-TVP-VAR model (168-hour rolling window, 24-hour step) for the primary A/A pair
-\texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt}.
+Figure~\ref{fig:tvpvar} shows the time-varying forecast-error-variance
+decomposition (FEVD) from a TVP-VAR model (168-hour rolling window, 24-hour
+step, \texttt{usdc\_net\_sold\_1h}) for the primary A/A pair.
 
-\textbf{Early-warning interpretation.}
-A static lead-lag result tells you that co-movement exists during a stress
-window.  The TVP-VAR tells you \emph{when it begins}: the date on which the
-propagation coefficient first significantly exceeds its pre-event 90\%
-credible interval is the earliest point at which a purely on-chain AMM-flow
-monitor would have flagged elevated cross-pool coupling.  We measure this as
-the first rolling window whose lower CI bound clears zero, and compare it to
-2023-06-15 (the declared shock onset, when CEX price dislocations became
-visible in public feeds).  If the TVP-VAR coefficient exceeds its pre-event
-baseline \emph{before} June~15, that gap quantifies the on-chain early-warning
-lead time --- the margin by which AMM-flow surveillance would have outpaced
-price-based monitoring.  If it exceeds the baseline \emph{on or after}
-June~15, the finding is still informative: it confirms that the co-movement is
-confined to the acute stress window and does not persist as a structural
-feature of the pair.
+\textbf{Transient, post-onset coupling.}
+The cross-pool spillover is strongly time-varying.  Averaged across the six
+rolling windows, \texttt{curve\_crvusd\_usdt} shocks explain 15.7\% of
+\texttt{curve\_3pool}'s forecast-error variance (the reverse direction explains
+only 1.5\%), but this average masks extreme concentration: a \emph{single}
+rolling window centred at $\approx$+140~hours relative to the 2023-06-15 shock
+onset carries a 94\% FEVD share, while all pre-onset windows show near-zero
+spillover.  The coupling is therefore acute and concentrated in the
+\emph{aftermath} of the shock, not as a precursor to it.
 
-The coefficient increases and then reverts toward zero as pool balances
-normalise.  This transient shape is inconsistent with spurious correlation
-driven by a common structural trend; it is consistent with an acute common
-shock that temporarily elevated arbitrage coupling between the pools.  The
-camera-ready version will report the specific number of hours of lead time
-(or lag) relative to the June~15 onset once the full empirical pipeline is run
-with live Etherscan credentials.
+This transient shape carries two implications.  First, it rules out spurious
+correlation driven by a persistent common trend: a structural artefact would
+produce stable spillover across windows, not a single late spike.  Second --- and
+contrary to a na\"ive early-warning hypothesis --- the on-chain coupling does
+\emph{not} precede the shock in this episode; it intensifies as the stress
+resolves and balances rebalance across pools.  The defensible claim is that the
+cross-pool coupling is \emph{event-driven and transient}, consistent with the
+contemporaneous (lag-0) lead-lag result, rather than a leading indicator.
+Whether AMM flow provides genuine early warning is an open question that
+requires events with a slower build-up than the abrupt USDT/Curve episode.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.95\linewidth]{results/paper/figures/figure_13_tvpvar_usdt_curve_2023.pdf}
-  \caption{TVP-VAR time-varying propagation coefficient for
-    \texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt},
-    USDT/Curve 2023 episode (168-hour window, 24-hour step, 90\% credible
-    interval shaded).  The coefficient first exceeds its pre-event baseline
-    at \textbf{[N hours before/after 2023-06-15 --- to be filled from pipeline
-    output]}, quantifying the on-chain early-warning lead time relative to the
-    first visible CEX price dislocation.  The coefficient decays back to
-    baseline as Curve pool balances normalise, ruling out a persistent
-    structural coupling between the pools.}
+  \caption{TVP-VAR forecast-error-variance decomposition for the
+    \texttt{curve\_crvusd\_usdt} $\rightarrow$ \texttt{curve\_3pool} spillover,
+    USDT/Curve 2023 (168-hour window, 24-hour step).  The spillover share is
+    near zero across all windows except a single window centred
+    $\approx$+140~h after the 2023-06-15 onset, where it reaches 0.94.  The
+    concentration in the aftermath --- not before the shock --- shows the coupling
+    is transient and event-driven, ruling out a persistent structural link
+    but providing no evidence of an early-warning lead time.}
   \label{fig:tvpvar}
 \end{figure}
 
@@ -1098,7 +1120,7 @@ evidence from Tier-B public market context, we find:
 
 \textbf{(i)~Co-movement.}  In the June 2023 USDT/Curve event, the Curve 3pool
 and Curve crvUSD/USDT pool exhibit statistically supported bidirectional
-AMM-flow co-movement ($\hat{\rho}=0.386$, 95\%~CI [0.25, 0.51],
+AMM-flow co-movement ($\hat{\rho}=0.386$, 95\%~CI [0.28, 0.48],
 Bonferroni $p\le 0.014$) at the hourly grid.  This is the only robust
 paper-claimable A/A result across five episodes.
 

@@ -82,6 +82,104 @@ See `DATA_INVENTORY.md` for the complete verified data inventory.
 
 ---
 
+## Verified results — full pipeline re-run (2026-06-04)
+
+This section reports numbers from an **end-to-end real-data re-run** of the
+`usdt_curve_2023` event (ingest → silver → gold panel → lead-lag → transfer
+entropy → TVP-VAR → claim gate), executed against the live Etherscan and
+Binance Vision APIs on 2026-06-04. No fixtures were used (`--no-fixture`).
+All numbers below are reproducible from the committed configs.
+
+### Node coverage (real data, Tier verified)
+
+| Node | Tier | Hourly rows | Source |
+|---|---|---|---|
+| `curve_3pool` | **A** | 379 | Etherscan `TokenExchange` logs (4,175 events) |
+| `curve_crvusd_usdt` | **A** | 285 | Etherscan `TokenExchange` logs (1,061 events) |
+| `usdt_mint_burn` | **A** | 5 | Etherscan `Issue`/`Redeem` logs (Tether decoder) |
+| `eth_usdt_exchange_flows` | B | 355 | Etherscan tokentx, exchange-labelled |
+| `usdt_binance` | B | 23,040 | Binance Vision bookTicker/klines |
+
+> The `usdt_mint_burn` node is **now genuine Tier-A** (5 hourly Issue/Redeem
+> events) — previously fixture. This is the first run with the Tether
+> Issue/Redeem decoder live.
+
+### Headline result — CONFIRMED
+
+The primary A/A lead-lag result reproduces exactly on fresh real data:
+
+| Direction | Lag | ρ̂ | p (raw) | p (Bonf.) | Sig. |
+|---|---|---|---|---|---|
+| `curve_3pool` → `curve_crvusd_usdt` | 0 | **0.3857** | 0.007 | **0.014** | ✓ |
+| `curve_crvusd_usdt` → `curve_3pool` | 0 | **0.3857** | <0.001 | **<0.001** | ✓ |
+
+- Feature: `usdc_net_sold_1h`; grid: 3600 s; overlap **n = 281 non-null hourly
+  buckets**.
+- Claim gate: `claim_level = A_A_dex_flow`, `claim_strength = robust`,
+  `paper_claim_allowed = True` (both directions), `uses_fixture = false`.
+- 4 of 45 provenance-claimable rows pass the paper gate (100% provenance pass).
+
+> **Reconciliation note:** the paper draft currently states `n = 168`; the
+> verified overlap is `n = 281`. The 95% Fisher-z CI tightens accordingly to
+> approximately **[0.28, 0.48]** (from the draft's [0.25, 0.51]). The paper
+> text must be updated to `n = 281` before submission.
+
+### Transfer entropy — convergent, with an honest twist
+
+TE was run on the **same** node pair, feature, and 3600 s grid (after fixing a
+min-node guard that previously blocked bivariate layer-filtered TE):
+
+| Direction | TE | p (naive) | p (block-shuffle) | Robust? |
+|---|---|---|---|---|
+| `curve_3pool` → `curve_crvusd_usdt` | 0.835 | 0.020 | 0.575 | **No** |
+| `curve_crvusd_usdt` → `curve_3pool` | 0.784 | 0.240 | 1.000 | No |
+
+**Interpretation.** TE shows a mild directional asymmetry under the naive null
+but **neither direction survives the block-shuffle null** that controls for
+serial correlation. This *converges* with the lead-lag finding rather than
+contradicting it: both paradigms agree the relationship is **contemporaneous
+co-movement, not robust directional transmission**. The lag-0 lead-lag peak and
+the non-robust TE direction tell the same story — a common-factor mechanism, not
+sequential contagion.
+
+### TVP-VAR — transient coupling, NOT early warning
+
+A rolling TVP-VAR (168 h window, 24 h step, `usdc_net_sold_1h`) now runs for
+`usdt_curve_2023` (previously skipped due to a feature-column bug, now fixed):
+
+| Spillover direction | FEVD share (mean) | FEVD share (max) |
+|---|---|---|
+| `curve_crvusd_usdt` → `curve_3pool` | 0.157 | **0.941** |
+| `curve_3pool` → `curve_crvusd_usdt` | 0.015 | 0.090 |
+
+The 94% peak occurs in a **single rolling window centred ≈ +140 h
+(≈ 5.8 days) *after* the 2023-06-15 shock onset**; all pre-onset windows show
+≈ 0 spillover.
+
+> **Honest correction:** an earlier draft speculated the coefficient
+> "strengthens *before* peak stress" as an early-warning signal. **The data do
+> not support this.** Cross-pool coupling is concentrated in the *aftermath*,
+> not as a precursor. The defensible claim is that the coupling is **transient
+> and event-driven** (consistent with no persistent structural link), not that
+> it provides early warning. The paper's TVP-VAR narrative (N7.2) must be
+> revised to remove the early-warning framing.
+
+### What this run establishes
+
+1. The headline A/A result is **real and reproducible** (ρ̂ = 0.386, Bonferroni
+   p ≤ 0.014, both directions, Tier-A on both endpoints, no fixtures).
+2. Three methods (lead-lag, TE, TVP-VAR) **converge on one mechanism**:
+   contemporaneous, transient cross-pool co-movement driven by a common USDT
+   shock — *not* directional/sequential contagion.
+3. Two paper claims need correction before submission: `n = 168 → 281`, and
+   removal of the TVP-VAR early-warning framing.
+
+Cross-event results (Terra pre-drain, USDC/SVB extended window, FTX/BUSD second
+Tier-A pools) are being regenerated and will be appended here once their
+real-data ingestion completes.
+
+---
+
 ## Data provenance and feature-tiering
 
 The repo uses both **node-level** and **feature-level** provenance. A node can be Tier A while

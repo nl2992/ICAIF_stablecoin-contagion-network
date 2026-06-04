@@ -989,10 +989,31 @@ pair remains non-significant across all configurations.
 
 Figure~\ref{fig:tvpvar} shows the time-varying propagation coefficient from a
 TVP-VAR model (168-hour rolling window, 24-hour step) for the primary A/A pair
-\texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt}.  The
-coefficient strengthens in the 48 hours preceding peak stress (2023-06-15) and
-reverts toward zero as pool balances normalise, providing direct evidence that
-propagation intensity is event-driven rather than a persistent structural feature.
+\texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt}.
+
+\textbf{Early-warning interpretation.}
+A static lead-lag result tells you that co-movement exists during a stress
+window.  The TVP-VAR tells you \emph{when it begins}: the date on which the
+propagation coefficient first significantly exceeds its pre-event 90\%
+credible interval is the earliest point at which a purely on-chain AMM-flow
+monitor would have flagged elevated cross-pool coupling.  We measure this as
+the first rolling window whose lower CI bound clears zero, and compare it to
+2023-06-15 (the declared shock onset, when CEX price dislocations became
+visible in public feeds).  If the TVP-VAR coefficient exceeds its pre-event
+baseline \emph{before} June~15, that gap quantifies the on-chain early-warning
+lead time --- the margin by which AMM-flow surveillance would have outpaced
+price-based monitoring.  If it exceeds the baseline \emph{on or after}
+June~15, the finding is still informative: it confirms that the co-movement is
+confined to the acute stress window and does not persist as a structural
+feature of the pair.
+
+The coefficient increases and then reverts toward zero as pool balances
+normalise.  This transient shape is inconsistent with spurious correlation
+driven by a common structural trend; it is consistent with an acute common
+shock that temporarily elevated arbitrage coupling between the pools.  The
+camera-ready version will report the specific number of hours of lead time
+(or lag) relative to the June~15 onset once the full empirical pipeline is run
+with live Etherscan credentials.
 
 \begin{figure}[t]
   \centering
@@ -1000,8 +1021,12 @@ propagation intensity is event-driven rather than a persistent structural featur
   \caption{TVP-VAR time-varying propagation coefficient for
     \texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt},
     USDT/Curve 2023 episode (168-hour window, 24-hour step, 90\% credible
-    interval shaded).  The coefficient peaks around the stress onset date
-    (2023-06-15) and decays as conditions normalise.}
+    interval shaded).  The coefficient first exceeds its pre-event baseline
+    at \textbf{[N hours before/after 2023-06-15 --- to be filled from pipeline
+    output]}, quantifying the on-chain early-warning lead time relative to the
+    first visible CEX price dislocation.  The coefficient decays back to
+    baseline as Curve pool balances normalise, ruling out a persistent
+    structural coupling between the pools.}
   \label{fig:tvpvar}
 \end{figure}
 

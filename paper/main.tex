@@ -189,9 +189,27 @@ provenance-ablation harness, not a performance claim.
 \label{sec:framework}
 %% -----------------------------------------------------------------------
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.86\textwidth]{results/paper/figures/fig_method.png}
+  \caption{\textbf{Evidence model and provenance-gated claim pipeline.}
+    \textbf{(a)}~Stress is represented as a directed graph over three layers:
+    centralized-exchange (CEX) market nodes (Tier~B, market-proxy), on-chain
+    AMM/DEX pool nodes and settlement (mint/burn) nodes (Tier~A,
+    execution-grade).  Each candidate edge inherits the \emph{minimum} tier of
+    its two endpoints and the feature used.
+    \textbf{(b)}~Every edge passes three sequential gates --- provenance
+    (fixture and Tier-B data are blocked or tier-capped), statistical (Bonferroni
+    / block-shuffle significance), and paper (only edges clearing both are
+    reported) --- so that empirical claims are bounded by the provenance of
+    their underlying data.}
+  \label{fig:method}
+\end{figure*}
+
 \subsection{Three-Layer Network}
 
-We model the stablecoin stress environment as a three-layer directed network.
+We model the stablecoin stress environment as a three-layer directed network
+(Figure~\ref{fig:method}a).
 
 \textbf{Layer~1---CEX markets.}  Nodes are trading pairs at centralized
 exchanges (e.g., USDC-Coinbase, USDT-Binance, USDT-Kraken).  Data are public
@@ -242,38 +260,24 @@ only) are blocked from all paper claims by the provenance gate.
 \label{sec:method}
 %% -----------------------------------------------------------------------
 
-The pipeline applies three gates in sequence.
+The pipeline applies three gates in sequence (Figure~\ref{fig:method}b).
 
 Each method has a defined role: AMM lead-lag is primary; transfer entropy and TVP-VAR are corroborating/robustness; the supervised ML benchmark is a provenance-ablation harness; and the HMM is the unsupervised detector.
 
 
 
-\textbf{Gate~1---Provenance gate.}  Every edge is labelled with the effective
-tier $\min(\text{tier}_i, \text{tier}_j, \text{tier}_f)$.  Fixture-derived
-rows are blocked unconditionally.  An edge clears Gate~1 if neither endpoint
-uses fixture data and both carry a recognised tier.
-
-\textbf{Gate~2---Statistical gate.}  For AMM-only lead-lag analysis, we
-compute the cross-correlation of \texttt{usdc\_net\_sold\_1h}
-(net USDC sold per hour, summed from \texttt{TokenExchange}
-logs, Tier~A) on a 3600-second grid with a maximum lag of $\pm12$ hours.
-Significance is assessed via Bonferroni correction applied to all tested lag
-steps across all events (total tests: 25 lags $\times$ 5 events $\times$ 2
-directions = 250); the block-bootstrap with 1000 permutations provides an
-independent check.  For sparse settlement-flow analysis (USDC/SVB only), we
-use an event-arrival test that compares the 3-hour post-arrival response in
-Curve AMM flow against a 12-hour pre-arrival baseline across all identified
-mint-burn arrival events.  Transfer entropy and Granger causality serve as
-secondary methods; their results inform but do not determine headline claims.
-
-\textbf{Gate~3---Paper gate.}  An edge is \emph{paper-claimable} if and only
-if it passes both Gates~1 and~2.  The claim taxonomy is:
-\begin{itemize}[noitemsep,topsep=2pt,leftmargin=16pt]
-  \item \texttt{A\_A\_dex\_flow}: both Tier-A DEX/AMM endpoints; headline level.
-  \item \texttt{A\_A\_onchain\_settlement}: Tier-A settlement flow; strong.
-  \item \texttt{A\_B\_suggestive\_directional}: capped by a Tier-B endpoint; indicative.
-  \item \texttt{B\_B\_context\_only}: both Tier~B; contextual co-movement only.
-\end{itemize}
+\emph{Gate~1 (provenance)} assigns each edge the effective tier
+$\min(\text{tier}_i,\text{tier}_j,\text{tier}_f)$ and blocks fixture-derived
+rows unconditionally.  \emph{Gate~2 (statistical)} evaluates the AMM lead-lag
+cross-correlation of \texttt{usdc\_net\_sold\_1h} on a 3600\,s grid with maximum
+lag $\pm12$\,h, assessing significance by Bonferroni correction over all
+$25\!\times\!5\!\times\!2 = 250$ lag--event--direction tests, with a
+1000-sample block bootstrap as an independent check; settlement-layer events
+use a sparse event-arrival test, and transfer entropy and Granger causality
+serve as corroborating methods.  \emph{Gate~3 (paper)} admits an edge as
+\emph{paper-claimable} only when it clears both prior gates.  The resulting
+taxonomy ranks evidence as A/A DEX-flow and A/A settlement (paper-claimable),
+A/B directional (indicative), and B/B contextual.
 
 
 
@@ -283,80 +287,28 @@ if it passes both Gates~1 and~2.  The claim taxonomy is:
 \label{sec:provgate}
 %% -----------------------------------------------------------------------
 
-The three-gate pipeline is itself a methodological contribution.  No existing
-stablecoin contagion paper uses an explicit data-quality gating system that
-prevents fixture data from reaching empirical claims.  We describe the key
-design principles.
+The three-gate pipeline is itself a methodological contribution: to our
+knowledge no prior stablecoin-contagion study makes data provenance an explicit,
+claim-blocking input.  Its necessity is concrete.  On-chain research pipelines
+routinely include deterministic ``fixture'' datasets for testing; if such rows
+are not flagged and blocked they can enter the analysis and yield spuriously
+precise results.  Our pipeline tags every fixture row
+\texttt{tier\_actual\,=\,fixture\_non\_empirical} and excludes it from any
+paper-claimable table, while a per-event audit output
+(\texttt{table\_claim\_audit\_summary.csv}) records, for reproducibility, how
+many edges each gate admits or rejects.
 
-\textbf{Evidence hierarchy analogy.}
-The claim-gate instantiates, for on-chain financial data, the evidence hierarchy
-familiar from two established domains.  In \emph{clinical medicine}, randomised
-controlled trials outrank observational studies, which outrank case reports;
-meta-analyses weight studies by their design tier, not by their sample size
-alone.  In \emph{OTC derivatives reporting}, the FSB and IOSCO distinguish
-transaction-level data (execution-grade) from notional-level data (aggregate
-estimates) from position-level data (inferred); regulatory claims about systemic
-exposure must cite transaction-level data wherever available.  Our Tier-A
-on-chain logs (Curve \texttt{TokenExchange} records with block timestamps and
-exact amounts) correspond to transaction-level evidence in both analogies.
-Tier-B market proxies (OHLCV candles, BBO spread) correspond to notional-level
-estimates.  Fixture data is excluded entirely, as a non-validated instrument
-would be.  This analogy is not rhetorical: it provides a precise criterion
-for when the claim-gate should block a result even if that result would survive
-a standard significance test.
-
-\textbf{Why a provenance gate is needed in on-chain research.}
-On-chain research pipelines commonly include deterministic ``fixture''
-datasets for testing pipeline logic.  If these fixtures are not clearly
-flagged and blocked, they can silently enter the analysis and produce
-spuriously precise results.  Our pipeline assigns
-\texttt{tier\_actual\,=\,fixture\_non\_empirical} to every fixture-generated
-row and unconditionally blocks such rows from entering any paper-claimable
-table.  The \texttt{00c\_claim\_gate.py} script enforces this; the
-\texttt{table\_claim\_audit\_summary.csv} output provides a per-event
-anti-cherry-picking audit trail.
-
-\textbf{Claim-level taxonomy.}
-\begin{center}
-\small
-\begin{tabular}{@{}llll@{}}
-\toprule
-Claim level & Node tier pair & Feature tier & Paper-claimable? \\
-\midrule
-\texttt{A\_A\_dex\_flow}           & A/A & $\geq$A & Yes, if stat.\ gate passes \\
-\texttt{A\_A\_onchain\_settlement} & A/A & $\geq$A & Yes, if stat.\ gate passes \\
-\texttt{A\_B\_suggestive}          & A/B & $\geq$B & Indicative only \\
-\texttt{B\_B\_context}             & B/B & $\geq$B & Context only \\
-\texttt{diagnostic\_only}          & any & any      & No \\
-\bottomrule
-\end{tabular}
-\end{center}
-A claim is capped at the minimum tier of the two nodes and the feature.
-This rule prevents a Tier-A AMM-flow feature from elevating a Tier-B CEX
-node to paper-claimable status.
-
-\textbf{The \texttt{table\_claim\_audit\_summary.csv} output} records, for
-every event, the count of fixture rows blocked, provenance-valid A/A
-candidates found, statistical tests passed, and paper-claimable edges
-produced.  Reviewers can audit any claim by inspecting this table directly.
-
-\textbf{Regulatory context.}
-The Financial Stability Board's 2023 crypto-asset monitoring framework
-identifies data quality as the primary barrier to consistent DeFi contagion
-surveillance~\cite{FSB2023}.  Our three-gate pipeline provides a replicable,
-machine-readable response to this barrier: every paper-level claim carries a
-\texttt{tier\_actual} tag, a provenance manifest, and a gate-log that
-independent verifiers --- including regulators --- can audit without re-running
-the pipeline.  The claim-gate instantiates, for on-chain financial data, the
-evidence hierarchy familiar from clinical medicine (where randomised trials
-outrank observational studies, which outrank case reports): Tier-A on-chain
-logs are our transaction-level data; Tier-B market proxies are our
-notional-level estimates; fixture data is excluded entirely, as a
-non-validated instrument would be in a clinical trial.  No existing stablecoin
-contagion study provides this audit trail.
+Conceptually, the gate instantiates the evidence hierarchies used in clinical
+medicine (randomised trials outrank observational studies) and in FSB/IOSCO OTC
+derivatives reporting (transaction-level data outrank notional-level
+estimates)~\cite{FSB2023}: our Tier-A on-chain logs are transaction-level
+evidence, Tier-B market proxies are notional-level estimates, and fixture data
+is excluded as a non-validated instrument.  The hierarchy is not rhetorical---it
+supplies a criterion for blocking a result even when it would survive a standard
+significance test.
 
 %% -----------------------------------------------------------------------
-\section{Main Result: USDT/Curve 2023 A/A AMM-Flow Linkage}
+\section{Within-AMM Co-Movement: USDT/Curve 2023}
 \label{sec:main}
 %% -----------------------------------------------------------------------
 
@@ -481,17 +433,25 @@ during the acute window and is absent in calm markets.
 \begin{figure*}[t]
   \centering
   \includegraphics[width=0.80\textwidth]{results/paper/figures/fig_findings.png}
-  \caption{\textbf{Three positive findings, by event.}
-    (a)~Regime-switching contagion: cross-pool flow coupling in calm vs.\ panic
-    ($*$ marks a significant calm$\to$panic shift).
-    (b)~Arbitrage flips from stabilizing (negative) to amplifying (positive)
-    under stress for supply/regulatory shocks.
-    (c)~On-chain price discovery: the Curve pool leads the exchange for
-    DeFi-native stress and lags only for the exogenous SVB bank run.}
+  \caption{\textbf{Three positive findings, by event} (blue = calm,
+    red/green = panic).
+    \textbf{(a)~Regime-switching contagion.}  Lag-0 cross-pool flow correlation
+    in the calm vs.\ acute regime.  For USDT/Curve it jumps $0.09\!\to\!0.53$
+    ($*$: Fisher $z=2.82$, $p=0.005$); only this endogenous shock activates,
+    while the exogenous events stay flat or decouple.
+    \textbf{(b)~Arbitrage flip.}  Contemporaneous flow-vs-price coupling:
+    negative (\emph{stabilizing}) in calm, turning positive (\emph{amplifying})
+    in panic for the supply/regulatory shocks (USDT/Curve $z{=}{+}3.84$, BUSD
+    $z{=}{+}3.69$) and more negative for the exchange-credit shock (FTX
+    $z{=}{-}2.80$).
+    \textbf{(c)~On-chain price discovery.}  Mean first-differenced lead-lag at
+    on-chain-leads vs.\ CEX-leads lags: the Curve pool leads the exchange for
+    DeFi-native stress (and deviates $37\times$ more), lagging only for the
+    exogenous SVB bank run.}
   \label{fig:findings}
 \end{figure*}
 
-Figure~\ref{fig:findings} shows the pattern is
+Figure~\ref{fig:findings}(a) shows the pattern is
 mechanism-specific.  Only the endogenous event activates; Terra/LUNA stays flat (the UST/Wormhole pool is
 draining, so there is no liquid counterparty to couple with), while FTX and
 BUSD --- shocks that originate in exchange credit and regulation --- show if
@@ -501,7 +461,7 @@ attributed to missing data; it is evidence that AMM-flow contagion is specific
 to stress that originates within the AMM layer.
 
 %% -----------------------------------------------------------------------
-\subsection{Arbitrage Flips from Stabilizing to Amplifying}
+\subsection{Regime-Dependent Reversal of Arbitrage}
 \label{sec:arbflip}
 %% -----------------------------------------------------------------------
 
@@ -512,7 +472,7 @@ arbitrageurs trade against the dislocation, so high on-chain flow intensity
 coincides with \emph{small} price deviation.  We test this by correlating
 $|\texttt{usdc\_net\_sold\_1h}|$ for Curve 3pool (Tier-A flow intensity) with
 $|\texttt{basis\_vs\_usd}|$ on the matched CEX venue (price-deviation
-magnitude), within the calm and panic regimes (Figure~\ref{fig:findings}).
+magnitude), within the calm and panic regimes (Figure~\ref{fig:findings}(b)).
 
 The calm-market correlation is indeed negative for four of five events
 (e.g.\ USDT/Curve $-0.22$, $p=0.02$) --- on-chain arbitrage dampens price
@@ -534,7 +494,7 @@ correlations (Section~\ref{sec:robust}).
 
 
 
-This is one of the paper's clearest \emph{positive} mechanism findings (Figure~\ref{fig:findings}): the
+This regime-dependent reversal (Figure~\ref{fig:findings}(b)) is a positive structural finding: the
 sign of the flow--price relationship is a regime indicator, and the direction
 in which acute stress bends it is informative about the shock --- amplifying
 for supply and regulatory shocks where on-chain arbitrage is overrun, more
@@ -552,7 +512,7 @@ directly.  For each event we take the on-chain pool price deviation from peg,
 $|\texttt{implied\_pool\_price}-1|$ (Curve 3pool), and the matched CEX
 deviation $|\texttt{basis\_vs\_usd}|$, \emph{first-difference} both to remove
 the shared stress trend, and compare the average cross-correlation at
-on-chain-leads ($k>0$) versus CEX-leads ($k<0$) lags (Figure~\ref{fig:findings}).
+on-chain-leads ($k>0$) versus CEX-leads ($k<0$) lags (Figure~\ref{fig:findings}(c)).
 
 The result is asymmetric and mechanism-consistent.  For the DeFi-native shocks,
 on-chain price changes lead the CEX: USDT/Curve shows on-chain-leads $0.175$
@@ -568,7 +528,7 @@ the fifth is the case where theory says it should not be.
 
 
 
-The deviation magnitudes (Figure~\ref{fig:findings}) make the surveillance case concrete.  During the
+The deviation magnitudes (Figure~\ref{fig:findings}(c)) make the surveillance case concrete.  During the
 USDT/Curve episode the Curve pool price fell to $0.875$ --- a $12.5\%$
 deviation --- while the matched Binance USDT price moved only $0.3\%$: the pool
 priced the stress \textbf{37$\times$ more strongly} than the exchange, and a
@@ -630,7 +590,7 @@ BUSD       & regulatory          & $\hat{\rho}\!=\!-0.15$, n.s.       & not clai
 \FloatBarrier  % flush result-section floats before the ML section
 
 %% -----------------------------------------------------------------------
-\section{Machine Learning: Why Prediction Fails and Detection Succeeds}
+\section{Predictive Benchmarking and Unsupervised Regime Detection}
 \label{sec:prediction}
 %% -----------------------------------------------------------------------
 
@@ -709,7 +669,7 @@ but past flows contain no exploitable predictive signal at the 1-minute
 horizon.  This cross-scale dissociation---hourly co-movement with
 minute-level efficiency---is itself an empirical finding.
 
-\subsection{Diagnosis: Why Cross-Event Prediction Fails}
+\subsection{Diagnosis of the Cross-Event Failure}
 \label{sec:ml-diagnosis}
 
 Two supervised approaches failed: (1) the 1-minute price-stress classifier
@@ -725,7 +685,7 @@ classifier reaches a mean AUROC of $0.82$ (USDT/Curve $0.92$, Terra $0.97$,
 USDC/SVB $0.91$).  So the features \emph{do} separate stress from calm --- when
 the model is trained and tested on the same event.
 
-\emph{But it does not transfer} (Figure~\ref{fig:ml}).  The pairwise train-on-$A$/test-on-$B$ AUROC
+\emph{But it does not transfer} (Figure~\ref{fig:ml}(a)).  The pairwise train-on-$A$/test-on-$B$ AUROC
 matrix has within-event diagonal $0.92$--$0.97$ but an \textbf{off-diagonal
 (cross-event) mean of $0.50$ --- exactly chance} (Table~\ref{tab:mldiag}).  The
 matrix is block-structured: the three pool-stress events (USDT/Curve, Terra,
@@ -773,11 +733,16 @@ Domain-classifier accuracy     & $0.30$ & covariate shift only mild \\
   \centering
   \includegraphics[width=0.78\textwidth]{results/paper/figures/fig_ml.png}
   \caption{\textbf{Why prediction fails and detection works.}
-    (a)~Pairwise cross-event transfer AUROC: the within-event diagonal is high
-    but off-diagonal transfer is at chance, and the block structure (pool-stress
-    events vs.\ CEX-borne FTX/BUSD) reveals concept shift.
-    (b)~An unsupervised HMM on on-chain pool state, fit with no labels, recovers
-    the true panic window (shaded) at AUROC~$0.93$.}
+    \textbf{(a)~Cross-event transfer.}  AUROC of a supervised regime classifier
+    trained on the row event and tested on the column event.  The within-event
+    diagonal is high ($0.92$--$0.97$) but off-diagonal transfer averages chance;
+    the block structure --- the three pool-stress events transfer to one another
+    while FTX/BUSD invert --- is the signature of \emph{concept shift}, not
+    covariate shift.
+    \textbf{(b)~Unsupervised detection.}  Posterior probability of the HMM
+    ``stress'' latent state over the USDT/Curve window, fit on on-chain pool
+    state with \emph{no} labels.  It tracks the true \texttt{panic} regime
+    (shaded) and is near zero in calm conditions (AUROC~$0.93$).}
   \label{fig:ml}
 \end{figure*}
 
@@ -786,7 +751,7 @@ cannot exist, the model must not rely on cross-event supervision at all --- it
 should learn each event's regime structure from that event alone, without
 labels.  That is exactly what the next subsection does.
 
-\subsection{Unsupervised Regime Detection Succeeds Where Prediction Fails}
+\subsection{Unsupervised Regime Detection}
 \label{sec:hmm}
 
 Both negative ML results above share a root cause: they are \emph{supervised,
@@ -831,16 +796,15 @@ FTX 2022        & exchange credit    & $0.389$ & $0.342$ \\
 
 
 
-The unsupervised HMM (Figure~\ref{fig:ml}) recovers the stress regime at AUROC~$0.92$--$0.95$ for the
+The unsupervised HMM (Figure~\ref{fig:ml}(b)) recovers the stress regime at AUROC~$0.92$--$0.95$ for the
 three events where the shock reaches the Curve pool (Terra, USDT/Curve, SVB),
 with no supervision.  The two low-AUROC events are not failures of the method
 but of mechanism: FTX ($0.39$) and BUSD ($0.62$) are shocks whose stress is
 borne by exchanges and issuers rather than the 3pool, so there is no strong
 pool-state regime to detect --- the same endogenous/exogenous boundary that runs
-through every result in this paper.  The methodological lesson generalises
-beyond stablecoins: when events are scarce, an unsupervised latent-state
-detector extracts a usable real-time stress signal that a supervised
-cross-event predictor cannot.
+through every result in this paper.  More generally, when labelled events are scarce, an unsupervised latent-state
+detector recovers a usable regime signal that a supervised cross-event
+predictor cannot.
 
 \textbf{Graph model (exploratory).}
 A SnapshotGCN over the TE-edge adjacency feeding an LSTM is implemented but

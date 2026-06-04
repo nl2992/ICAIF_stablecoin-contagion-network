@@ -8,6 +8,20 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{array}
+\usepackage{placeins}  % \FloatBarrier to flush pending floats at section ends
+%% Loosen float placement so dense result sections can absorb more floats/page
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{8}
+
+%% Figure search paths: figures_tex/ lives beside this file; results/paper/figures/
+%% lives at the repo root (one level up).  Listing both lets the paper compile
+%% from the paper/ directory regardless of where a figure was generated.
+\graphicspath{{./}{../}}
 
 %% Relax line-breaking to prevent overfull hboxes from inline code / long tokens
 \setlength{\emergencystretch}{3em}
@@ -1098,6 +1112,8 @@ BUSD 2023
 \end{tabularx}
 \end{table*}
 
+\FloatBarrier  % flush result-section floats before the ML section
+
 %% -----------------------------------------------------------------------
 \section{Machine Learning: Why Prediction Fails and Detection Succeeds}
 \label{sec:prediction}
@@ -1371,6 +1387,8 @@ with Tier-A panels before cross-event generalisation is plausible.
 Full empirical GNN results are therefore not included in the primary
 analysis (see Section~\ref{sec:limitations}) and the \texttt{gnn}
 Makefile target is intentionally excluded from \texttt{paper\_gate}.
+
+\FloatBarrier  % flush the dense ML-section floats before moving on
 
 
 %% -----------------------------------------------------------------------

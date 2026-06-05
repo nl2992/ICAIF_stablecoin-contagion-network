@@ -591,7 +591,7 @@ BUSD       & regulatory          & $\hat{\rho}\!=\!-0.15$, n.s.       & not clai
 \FloatBarrier  % flush result-section floats before the ML section
 
 %% -----------------------------------------------------------------------
-\section{Predictive Benchmarking and Unsupervised Regime Detection}
+\section{When Prediction Fails: Unsupervised Regime Detection}
 \label{sec:prediction}
 %% -----------------------------------------------------------------------
 
@@ -899,9 +899,11 @@ the exogenous SVB bank run.  \emph{(iv)~Unsupervised detection over supervised p
 cross-event prediction fails under concept shift ($n=5$), whereas an unsupervised
 HMM recovers the stress regime from on-chain state without labels
 (AUROC~$0.92$--$0.95$).  The provenance gate unifies these results: it rejects
-the non-robust predictive lift while admitting the findings that survive
-scrutiny.  Future
-work: live CEX L2 depth, extension to Uniswap~v3, and powered settlement tests.
+the non-robust predictive lift while certifying the findings that withstand
+scrutiny.  Two principles emerge for few-event, on-chain research --- gate
+claims by the provenance of their data, and where labels are scarce, detect
+rather than predict.  Future work includes executable CEX order-book depth, an
+extension to Uniswap~v3, and higher-powered settlement-layer tests.
 
 
 \bibliographystyle{ACM-Reference-Format}

@@ -79,13 +79,14 @@ off-chain run (FTX: $z=-2.8$).  Second, price discovery is on-chain for
 DeFi-native stress: the Curve pool price leads Binance ($+1$h $r=0.28$,
 $p<10^{-4}$) and deviates $37\times$ more ($12.5\%$ vs $0.3\%$) for USDT/Curve,
 while the CEX leads only for the exogenous SVB bank run.  Finally, on the machine-learning
-question, Tier-A on-chain pool state adds genuine stress-detection information
-over a Tier-B market baseline (up to $+0.37$ AUROC for Terra/LUNA, where the CEX
-basis alone is near-useless), yet this within-event signal does not transfer:
-supervised cross-event prediction collapses to chance under concept shift, while
-an unsupervised Hidden Markov Model recovers the regime from on-chain state
-without labels (AUROC up to $0.95$).  The provenance gate certifies the first
-and rejects the second.  The broad implication:
+question, we run one unsupervised detector causally on each evidence layer: an
+online Hidden Markov Model on Tier-A on-chain state recovers endogenous
+DeFi-native stress that the Tier-B market layer registers at chance --- for
+Terra/LUNA, causal AUROC $0.95$ versus $0.50$, raising the alarm $116$ hours
+before the CEX basis --- whereas market data is needed for the exchange- and
+regulation-borne shocks the pool never sees.  Detection, not prediction, is the
+right frame: supervised cross-event prediction collapses under concept shift,
+and the two layers are complementary by mechanism.  The broad implication:
 DeFi stress surveillance needs \emph{separate monitoring architectures} for
 endogenous pool-imbalance events versus exchange-originating or regulatory
 shocks.  A provenance-aware three-gate pipeline underpins every claim, blocking
@@ -93,7 +94,7 @@ fixture and Tier-B data from reaching paper-level conclusions.
 \end{abstract}
 
 \keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate;
-  contagion networks; machine learning; prediction benchmark}
+  contagion networks; online detection; hidden Markov model}
 
 \ccsdesc[500]{Applied computing~Economics}
 \ccsdesc[300]{Computing methodologies~Machine learning}
@@ -147,12 +148,13 @@ present only for the endogenous shock, despite all five events carrying genuine
 Tier-A A/A pairs; (2)~arbitrage flipping from stabilizing to amplifying under
 stress ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX); (3)~on-chain price
 discovery, the Curve pool leading the exchange and deviating $37\times$ more for
-DeFi-native stress; and (4)~a machine-learning result with two
-sides --- Tier-A on-chain pool state adds robust within-event stress-detection
-information over a Tier-B market baseline (up to $+0.37$ AUROC), but this signal
-does not transfer across events under concept shift, so an unsupervised HMM
-(AUROC $0.92$--$0.95$), not a supervised predictor, is the right tool when
-labels are scarce.
+DeFi-native stress; and (4)~a machine-learning result on
+which evidence layer detects stress first --- an unsupervised online detector run
+causally on Tier-A on-chain state recovers endogenous DeFi-native stress that the
+Tier-B market layer registers at chance (Terra/LUNA causal AUROC $0.95$ vs
+$0.50$, $116$h earlier), while market data is required for exchange-borne shocks;
+the layers are complementary, and supervised cross-event prediction fails under
+concept shift.
 
 
 %% -----------------------------------------------------------------------
@@ -269,7 +271,7 @@ only) are blocked from all paper claims by the provenance gate.
 
 The pipeline applies three gates in sequence (Figure~\ref{fig:method}b).
 
-Each method has a defined role: AMM lead-lag is primary; transfer entropy and TVP-VAR are corroborating/robustness; the supervised ML benchmark is a provenance-ablation harness; and the HMM is the unsupervised detector.
+Each method has a defined role: AMM lead-lag is primary; transfer entropy and TVP-VAR are corroborating/robustness; the unsupervised HMM is run causally as an online stress detector on each evidence layer; and supervised prediction is reported only as a negative control (it fails under concept shift).
 
 
 
@@ -597,85 +599,144 @@ BUSD       & regulatory          & $\hat{\rho}\!=\!-0.15$, n.s.       & not clai
 \FloatBarrier  % flush result-section floats before the ML section
 
 %% -----------------------------------------------------------------------
-\section{When On-Chain Data Helps: Detection versus Prediction}
+\section{Online Stress Detection: When On-Chain Data Sees First}
 \label{sec:prediction}
 %% -----------------------------------------------------------------------
 
-This section asks what machine-learning value the Tier-A on-chain layer actually
-carries, and answers it with the same provenance discipline applied to every
-other claim.  Three questions organise the analysis.  \emph{(i)~Within} an
-event, does on-chain pool state carry stress information beyond a price/market
-baseline?  Decisively yes, and most where the market signal is weakest
-(Section~\ref{sec:infoval}).  \emph{(ii)}~Does any supervised mapping
-\emph{transfer} across events?  No: across five heterogeneous episodes the
-feature--label relation inverts and cross-event prediction collapses to chance
-(Section~\ref{sec:ml-diagnosis}).  \emph{(iii)}~Absent labels, can the regime be
-recovered at all?  Yes, by an unsupervised latent-state model
-(Section~\ref{sec:hmm}).  The provenance gate unifies the three answers: it
-\emph{certifies} the within-event informational value of Tier-A data and
-\emph{rejects} the non-transferable cross-event predictive lift --- one
-discipline, opposite verdicts.
+Predicting stablecoin stress is a natural machine-learning goal, but it inherits
+a structural obstacle that no amount of modelling removes: only a handful of
+systemic episodes exist, and we confirm below that supervised cross-event
+prediction cannot overcome it.  We therefore pose the question the data can
+answer, and that a surveillance system actually needs.  Framed as \emph{online,
+unsupervised detection}, does execution-grade Tier-A on-chain data reveal stress
+that Tier-B market data misses --- and sooner?
 
-\subsection{On-Chain Features Add Detection Value}
-\label{sec:infoval}
+Our machine-learning contribution is a causal, model-agnostic benchmark.  We run
+one unsupervised detector --- a three-state Gaussian Hidden Markov Model ---
+\emph{identically} on Tier-A on-chain pool state and on Tier-B market state, and
+score it on its \emph{filtered} (forward-only) posterior, so the decision at hour
+$t$ uses only information available by $t$.  Because the model is fixed and only
+the data source varies, any performance gap is attributable to the \emph{data},
+not to model capacity --- the comparison a provenance framework should make.  The
+finding is that on-chain data is \emph{necessary} to detect endogenous,
+DeFi-native stress that market data registers at chance, that it does so up to
+$116$ hours earlier, and that the two evidence layers are \emph{complementary}
+across shock mechanisms.
 
-\textbf{Task.}  On each event's hourly grid we detect the contemporaneous stress
-regime (the \texttt{panic} hours) with 5-fold cross-validated logistic
-regression, comparing two provenance-defined feature sets on identical folds: a
-Tier-B \emph{market} baseline (CEX $|\text{basis}|$, spread, order-book
-imbalance) and that baseline \emph{plus} Tier-A on-chain pool state
-($|\text{price\,dev}|$, $|\text{reserve imbalance}|$, pool slippage,
-$|\text{net USDC sold}|$).  The lift is a paired, within-fold difference,
-averaged over 20 random seeds.
+\subsection{Detector and Evaluation Protocol}
+\label{sec:detector}
 
-\textbf{Result.}  Adding Tier-A features improves stress detection in four of
-five events, and the combined model never trails the market baseline by more
-than $0.6$~pp (Figure~\ref{fig:ml}(a)).  The gain is largest exactly where the
-market signal is weakest.  For Terra/LUNA the CEX basis alone is near-useless
-(AUROC~$0.61$) because the de-peg registers in the on-chain pool before it is
-priced into the USDT basis; adding pool state lifts detection to $0.99$ --- a
-$+0.37$ gain, stable to $\pm0.002$ across seeds.  USDC/SVB gains $+0.09$
-($0.88\!\to\!0.96$).  Averaged over the three events with a genuine on-chain
-regime (Terra, USDT/Curve, SVB) the lift is $+0.15$~AUROC.  Where the market
-baseline already saturates (USDT/Curve, $0.98$) on-chain features add nothing,
-which is the same reading from the other side: \emph{on-chain data is
-informative precisely when price data is not}.  This is the paper's provenance
-thesis made quantitative, and it is the one machine-learning claim the gate
-\emph{certifies} --- a robust, replicable Tier-A informational gain.
+We fit a three-state Gaussian HMM by expectation--maximisation on standardised
+features, using \emph{no} \texttt{event\_phase} labels.  The Tier-A feature set
+is on-chain Curve-3pool state ($|\text{price\,dev}|$, $|\text{net USDC sold}|$,
+$|\text{reserve imbalance}|$); the Tier-B set is CEX market state
+($|\text{basis}|$, spread, order-book imbalance).  The latent state with the
+highest mean on the lead stress feature is labelled ``stress''.  Detection is
+scored \emph{causally}: at each hour we form the filtered posterior
+$P(\text{stress}\mid x_{1:t})$ and measure (i)~its AUROC against the held-out
+\texttt{panic} regime and (ii)~the \emph{detection latency} --- hours from the
+true onset to the first alarm, where the alarm threshold is fixed at a $5\%$
+false-alarm rate on the pre-onset calm window.  As a stricter check we refit the
+HMM on the first half of each episode and filter forward; the source ranking is
+unchanged.
 
-\subsection{...but It Does Not Transfer Across Events}
-\label{sec:ml-diagnosis}
+\subsection{Result: On-Chain Data Detects the Endogenous Regime}
+\label{sec:detection}
 
-The within-event signal does not survive as a cross-event \emph{predictor}.  A
-leave-one-event-out classifier that predicts a held-out event's \texttt{panic}
-hours from the others reaches only mean AUROC~$\approx0.60$ (one held-out event
-at $0.11$), and an earlier within-event forecasting configuration that appeared
-to show a $+5.1$~pp Tier-A lift did not replicate once the evaluation window was
-extended to the full 30-day SVB stress period: the lift vanished ($+0.1$~pp for
-the best model, and Random Forest was \emph{hurt} by $-9.8$~pp).  We therefore
-make no cross-event predictive claim --- the provenance gate rejects it --- and
-instead diagnose the cause (Figure~\ref{fig:ml}(b), Table~\ref{tab:mldiag}).
+Run on identical detectors, the two data sources separate sharply by mechanism
+(Table~\ref{tab:detection}, Figure~\ref{fig:detection}).  For the three
+pool-borne episodes the on-chain detector attains a mean causal AUROC of $0.92$
+against the market detector's $0.78$.  The gap is widest for Terra/LUNA: the
+on-chain detector scores $0.954$ while the market detector sits at \emph{chance}
+($0.499$), and it raises the alarm $116$~hours earlier.  The reason is
+mechanistic and visible in Figure~\ref{fig:detection}(b): Terra was a UST
+de-peg, so USDT held its peg and the USDT/Binance basis is actually \emph{higher}
+in the calm pre-window than during the panic (basis AUROC $0.39$), while on-chain
+pool deviation climbs through the event.  A market-only monitor is structurally
+blind to a stablecoin crisis that does not pass through its own order book; the
+pool is not.
 
-The pairwise train-on-$A$/test-on-$B$ AUROC matrix has a high within-event
-diagonal ($0.92$--$0.97$) but an \textbf{off-diagonal mean of $0.50$ --- exactly
-chance}, and is block-structured: the three pool-stress events transfer to one
-another ($0.76$--$0.97$) while transfer to and from FTX/BUSD is at or below
-chance.  A domain classifier identifying a sample's source event reaches only
-$0.30$ accuracy (chance $0.20$), so the feature \emph{distributions} are
-similar; what differs is the feature-to-label \emph{mapping}.  The panic/calm
-price-deviation ratio is $2.0$/$1.9$/$2.9$ for the pool-stress events --- panic
-means the pool is stressed --- but $0.84$/$0.54$ for FTX and BUSD, where panic
-coincides with \emph{lower} pool deviation.  The relationship \textbf{inverts},
-so no single cross-event rule can hold: this is concept shift, not covariate
-shift, and it is why the within-event informational value of
-Section~\ref{sec:infoval} cannot be repackaged as a cross-event predictor.
+The converse holds for the exogenous episodes, and it is the more important
+point.  For FTX (exchange credit) and BUSD (regulatory) the \emph{market}
+detector wins decisively ($0.87$ and $0.89$ versus $0.40$ and $0.61$): their
+stress is borne by exchanges and issuers and never reaches the 3pool, so there is
+no on-chain regime to detect.  Neither layer dominates --- each detects the
+stress that flows through it.  This is the empirical case for the provenance
+framework's multi-layer design: a surveillance system needs the on-chain layer to
+see endogenous DeFi stress and the market layer to see exchange-borne stress, and
+a single-source monitor will be blind to one of them.
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Diagnosing the cross-event ML failure.}  The signal is strong
-  within events but does not transfer; covariate shift is mild, so the cause is
-  \emph{concept shift} --- the panic/calm price-deviation ratio inverts between
-  pool-stress events and CEX-borne events.}
+\caption{\textbf{Online causal stress detection by data source.}  Causal
+  (filtered-posterior) AUROC of one unsupervised 3-state Gaussian HMM run
+  identically on Tier-A on-chain versus Tier-B market state, scored against the
+  held-out \texttt{panic} regime with no labels in fitting.  On-chain detection
+  wins or ties for pool-borne stress (and leads by $116$h on Terra); market wins
+  for exchange-/regulation-borne stress --- the layers are complementary.}
+\label{tab:detection}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llccl}
+\toprule
+Event & Mechanism & On-chain & Market & Detects \\
+\midrule
+Terra/LUNA 2022 & algorithmic     & $\mathbf{0.954}$ & $0.499$ & on-chain ($+116$h) \\
+USDT/Curve 2023 & DeFi-native     & $0.934$ & $0.937$ & either (tie) \\
+USDC/SVB 2023   & fiat bank run   & $0.881$ & $0.909$ & either (tie) \\
+BUSD 2023       & regulatory      & $0.609$ & $\mathbf{0.887}$ & market \\
+FTX 2022        & exchange credit & $0.401$ & $\mathbf{0.868}$ & market \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.86\textwidth]{results/paper/figures/fig_detection.png}
+  \caption{\textbf{Online stress detection: Tier-A on-chain versus Tier-B market
+    data.}  \textbf{(a)~Causal AUROC by data source.}  One unsupervised HMM,
+    scored on its filtered (forward-only) posterior, run separately on on-chain
+    pool state (green) and market state (blue).  On-chain wins or ties for the
+    three pool-borne events and is decisive for Terra; market wins for the
+    exchange-/regulation-borne FTX and BUSD --- complementary layers, not a single
+    winner.  \textbf{(b)~Why, for Terra.}  Standardised on-chain pool deviation
+    rises through the panic window (shaded) while the USDT/Binance basis stays
+    flat: USDT held its peg during a UST de-peg, so a market-only monitor is
+    blind to the crisis.}
+  \label{fig:detection}
+\end{figure*}
+
+\subsection{What Does Not Work, and Why It Confirms the Frame}
+\label{sec:ml-diagnosis}
+
+Three supervised alternatives fail, and their failure is exactly what makes
+unsupervised detection the right tool.  First, a \emph{within-event supervised
+probe} does show that adding Tier-A features to a market baseline raises
+detection AUROC --- by up to $+0.37$ for Terra under a linear model --- but the
+lift is model-dependent (only $+0.02$ for gradient-boosted trees, which recover
+the signal nonlinearly from the market features), so we do not rest a claim on
+its magnitude.  Second, \emph{cross-event prediction} collapses: a
+leave-one-event-out classifier reaches mean AUROC $\approx0.60$ (one held-out
+event at $0.11$), and a pairwise transfer matrix has a within-event diagonal of
+$0.92$--$0.97$ but an off-diagonal mean of $0.50$ --- chance
+(Table~\ref{tab:mldiag}).  The cause is \emph{concept shift}, not covariate
+shift: a domain classifier identifying a sample's source event reaches only
+$0.30$ accuracy (chance $0.20$), so the feature \emph{distributions} are similar,
+but the panic/calm price-deviation ratio is $2.0$/$1.9$/$2.9$ for the pool-borne
+events and inverts to $0.84$/$0.54$ for FTX and BUSD --- the feature-to-label map
+is not shared across mechanisms.  Third, \emph{forecasting} adds nothing: a GRU
+sequence model over minute-level features at $15$--$60$-minute horizons yields no
+on-chain lift over a market baseline (splits are either degenerate or the market
+baseline already saturates).  With five heterogeneous events no transferable
+supervised rule can exist; an unsupervised, per-event, causal detector sidesteps
+the obstacle entirely.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Why supervised cross-event prediction fails.}  The signal is
+  strong within events but does not transfer; covariate shift is mild, so the
+  cause is \emph{concept shift} --- the panic/calm price-deviation ratio inverts
+  between pool-borne events and exchange-borne events.}
 \label{tab:mldiag}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -693,81 +754,6 @@ Domain-classifier accuracy     & $0.30$ & covariate shift only mild \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.96\textwidth]{results/paper/figures/fig_ml.png}
-  \caption{\textbf{What on-chain data can and cannot do for stress ML.}
-    \textbf{(a)~On-chain adds detection value.}  Within-event stress-detection
-    AUROC for a Tier-B market-only baseline (blue) versus that baseline plus
-    Tier-A on-chain pool state (green), 5-fold CV averaged over 20 seeds.  The
-    gain is largest where the market signal is weakest (Terra/LUNA $+0.37$,
-    market $0.61\!\to\!0.99$); it is near zero where the market baseline already
-    saturates (USDT/Curve).
-    \textbf{(b)~Transfer fails.}  AUROC of a supervised regime classifier trained
-    on the row event and tested on the column event: a high within-event diagonal
-    ($0.92$--$0.97$) but off-diagonal transfer at chance, the block structure of
-    \emph{concept shift}.
-    \textbf{(c)~Detection without labels.}  Posterior of the HMM ``stress'' state
-    over the USDT/Curve window, fit on on-chain pool state with \emph{no} labels;
-    it tracks the true \texttt{panic} regime (shaded), AUROC~$0.93$.}
-  \label{fig:ml}
-\end{figure*}
-
-\subsection{Unsupervised Regime Detection}
-\label{sec:hmm}
-
-The cross-event failure above has a single root cause: it is a \emph{supervised,
-cross-event} task, and five events cannot teach a model a transferable mapping.
-This is not a defect of the data but a structural property of few-event regimes
---- and it points to the right tool: if the within-event information of
-Section~\ref{sec:infoval} is real but cannot transfer under supervision, a model
-should learn each event's regime from that event alone, without labels.  We reframe the problem as \emph{unsupervised, per-event,
-online detection}: can a latent-state model recover the stress regime from
-on-chain pool state alone, with no labels?
-
-We fit a three-state Gaussian Hidden Markov Model to standardized on-chain
-features of Curve 3pool --- $|\texttt{usdc\_net\_sold\_1h}|$,
-$|\texttt{implied\_pool\_price}-1|$, and $|\texttt{reserve\_imbalance}|$ --- with
-no access to the \texttt{event\_phase} labels during fitting.  We label the
-latent state with the highest mean price-deviation as the ``stress'' state and,
-post hoc, measure how well its posterior recovers the true \texttt{panic}
-regime (Table~\ref{tab:hmm}).
-
-\begin{table}[t]
-\centering
-\caption{\textbf{Unsupervised HMM stress detection.}  A 3-state Gaussian HMM on
-  on-chain pool state, fit \emph{without labels}; AUROC and balanced accuracy
-  of the inferred stress state against the held-out \texttt{panic} regime.  The
-  detector succeeds wherever stress reaches the pool and is correctly silent for
-  the FTX exchange-credit shock that never stressed the 3pool.}
-\label{tab:hmm}
-\small
-\setlength{\tabcolsep}{6pt}
-\begin{tabular}{llcc}
-\toprule
-Event & Shock & AUROC & Bal.\ acc. \\
-\midrule
-Terra/LUNA 2022 & algorithmic        & $\mathbf{0.954}$ & $0.958$ \\
-USDT/Curve 2023 & DeFi-native        & $\mathbf{0.927}$ & $0.828$ \\
-USDC/SVB 2023   & fiat bank run      & $\mathbf{0.917}$ & $0.782$ \\
-BUSD 2023       & regulatory         & $0.618$ & $0.453$ \\
-FTX 2022        & exchange credit    & $0.389$ & $0.342$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-
-
-The unsupervised HMM (Figure~\ref{fig:ml}(c)) recovers the stress regime at AUROC~$0.92$--$0.95$ for the
-three events where the shock reaches the Curve pool (Terra, USDT/Curve, SVB),
-with no supervision.  The two low-AUROC events are not failures of the method
-but of mechanism: FTX ($0.39$) and BUSD ($0.62$) are shocks whose stress is
-borne by exchanges and issuers rather than the 3pool, so there is no strong
-pool-state regime to detect --- the same endogenous/exogenous boundary that runs
-through every result in this paper.  More generally, when labelled events are scarce, an unsupervised latent-state
-detector recovers a usable regime signal that a supervised cross-event
-predictor cannot.
 
 \textbf{Graph model (exploratory).}
 A SnapshotGCN over the TE-edge adjacency feeding an LSTM is implemented but
@@ -856,16 +842,16 @@ interdependence --- and only for the endogenous shock.
 ($z=+3.84$ USDT/Curve, $+3.69$ BUSD; $-2.80$ FTX), a sign flip no trend can
 produce.  \emph{(iii)~On-chain price discovery}: the Curve pool leads the
 exchange for DeFi-native stress and deviates $37\times$ more, lagging only for
-the exogenous SVB bank run.  \emph{(iv)~On-chain data helps detection, not cross-event prediction.}  Tier-A
-on-chain pool state adds robust within-event stress-detection information over a
-Tier-B market baseline (up to $+0.37$ AUROC, largest where the market signal is
-weakest), but this signal does not transfer across events under concept shift;
-an unsupervised HMM recovers the regime from on-chain state without labels
-(AUROC~$0.92$--$0.95$).  The provenance gate unifies these results: it rejects
-the non-robust predictive lift while certifying the findings that withstand
-scrutiny.  Two principles emerge for few-event, on-chain research --- gate
-claims by the provenance of their data, and where labels are scarce, detect
-rather than predict.  Future work includes executable CEX order-book depth, an
+the exogenous SVB bank run.  \emph{(iv)~Online detection by evidence layer.}  Run causally as an unsupervised
+online detector, the Tier-A on-chain layer recovers endogenous DeFi-native stress
+that the Tier-B market layer registers at chance (Terra/LUNA causal AUROC $0.95$
+vs $0.50$, $116$h earlier), while the market layer is required for exchange-borne
+shocks the pool never sees --- the layers are complementary, and supervised
+cross-event prediction fails under concept shift.  The provenance gate unifies
+these results: it rejects the model-fragile predictive lift while certifying the
+findings that withstand scrutiny.  Two principles emerge for few-event, on-chain
+research --- gate claims by the provenance of their data, and where labels are
+scarce, detect rather than predict.  Future work includes executable CEX order-book depth, an
 extension to Uniswap~v3, and higher-powered settlement-layer tests.
 
 

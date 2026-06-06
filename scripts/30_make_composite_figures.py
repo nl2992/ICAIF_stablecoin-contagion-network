@@ -53,20 +53,38 @@ def findings():
     fig.tight_layout(w_pad=1.1); _save(fig,"fig_findings")
 
 def ml():
+    fig, ax = plt.subplots(1, 3, figsize=(7.1, 2.35),
+                           gridspec_kw={"width_ratios": [1.05, 1.0, 1.25]})
+
+    # ---- panel (a): informational value -- Tier-B market vs +Tier-A on-chain ----
+    iv = pl.read_csv(TAB/"table_informational_value.csv")
+    ev_iv = iv["event_id"].to_list(); x = np.arange(len(ev_iv)); w = 0.38
+    mk = iv["auroc_market"].to_list(); bo = iv["auroc_both"].to_list()
+    ax[0].bar(x-w/2, mk, w, label="market only (B)", color=C_CALM)
+    ax[0].bar(x+w/2, bo, w, label="+ on-chain (A)", color=C_POS)
+    for i, r in enumerate(iv.iter_rows(named=True)):
+        if r["lift_both_minus_market"] >= 0.05:
+            ax[0].annotate(f"+{r['lift_both_minus_market']:.2f}", (x[i]+w/2, bo[i]+0.01),
+                           ha="center", fontsize=6, color="#1d6b35")
+    ax[0].axhline(0.5, ls="--", color="#999", lw=0.6)
+    ax[0].set_xticks(x); ax[0].set_xticklabels([S[e] for e in ev_iv], fontsize=6.2)
+    ax[0].set_ylim(0.45, 1.04); ax[0].set_ylabel("detection AUROC")
+    ax[0].set_title("(a) On-chain adds info"); ax[0].legend(frameon=False, fontsize=5.8, loc="lower left")
+
+    # ---- panel (b): cross-event transfer matrix (concept shift) ----
     df = pl.read_csv(TAB/"table_transfer_matrix.csv")
     ev=[c for c in df.columns if c!="train_event"]
     M=np.array([[df.filter(pl.col("train_event")==tr)[te][0] for te in ev] for tr in ev],float)
-    fig, ax = plt.subplots(1, 2, figsize=(7.1, 2.7), gridspec_kw={"width_ratios":[1,1.15]})
-    im=ax[0].imshow(M,cmap="RdYlGn",vmin=0,vmax=1)
-    ax[0].set_xticks(range(len(ev))); ax[0].set_yticks(range(len(ev)))
+    im=ax[1].imshow(M,cmap="RdYlGn",vmin=0,vmax=1)
+    ax[1].set_xticks(range(len(ev))); ax[1].set_yticks(range(len(ev)))
     lbl=[S[e].replace("\n","") for e in ev]
-    ax[0].set_xticklabels(lbl,rotation=45,ha="right",fontsize=6); ax[0].set_yticklabels(lbl,fontsize=6)
+    ax[1].set_xticklabels(lbl,rotation=45,ha="right",fontsize=5.6); ax[1].set_yticklabels(lbl,fontsize=5.6)
     for i in range(len(ev)):
-        for j in range(len(ev)): ax[0].text(j,i,f"{M[i,j]:.2f}",ha="center",va="center",fontsize=6)
-    ax[0].set_xlabel("test",fontsize=7); ax[0].set_ylabel("train",fontsize=7)
-    ax[0].set_title("(a) Cross-event transfer AUROC")
-    fig.colorbar(im,ax=ax[0],fraction=.046,pad=.04)
-    # HMM posterior
+        for j in range(len(ev)): ax[1].text(j,i,f"{M[i,j]:.2f}",ha="center",va="center",fontsize=5.4)
+    ax[1].set_xlabel("test",fontsize=7); ax[1].set_ylabel("train",fontsize=7)
+    ax[1].set_title("(b) Transfer fails")
+
+    # ---- panel (c): unsupervised HMM posterior ----
     from hmmlearn.hmm import GaussianHMM
     d=(pl.read_parquet(gold_root()/"dataset_contagion_features_usdt_curve_2023.parquet")
        .filter(pl.col("node_id")=="curve_3pool").with_columns((pl.col("event_time_seconds")//3600).alias("h"))
@@ -81,11 +99,11 @@ def ml():
     inp=False
     for i in range(len(h)):
         if y[i] and not inp: s0=h[i]; inp=True
-        if inp and (i==len(h)-1 or not y[i]): ax[1].axvspan(s0,h[i],color=C_PAN,alpha=.12); inp=False
-    ax[1].plot(h,post,color="#222",lw=1.2); ax[1].axhline(.5,ls="--",color="#999",lw=.6)
-    ax[1].set_xlabel("hours rel. onset",fontsize=7); ax[1].set_ylabel("P(stress)",fontsize=7); ax[1].set_ylim(-.03,1.03)
-    ax[1].set_title("(b) HMM detection (AUROC 0.93)")
-    fig.tight_layout(w_pad=1.0); _save(fig,"fig_ml")
+        if inp and (i==len(h)-1 or not y[i]): ax[2].axvspan(s0,h[i],color=C_PAN,alpha=.12); inp=False
+    ax[2].plot(h,post,color="#222",lw=1.2); ax[2].axhline(.5,ls="--",color="#999",lw=.6)
+    ax[2].set_xlabel("hours rel. onset",fontsize=7); ax[2].set_ylabel("P(stress)",fontsize=7); ax[2].set_ylim(-.03,1.03)
+    ax[2].set_title("(c) HMM, no labels")
+    fig.tight_layout(w_pad=0.8); _save(fig,"fig_ml")
 
 def main():
     for fn in (findings, ml):

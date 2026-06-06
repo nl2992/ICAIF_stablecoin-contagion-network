@@ -1,0 +1,6 @@
+event,onset_hour,onchain_cross,market_cross,onchain_lead_h,market_lead_h,onchain_minus_market_h
+usdt_curve_2023,123,117,122,6,1,5
+terra_luna_2022,482,448,556,34,-74,108
+ftx_2022,126,172,0,-46,126,-172
+busd_2023,174,789,177,-615,-3,-612
+usdc_svb_2023,444,449,454,-5,-10,5

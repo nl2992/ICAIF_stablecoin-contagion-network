@@ -1,0 +1,16 @@
+event,horizon,auroc_market,auroc_both,lift,note
+usdt_curve_2023,15,,,,degenerate
+usdt_curve_2023,30,,,,degenerate
+usdt_curve_2023,60,,,,degenerate
+terra_luna_2022,15,0.9982,0.9653,-0.0328,
+terra_luna_2022,30,0.998,0.9489,-0.0492,
+terra_luna_2022,60,0.9977,0.8343,-0.1634,
+ftx_2022,15,,,,degenerate
+ftx_2022,30,,,,degenerate
+ftx_2022,60,,,,degenerate
+busd_2023,15,1.0,1.0,0.0,
+busd_2023,30,0.9999,1.0,0.0001,
+busd_2023,60,0.9991,1.0,0.0009,
+usdc_svb_2023,15,,,,degenerate
+usdc_svb_2023,30,,,,degenerate
+usdc_svb_2023,60,,,,degenerate

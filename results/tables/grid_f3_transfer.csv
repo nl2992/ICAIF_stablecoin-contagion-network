@@ -1,0 +1,16 @@
+method,held_out,transfer_auroc
+raw,usdt_curve_2023,0.491
+raw,terra_luna_2022,0.7494
+raw,ftx_2022,0.3809
+raw,busd_2023,0.5806
+raw,usdc_svb_2023,0.884
+zscore_per_event,usdt_curve_2023,0.9119
+zscore_per_event,terra_luna_2022,0.9405
+zscore_per_event,ftx_2022,0.4112
+zscore_per_event,busd_2023,0.5043
+zscore_per_event,usdc_svb_2023,0.8425
+coral,usdt_curve_2023,0.8981
+coral,terra_luna_2022,0.947
+coral,ftx_2022,0.3238
+coral,busd_2023,0.6218
+coral,usdc_svb_2023,0.7745

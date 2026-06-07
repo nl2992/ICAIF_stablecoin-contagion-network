@@ -158,31 +158,19 @@ $0.50$, $116$h earlier), while market data is required for exchange-borne shocks
 the layers are complementary, and supervised cross-event prediction fails under
 concept shift.
 
-\textbf{Implications for DeFi risk practitioners.}  These findings have immediate
-operational impact.  Risk managers currently deployed only on CEX price feeds
-would have been structurally blind to the Terra UST de-peg, detecting it 116
-hours late.  In contrast, on-chain pool data would have triggered alarms within
-the first observed hours, enabling liquidation avoidance, collateral rebalancing,
-or early redemption-rate discovery in the window before the full cascade.  Our
-mechanism-based taxonomy (Figure~\ref{fig:decision}) provides a replicable
-decision framework: endogenous pool-imbalance shocks require on-chain detection,
-while exchange-originated and regulatory shocks remain observable only through
-market signals.  A complete surveillance system must monitor both layers
-independently and classify incoming stress signals by mechanism rather than
-relying on a single detector.
+\textbf{Implications for DeFi risk practitioners.}  Risk managers on CEX-only feeds
+would be structurally blind to pool-imbalance shocks: Terra/LUNA went undetected
+116 hours longer than on-chain monitoring would have allowed.  Figure~\ref{fig:decision}
+provides a replicable decision framework: endogenous shocks require on-chain detection,
+exogenous shocks require market signals.  Both layers are necessary.
 
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.90\textwidth]{results/paper/figures/fig_decision_framework.png}
-  \caption{\textbf{DeFi stress surveillance: mechanism-based detector selection.}
-    For each shock type (endogenous pool-imbalance vs.\ exogenous CEX/regulatory/banking),
-    a specific evidence layer achieves superior detection latency and AUROC.
-    On-chain Hidden Markov Model achieves 0.95 AUROC for Terra/LUNA (algorithmic),
-    raising alarms 116 hours before market-based detection (0.50 AUROC, at chance).
-    Market detector wins decisively for exchange-originated (FTX) and regulatory
-    (BUSD) shocks, which bypass the pool.  A robust surveillance system requires
-    both layers, each tuned to its mechanism, rather than a single detector.}
+  \includegraphics[width=0.85\textwidth]{results/paper/figures/fig_decision_framework.png}
+  \caption{\textbf{Mechanism-based detector selection.}  Endogenous pool-imbalance
+    shocks require on-chain monitoring (Terra 0.95 AUROC, 116h earlier); exogenous
+    shocks require market monitoring (FTX/BUSD 0.87--0.89). Both layers necessary.}
   \label{fig:decision}
 \end{figure*}
 
@@ -192,34 +180,19 @@ relying on a single detector.
 %% -----------------------------------------------------------------------
 
 \textbf{Stablecoin stress and AMM microstructure.}  Stablecoin stability has
-been studied through runs and reserve adequacy~\cite{Gorton2023,Lyons2023,Diamond1983,Clements2022},
-DeFi run dynamics~\cite{Cao2024}, and the economics of safe-asset
-status~\cite{KlagesMundt2020,He2023,Gorton2012}; classical theory links funding-
-and market-liquidity co-movement under stress~\cite{Brunnermeier2009}.  AMM
-microstructure work characterises loss-versus-rebalancing~\cite{Milionis2022}
-and constant-function pricing~\cite{Angeris2020,Park2023}; we build on Curve's
-StableSwap design~\cite{Egorov2019} and treat \texttt{TokenExchange} logs as
-execution-grade evidence in the spirit of tick-data
-econometrics~\cite{AitSahalia2010}.
+been studied through runs, reserve adequacy, and safe-asset economics~\cite{Gorton2023,Lyons2023,Cao2024}.
+AMM microstructure analyzes loss-versus-rebalancing and constant-function pricing~\cite{Milionis2022,Angeris2020}.
+We build on Curve's StableSwap design~\cite{Egorov2019} and treat on-chain logs as
+execution-grade evidence in the spirit of tick-data econometrics~\cite{AitSahalia2010}.
 
-\textbf{On-chain contagion measurement.}  On-chain network methods have tracked
-exchange fund flows~\cite{Makarov2022}, spillover networks~\cite{Diebold2014},
-and Tether-driven manipulation~\cite{Griffin2020} using lead-lag and Granger
-tools~\cite{Granger1969}.  Forbes and Rigobon~\cite{Forbes2002} draw the central
-distinction --- contagion (a crisis-driven \emph{shift} in linkage) versus
-interdependence --- which our regime test makes operational on Tier-A flow.
-Unlike prior work, we explicitly gate co-movement claims by data provenance
-rather than conflating execution-grade logs with derived market data.
+\textbf{On-chain contagion measurement.}  Forbes and Rigobon~\cite{Forbes2002} distinguish
+contagion (crisis-driven linkage shift) from interdependence. We make this operational
+on Tier-A on-chain flow, explicitly gating claims by data provenance rather than
+conflating execution-grade logs with market proxies.
 
-\textbf{Methodological rigour in financial AI.}  A recent ICAIF thread
-foregrounds trustworthiness over raw performance: interpretability as an
-adoption requirement~\cite{Faloughi2025}, scrutiny exposing artefactual model
-signal~\cite{LeeBias2025}, and evaluation choices reshaping
-conclusions~\cite{LeeDFL2025}.  Our provenance gate sits in this lineage --- an
-auditable, claim-blocking discipline measured by how reliably it rejects
-untrustworthy findings.  Random Forests and gradient
-boosting~\cite{Breiman2001,ChenGuestrin2016} serve here only as a
-provenance-ablation harness, not a performance claim.
+\textbf{Methodological rigour in financial AI.}  Recent ICAIF work emphasizes trustworthiness
+over raw performance~\cite{Faloughi2025,LeeBias2025,LeeDFL2025}. Our provenance gate
+provides an auditable, claim-blocking discipline for evaluating ML systems before deployment.
 
 
 %% -----------------------------------------------------------------------
@@ -448,30 +421,18 @@ substantive conclusion.
 %% -----------------------------------------------------------------------
 
 The static, full-window correlation understates the result.  The contagion
-literature distinguishes \emph{interdependence} (a stable cross-market linkage
-present in all states) from \emph{contagion} (a linkage that \emph{rises}
-because of the crisis)~\cite{Forbes2002}.  We make this distinction operational
-on Tier-A flow: within each event we partition the hourly panel by its
-\texttt{event\_phase} label and compute the lag-0 cross-pool correlation of
-\texttt{usdc\_net\_sold\_1h} separately in the calm (\texttt{pre}) and acute
-(\texttt{panic}) regimes, then test the difference with a Fisher $r$-to-$z$
-two-sample statistic.  The test is formalized as:
+literature distinguishes \emph{interdependence} (stable linkage in all states) from
+\emph{contagion} (linkage that rises during crisis)~\cite{Forbes2002}.  We test
+the difference via Fisher $r$-to-$z$ two-sample statistic:
 \begin{equation}
   z_{\text{Fisher}} = \frac{1}{2}\left( \ln\frac{1+\hat{\rho}_{\text{panic}}}{1-\hat{\rho}_{\text{panic}}}  - \ln\frac{1+\hat{\rho}_{\text{calm}}}{1-\hat{\rho}_{\text{calm}}} \right)
-  \left( \frac{1}{n_{\text{panic}}-3} + \frac{1}{n_{\text{calm}}-3} \right)^{-1/2},
+  \left( \frac{1}{n_{\text{panic}}-3} + \frac{1}{n_{\text{calm}}-3} \right)^{-1/2}
 \end{equation}
-where $\hat{\rho}_s$ is the sample Pearson correlation in regime $s$, and $n_s$ is the
-sample size. A significant $z_{\text{Fisher}}$ indicates a statistically supported
-shift in linkage strength across regimes.
 
-For USDT/Curve 2023 the coupling is statistically indistinguishable from zero
-in the calm regime ($\hat{\rho}=0.09$, $n=95$, $p=0.38$) and rises to
-$\hat{\rho}=0.53$ ($n=53$, $p<10^{-4}$) during panic; the regime shift is
-significant ($z_{\text{Fisher}}=+2.82$, $p=0.005$).  This is contagion in the precise
-Forbes--Rigobon sense, and it reframes the lag-0 result of
-Section~\ref{sec:main}: the simultaneity is not a weak ``no-direction'' finding
-but the signature of a \emph{common shock} that strikes both pools at once
-during the acute window and is absent in calm markets.
+For USDT/Curve 2023 the coupling is near-zero in calm ($\hat{\rho}=0.09$, $p=0.38$)
+and rises to $\hat{\rho}=0.53$ during panic ($z_{\text{Fisher}}=+2.82$, $p=0.005$) ---
+contagion in the Forbes--Rigobon sense. The lag-0 peak is not a failure to detect
+direction, but evidence of a \emph{common shock} striking both pools simultaneously.
 
 
 
@@ -662,23 +623,16 @@ across shock mechanisms.
 \subsection{Detector and Evaluation Protocol}
 \label{sec:detector}
 
-We fit a three-state Gaussian HMM by expectation--maximisation on standardised
-features, using \emph{no} \texttt{event\_phase} labels.  The Tier-A feature set
-is on-chain Curve-3pool state ($|\text{price\,dev}|$, $|\text{net USDC sold}|$,
-$|\text{reserve imbalance}|$); the Tier-B set is CEX market state
-($|\text{basis}|$, spread, order-book imbalance).  The latent state with the
-highest mean on the lead stress feature is labelled ``stress''.  Detection is
-scored \emph{causally}: at each hour we form the filtered (forward-only) posterior
+We fit a three-state Gaussian HMM on standardised features, using \emph{no} labels.
+Tier-A features: on-chain pool state ($|\text{price\,dev}|$, $|\text{net USDC sold}|$,
+$|\text{reserve imbalance}|$). Tier-B features: CEX state ($|\text{basis}|$, spread, OBI).
+Detection is scored causally via the filtered (forward-only) posterior:
 \begin{equation}
   P(\text{stress} \mid x_{1:t}) = \frac{\exp({\text{logfilt}}[t, s])}{\sum_{s'} \exp({\text{logfilt}}[t, s'])},
 \end{equation}
-where ${\text{logfilt}}[t, s]$ is the log-probability of being in state $s$ at time $t$ given all observations
-up to and including $t$ (computed via the forward algorithm with diagonal Gaussian emission densities).
-We measure (i)~AUROC of this filtered posterior against the held-out \texttt{panic} regime label,
-and (ii)~the \emph{detection latency} --- hours from true panic onset to the first alarm, where the
-alarm threshold is calibrated to a $5\%$ false-alarm rate on the pre-onset calm window.
-As a stricter robustness check, we refit the HMM on the first half of each episode and filter
-forward on the full series; the source ranking is unchanged.
+measuring (i)~AUROC against the held-out panic regime and (ii)~detection latency
+(hours from onset to alarm, threshold calibrated to 5\% false-alarm on pre-onset calm).
+A half-fit robustness variant retrains on the first 50\% only.
 
 \subsection{Result: On-Chain Data Detects the Endogenous Regime}
 \label{sec:detection}
@@ -889,26 +843,13 @@ vs $0.50$, $116$h earlier), while the market layer is required for exchange-born
 shocks the pool never sees --- the layers are complementary, and supervised
 cross-event prediction fails under concept shift.
 
-\textbf{Implications for DeFi financial risk management.}  The mechanism-specific
-detector architecture has immediate practical consequences. Risk managers relying
-solely on CEX basis feeds are structurally blind to endogenous pool-driven stress
-events, a gap exposed acutely by the Terra/LUNA crisis. Conversely, an on-chain-only
-monitor would miss exchange- and regulation-driven shocks. Implementing the
-dual-layer detector framework (Figure~\ref{fig:decision}) enables a 116-hour
-detection advantage for endogenous episodes and ensures no asset class is
-invisible to surveillance. Our provenance-gated methodology provides a replicable
-template for auditing AI/ML models before they inform operational systems: it
-blocks unfounded claims (supervised cross-event prediction at 0.50 AUROC) and
-certifies robust findings (unsupervised per-event detection at 0.95 AUROC) by
-grounding every claim in the provenance hierarchy established in clinical
-epidemiology and regulatory derivatives reporting.
-
 The provenance gate unifies these results: it rejects the model-fragile predictive
 lift while certifying the findings that withstand scrutiny.  Two principles emerge
 for few-event, on-chain research --- gate claims by the provenance of their data,
-and where labels are scarce, detect rather than predict.  Future work includes
-executable CEX order-book depth, an extension to Uniswap~v3, and higher-powered
-settlement-layer tests.
+and where labels are scarce, detect rather than predict.  Risk managers implementing
+the dual-layer framework (Figure~\ref{fig:decision}) gain a 116-hour detection
+advantage for endogenous episodes.  Future work includes CEX order-book depth,
+Uniswap~v3 extension, and higher-powered settlement-layer tests.
 
 
 \bibliographystyle{ACM-Reference-Format}

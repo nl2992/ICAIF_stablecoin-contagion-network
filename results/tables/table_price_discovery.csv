@@ -1,0 +1,6 @@
+event_id,cex_node,onchain_leads_mean_r,cex_leads_mean_r,lead1h_r,lead1h_p,max_onchain_dev,max_cex_dev,onchain_dev_ratio,price_discovery_venue
+usdt_curve_2023,usdt_binance,0.1749,0.0403,0.2805,0.0,0.1249,0.00336,37.2,on_chain_leads
+terra_luna_2022,usdt_binance,0.0445,0.0443,0.1664,0.0,0.4076,0.04947,8.2,on_chain_leads
+ftx_2022,usdt_binance,0.0428,-0.0435,-0.0156,0.6778,0.2923,9.97254,0.0,on_chain_leads
+busd_2023,busd_binance,0.0996,0.0174,0.1505,0.0,0.3191,0.00952,33.5,on_chain_leads
+usdc_svb_2023,usdc_binance,0.0399,0.1199,0.1067,0.1112,0.3264,0.0945,3.5,cex_leads

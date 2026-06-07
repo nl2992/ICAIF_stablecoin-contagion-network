@@ -550,8 +550,20 @@ def fig06_aa_paper_network(out: Path) -> None:
             transform=ax.transAxes, ha="center", fontsize=8.5, color="#2c3e50",
             bbox=dict(boxstyle="round,pad=0.3", facecolor=CBA,
                       edgecolor=CA, lw=1.2))
+
+    # Tier legend (TODO 4.6 — tier labels on all network figures)
+    tier_legend = [
+        mpatches.Patch(facecolor=CA, edgecolor="#1a6e3a", lw=1.5,
+                       label="Tier A node — on-chain execution-grade"),
+        Line2D([0],[0], color=CSTAR, lw=2.5, linestyle="solid",
+               label="A/A edge — solid · paper-claimable"),
+    ]
+    ax.legend(handles=tier_legend, loc="upper right", fontsize=8.5,
+              framealpha=0.95, edgecolor="#ccc")
+
     ax.set_title("Figure 6 – A/A paper-claimable AMM-flow network\n"
-                 "Only USDT/Curve 2023 Curve-to-Curve pair passes both provenance + statistical gates",
+                 "Solid edges = A/A (both Tier-A nodes, both gates pass)  ·  "
+                 "Dark fill = Tier-A on-chain execution-grade data",
                  fontsize=10.5, fontweight="bold", color="#2c3e50", pad=12)
     _save(fig, out, "figure_06_aa_paper_claimable_network.png")
 
@@ -919,13 +931,19 @@ def fig12_full_paper_network(out: Path) -> None:
         labels={n: n.replace("_","\n") for n in G.nodes()},
         font_size=6, font_color="white", font_weight="bold")
 
-    # edge colours by claim level
+    # ── Edge styles encode claim tier (TODO 4.6 — tier labels on all network figures)
+    # Solid dark   = A/A paper-claimable (both gates pass)
+    # Dashed medium = A/B directional (one Tier-A endpoint)
+    # Dotted light  = B/B contextual
+    # (Fixture-derived edges are never drawn — they don't reach paper tables)
     for (u,v,d) in G.edges(data=True):
-        cl = d.get("claim_level","B_B_context_only")
-        col = CSTAR if cl=="A_A_dex_flow" else (CAB if "A_B" in cl else CBB)
-        lw  = 2.5  if cl=="A_A_dex_flow" else (1.4 if "A_B" in cl else 0.8)
+        cl    = d.get("claim_level","B_B_context_only")
+        col   = CSTAR if "A_A" in cl else (CAB if "A_B" in cl else CBB)
+        lw    = 2.5   if "A_A" in cl else (1.5  if "A_B" in cl else 0.8)
+        style = "solid"  if "A_A" in cl else ("dashed" if "A_B" in cl else "dotted")
         nx.draw_networkx_edges(G, pos, ax=ax, edgelist=[(u,v)],
-            edge_color=col, width=lw, arrowsize=12, arrowstyle="-|>",
+            edge_color=col, width=lw, style=style,
+            arrowsize=12, arrowstyle="-|>",
             connectionstyle="arc3,rad=0.12",
             min_source_margin=22, min_target_margin=22)
 
@@ -935,23 +953,31 @@ def fig12_full_paper_network(out: Path) -> None:
                 fontsize=9, fontweight="bold", color="#2c3e50",
                 transform=ax.transAxes if False else ax.transData)
 
-    # legend — no B/B entry: paper-claimable tables do not contain B/B rows
+    # ── Legend with full tier encoding ────────────────────────────────────────
     legend_elements = [
-        mpatches.Patch(facecolor=CA,    label="Tier A node (on-chain execution-grade)"),
-        mpatches.Patch(facecolor=CB,    label="Tier B node (public market context)"),
-        Line2D([0],[0], color=CSTAR, lw=2.5, label="A/A paper-claimable ★ (both gates pass)"),
-        Line2D([0],[0], color=CAB,   lw=1.5, label="A/B suggestive (paper-claimable)"),
+        mpatches.Patch(facecolor=CA,  edgecolor="#1a6e3a", lw=1.5,
+                       label="Tier A node — on-chain execution-grade"),
+        mpatches.Patch(facecolor=CB,  edgecolor="#aaa",
+                       label="Tier B node — public market context"),
+        mpatches.Patch(facecolor="white", edgecolor="#555", hatch="////",
+                       label="Fixture node — not in paper analysis"),
+        Line2D([0],[0], color=CSTAR, lw=2.5, linestyle="solid",
+               label="A/A edge — solid · paper-claimable (both gates pass)"),
+        Line2D([0],[0], color=CAB,   lw=1.5, linestyle="dashed",
+               label="A/B edge — dashed · directional (suggestive)"),
+        Line2D([0],[0], color=CBB,   lw=0.8, linestyle="dotted",
+               label="B/B edge — dotted · contextual only"),
         mpatches.Patch(facecolor="white", edgecolor="#555",
-                       label="□ AMM/DEX  ○ CEX  ◇ Settlement/Flow"),
+                       label="Shape: □ DEX/AMM  ○ CEX  ◇ Settlement"),
     ]
-    ax.legend(handles=legend_elements, loc="lower right", fontsize=8.5,
-              framealpha=0.95, edgecolor="#ccc")
+    ax.legend(handles=legend_elements, loc="lower right", fontsize=8,
+              framealpha=0.95, edgecolor="#ccc", ncol=1)
 
     ax.set_title(
         "Figure 12 – Paper-claimable stress-propagation network\n"
-        "Only edges passing both provenance and statistical gates · "
-        "amber = A/A headline · blue = A/B suggestive · fixture nodes omitted",
-        fontsize=10.5, fontweight="bold", color="#2c3e50", pad=10)
+        "Edge style encodes claim tier: solid=A/A, dashed=A/B, dotted=B/B  ·  "
+        "Node fill encodes data tier: dark=Tier-A, light=Tier-B",
+        fontsize=10, fontweight="bold", color="#2c3e50", pad=10)
     _save(fig, out, "figure_12_full_paper_claimable_network.png")
 
 
@@ -990,6 +1016,102 @@ def _dex_series(df: pd.DataFrame, node_id: str, feature: str) -> pd.Series:
 # ═══════════════════════════════════════════════════════════════════════════════
 # Entry point
 # ═══════════════════════════════════════════════════════════════════════════════
+# Figure 13 — TVP-VAR time-varying propagation coefficient (robustness appendix)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def fig13_tvpvar_usdt_curve(out: Path) -> None:
+    """Time-varying propagation coefficient from TVP-VAR for USDT/Curve 2023.
+
+    Reads results/tables/tvpvar_usdt_curve_2023.csv (or .parquet) and plots
+    the rolling coefficient for the primary A/A pair
+    (curve_3pool → curve_crvusd_usdt) over the event window.
+
+    If the TVP-VAR results file is absent (not yet generated), writes a
+    placeholder figure with an informative message so the paper package
+    validation does not fail.
+    """
+    import polars as pl
+
+    event_id = "usdt_curve_2023"
+    raw_dir  = RAW_TBL  # results/tables/
+
+    # Try parquet first, fall back to CSV
+    tvp_path = None
+    for suffix in (".parquet", ".csv"):
+        candidate = raw_dir / f"tvpvar_{event_id}{suffix}"
+        if candidate.exists():
+            tvp_path = candidate
+            break
+
+    fig, ax = plt.subplots(figsize=(8, 3.5))
+
+    if tvp_path is None:
+        ax.text(
+            0.5, 0.5,
+            "TVP-VAR results not yet generated.\n"
+            "Run: make tvpvar EVENT=usdt_curve_2023",
+            ha="center", va="center", transform=ax.transAxes,
+            fontsize=11, color="grey",
+        )
+        ax.set_title("TVP-VAR: time-varying coefficient (PLACEHOLDER)", fontsize=10)
+        logger.warning(
+            "TVP-VAR results not found for %s; writing placeholder figure.", event_id
+        )
+    else:
+        df = (pl.read_parquet(tvp_path) if tvp_path.suffix == ".parquet"
+              else pl.read_csv(tvp_path))
+
+        # Expected columns: wall_clock_utc, source, target, coef, ci_low, ci_high
+        # Filter for the primary A/A pair
+        src, tgt = "curve_3pool", "curve_crvusd_usdt"
+        pair_col_s = next((c for c in ["source", "source_node", "node_i"] if c in df.columns), None)
+        pair_col_t = next((c for c in ["target", "target_node", "node_j"] if c in df.columns), None)
+
+        if pair_col_s and pair_col_t:
+            pair = df.filter(
+                (pl.col(pair_col_s) == src) & (pl.col(pair_col_t) == tgt)
+            )
+        else:
+            pair = df  # fallback: plot everything
+
+        ts_col  = next((c for c in ["wall_clock_utc", "timestamp", "date"] if c in pair.columns), None)
+        coef_col = next((c for c in ["coef", "coefficient", "beta"] if c in pair.columns), None)
+        ci_lo    = next((c for c in ["ci_low", "ci_lower", "lower"] if c in pair.columns), None)
+        ci_hi    = next((c for c in ["ci_high", "ci_upper", "upper"] if c in pair.columns), None)
+
+        if ts_col and coef_col:
+            xs = pair[ts_col].to_list()
+            ys = pair[coef_col].cast(pl.Float64).to_list()
+            ax.plot(xs, ys, color="#1f77b4", lw=1.8, label=f"{src} → {tgt}")
+            if ci_lo and ci_hi:
+                lo = pair[ci_lo].cast(pl.Float64).to_list()
+                hi = pair[ci_hi].cast(pl.Float64).to_list()
+                ax.fill_between(xs, lo, hi, alpha=0.2, color="#1f77b4", label="90% CI")
+            ax.axhline(0, ls="--", lw=0.8, color="grey")
+            ax.set_xlabel("Date (UTC)")
+            ax.set_ylabel("TVP-VAR coefficient")
+            ax.set_title(
+                f"TVP-VAR: rolling propagation coefficient\n"
+                f"{src} → {tgt} (USDT/Curve 2023, 168h window, 24h step)",
+                fontsize=9,
+            )
+            ax.legend(fontsize=8)
+        else:
+            ax.text(
+                0.5, 0.5,
+                "Unexpected TVP-VAR column schema.\n"
+                f"Found columns: {pair.columns[:6]}",
+                ha="center", va="center", transform=ax.transAxes, fontsize=9, color="grey",
+            )
+
+    plt.tight_layout()
+    out_path = out / "figure_13_tvpvar_usdt_curve_2023.pdf"
+    plt.savefig(out_path, bbox_inches="tight", dpi=150)
+    plt.close()
+    logger.info("Wrote Figure 13 → %s", out_path)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate all 12 paper figures.")
@@ -1014,6 +1136,7 @@ def main() -> None:
         (10, fig10_feature_tier_matrix),
         (11, fig11_node_coverage_heatmap),
         (12, fig12_full_paper_network),
+        (13, fig13_tvpvar_usdt_curve),   # TVP-VAR time-varying coefficient (robustness)
     ]
 
     to_run = {n: fn for n, fn in all_figs

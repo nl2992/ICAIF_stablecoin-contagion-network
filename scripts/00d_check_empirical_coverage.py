@@ -25,6 +25,15 @@ def main() -> None:
         default=[],
         help="Optional required real layers, e.g. CEX DEX mint_burn.",
     )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help=(
+            "Strict mode: fail loudly if ANY fixture rows are found in the gold "
+            "panel for this event.  Use in CI to prevent fixture contamination "
+            "from silently reaching the paper pipeline."
+        ),
+    )
     args = parser.parse_args()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
@@ -32,6 +41,24 @@ def main() -> None:
         raise SystemExit(f"Panel not found: {panel_path}. Run script 03 first.")
 
     panel = pl.read_parquet(panel_path)
+
+    # ── Strict fixture check (--strict / CI mode) ────────────────────────────
+    if args.strict and "tier_actual" in panel.columns:
+        fixture_rows = panel.filter(
+            pl.col("tier_actual") == "fixture_non_empirical"
+        )
+        if fixture_rows.height > 0:
+            fixture_nodes = fixture_rows["node_id"].unique().to_list() if "node_id" in fixture_rows.columns else ["unknown"]
+            raise SystemExit(
+                f"[STRICT] Fixture rows detected in gold panel for {args.event}!\n"
+                f"  {fixture_rows.height} rows from fixture nodes: {fixture_nodes}\n"
+                f"  Run 'make empirical EVENT={args.event}' with ETHERSCAN_API_KEY "
+                f"set to replace fixtures with real data before paper submission."
+            )
+        logger.info(
+            "[STRICT] No fixture rows in gold panel for %s — all nodes are real data.",
+            args.event,
+        )
     result = check_empirical_coverage(
         panel,
         event_id=args.event,

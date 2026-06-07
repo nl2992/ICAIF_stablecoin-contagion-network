@@ -1,4 +1,4 @@
-.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag subhourly sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary propagation_score paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all forbes_rigobon qvar amm_leadlag_15min arb_meta_label
+.PHONY: setup test windows coverage coveragegate audit claimgate ingest reconstruct panel eventmaps combine maps leadlag amm_leadlag sparse_flow hy var tvpvar hawkes te network predict predset gnn eventstudy robustness summary paper paper_gate claim_summary narrative_figures paper_figures columbia_figures extended_figures validate_paper empirical empirical_all mvp usdc demo_all all centrality pool_verify grid_sensitivity block_shuffle loeo robustness_full regime_contagion arbitrage_regime price_discovery hmm_regime ml_diagnostics informational_value
 
 setup:
 	pip install -r requirements.txt
@@ -71,9 +71,6 @@ sparse_flow:
 		--n-permutations 1000 \
 		--paper-mode
 
-subhourly:
-	python scripts/18_build_subhourly_features.py --event $(EVENT)
-
 hy:
 	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT)
 
@@ -89,22 +86,6 @@ hawkes:
 te:
 	python scripts/07_run_transfer_entropy.py --event $(EVENT)
 
-forbes_rigobon:
-	python scripts/07b_run_forbes_rigobon.py --event $(EVENT) --paper-mode
-
-qvar:
-	python scripts/08b_run_qvar.py --event $(EVENT) --paper-mode
-
-# 15-minute AMM lead-lag (finer resolution check for USDT/Curve 2023 anchor)
-amm_leadlag_15min:
-	python scripts/04_run_leadlag.py \
-		--event $(EVENT) \
-		--layer-filter DEX \
-		--feature-cols usdc_net_sold_1h \
-		--grid-seconds 900 \
-		--max-lag 12 \
-		--paper-mode
-
 network:
 	python scripts/08_build_networks.py --event $(EVENT) --edge-source te
 
@@ -114,6 +95,11 @@ predict:
 predset:
 	python scripts/09b_make_prediction_dataset.py --event $(EVENT)
 
+# GNN is EXPLORATORY — not included in paper_gate or empirical_all.
+# Five events are insufficient for generalizable GNN learning; fixture-trained
+# SnapshotGCN yields AUROC ≈ 0.18 (at-chance), confirming provenance gate
+# correctness.  Include in primary analysis only when ≥20 events with Tier-A
+# panels are available.  See paper limitations section (TODO 2.5).
 gnn:
 	python scripts/09d_train_temporal_gnn.py --event $(EVENT)
 
@@ -123,13 +109,46 @@ eventstudy:
 robustness:
 	python scripts/10_run_robustness.py --event $(EVENT)
 
+# ── Robustness checks for the primary USDT/Curve 2023 A/A result ──────────
+
+# TODO 5.1: Grid sensitivity — run AMM lead-lag at 30min / 1h / 2h grids
+grid_sensitivity:
+	@echo "Grid sensitivity check for usdt_curve_2023 A/A pair"
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 1800 --max-lag 24 --paper-mode
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 --max-lag 12 --paper-mode
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 7200 --max-lag 6 --paper-mode
+
+# TODO 5.2: Block-shuffle test — 24-hour block permutations, 10k reps
+block_shuffle:
+	@echo "Block-shuffle robustness for usdt_curve_2023 A/A pair"
+	python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 --max-lag 12 --paper-mode \
+		--bootstrap-reps 10000 --block-shuffle
+
+# TODO 5.3: LOEO — leave-one-event-out for each of the 5 events
+loeo:
+	@echo "Leave-one-event-out robustness check"
+	for excluded in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
+		python scripts/04_run_leadlag.py --event usdt_curve_2023 \
+			--layer-filter DEX --feature-cols usdc_net_sold_1h \
+			--grid-seconds 3600 --max-lag 12 --paper-mode \
+			--loeo $$excluded || true; \
+	done
+
+# Run all robustness checks in sequence
+robustness_full: grid_sensitivity block_shuffle loeo
+
 summary:
 	python scripts/11b_summarise_real_only_results.py
 	python scripts/11c_summarise_robustness.py
 	python scripts/11_summarise_results.py
-
-propagation_score:
-	python scripts/19_compute_propagation_intensity.py
 
 # Diagnostic paper build (reads results/tables, no claim enforcement)
 paper:
@@ -159,13 +178,44 @@ validate_paper:
 paper_gate:
 	python scripts/00c_claim_gate.py --all-events --strict
 	python scripts/11d_make_claim_summary_tables.py
+	python scripts/08b_run_centrality.py
 	python scripts/99_make_paper_outputs.py --strict
 	python scripts/98_make_narrative_figures.py
 	python scripts/13_make_paper_figures.py
 	python scripts/15_make_columbia_paper_pack.py
 	python scripts/16_make_extended_figures.py
-	python scripts/19_compute_propagation_intensity.py
 	python scripts/14_validate_paper_package.py
+
+centrality:
+	python scripts/08b_run_centrality.py $(if $(EVENT),--event $(EVENT),)
+
+pool_verify:
+	python scripts/00e_verify_pool_size_estimates.py
+
+# Regime-switching contagion test (Forbes-Rigobon) across all events' A/A pairs
+regime_contagion:
+	python scripts/24_run_regime_contagion.py
+
+# Stabilizing->amplifying arbitrage regime flip (flow vs CEX price by regime)
+arbitrage_regime:
+	python scripts/25_run_arbitrage_regime.py
+
+# On-chain vs CEX price discovery (does the Curve pool price lead the exchange?)
+price_discovery:
+	python scripts/26_run_price_discovery.py
+
+# Unsupervised HMM stress-regime detection from on-chain pool state (AI method)
+hmm_regime:
+	python scripts/27_run_hmm_regime.py
+
+# Diagnose WHY supervised cross-event ML fails (concept shift) vs HMM
+ml_diagnostics:
+	python scripts/28_run_ml_diagnostics.py
+
+# Informational value: do Tier-A on-chain features add within-event stress
+# detection over a Tier-B market baseline? (the certified positive ML result)
+informational_value:
+	python scripts/33_run_informational_value.py
 
 # run an empirical paper-claim pipeline for one event.
 # Disables fixture fallback; gates result edges by provenance; uses --paper-mode
@@ -181,22 +231,28 @@ empirical:
 	python scripts/04b_run_hayashi_yoshida.py --event $(EVENT) --paper-mode
 	python scripts/05_run_var_granger.py --event $(EVENT)
 	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode --window-size 168 --step-size 24
-	python scripts/06_run_hawkes.py --event $(EVENT) || true
-	python scripts/07_run_transfer_entropy.py --event $(EVENT) --paper-mode
+	# DEX-layer TVP-VAR: uses usdc_net_sold_1h so usdt_curve_2023 (2 real DEX nodes)
+	# is never skipped.  Result saved with _dex suffix.
+	python scripts/05b_run_tvp_var.py --event $(EVENT) --paper-mode \
+		--layer-filter DEX --feature-col usdc_net_sold_1h \
+		--window-size 168 --step-size 24 || true
+	# Hawkes: soft-fail only if tick library is genuinely absent (not a bug).
+	# Install tick with: pip install -r requirements-optional.txt
+	python -c "import tick" 2>/dev/null \
+		&& python scripts/06_run_hawkes.py --event $(EVENT) \
+		|| echo "WARNING: tick not installed — Hawkes skipped. Run: pip install -r requirements-optional.txt"
+	# TE at AMM-only hourly grid (aligns with primary lead-lag for direct comparison)
+	python scripts/07_run_transfer_entropy.py --event $(EVENT) \
+		--layer-filter DEX --feature-cols usdc_net_sold_1h \
+		--grid-seconds 3600 --paper-mode
 	python scripts/08_build_networks.py --event $(EVENT) --edge-source te
 	python scripts/09_run_prediction.py --event $(EVENT)
 	python scripts/10_run_robustness.py --event $(EVENT)
 	python scripts/12_run_event_study.py --event $(EVENT) --paper-mode
 	# AMM-only Tier-A analysis (paper narrative)
 	python scripts/04_run_leadlag.py --event $(EVENT) --layer-filter DEX --feature-cols usdc_net_sold_1h --grid-seconds 3600 --max-lag 12 --paper-mode || true
-	# 15-minute AMM lead-lag resolution check (soft-fail: fewer observations)
-	python scripts/04_run_leadlag.py --event $(EVENT) --layer-filter DEX --feature-cols usdc_net_sold_1h --grid-seconds 900 --max-lag 12 --paper-mode || true
 	# Sparse mint/burn event study (soft-fail: usdc_mint_burn not available for all events)
 	python scripts/06b_run_sparse_flow_event_study.py --event $(EVENT) --source-node usdc_mint_burn --source-feature mint_burn_net_1h --target-feature usdc_net_sold_1h --post-hours 3 --baseline-hours 12 --paper-mode || true
-	# Forbes-Rigobon contagion test (soft-fail)
-	python scripts/07b_run_forbes_rigobon.py --event $(EVENT) --paper-mode || true
-	# Quantile VAR tail-spillover (soft-fail: requires statsmodels)
-	python scripts/08b_run_qvar.py --event $(EVENT) --paper-mode || true
 	python scripts/00c_claim_gate.py --event $(EVENT)
 
 # Run all 5 events empirically then assemble claim-gated paper outputs.
@@ -207,6 +263,9 @@ empirical_all:
 	for event in usdc_svb_2023 terra_luna_2022 usdt_curve_2023 ftx_2022 busd_2023; do \
 		python scripts/09_run_prediction.py --event $$event --loeo --ablation; \
 	done
+	# Build the combined 287K-row cross-event panel AFTER all individual events
+	# are processed.  Required by any cross-event analysis in paper_gate.
+	python scripts/03c_combine_panels.py
 	$(MAKE) paper_gate
 
 # MVP demo: fixture-allowed, single event, no claim gate (for orchestration testing only)
@@ -225,7 +284,3 @@ demo_all:
 
 # all: canonical paper-safe target. Runs empirical_all (real data only).
 all: empirical_all
-
-# CEX arb meta-labeling experiment (downloads klines on first run, uses cache thereafter)
-arb_meta_label:
-	python scripts/23_run_arb_meta_label.py

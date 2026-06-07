@@ -1,0 +1,6 @@
+event_id,n_hours,n_states,auroc,balanced_acc,stress_state_prevalence,detects_regime
+usdt_curve_2023,379,3,0.9271,0.8283,0.3668,True
+terra_luna_2022,1045,3,0.9545,0.9583,0.1378,True
+ftx_2022,718,3,0.3888,0.3424,0.4903,False
+busd_2023,864,3,0.6176,0.453,0.0868,False
+usdc_svb_2023,696,3,0.9165,0.7823,0.0647,True

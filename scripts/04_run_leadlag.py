@@ -44,7 +44,35 @@ def main() -> None:
                         help="Restrict to real (non-fixture) nodes only and add event_id column.")
     parser.add_argument("--layer-filter", default=None,
                         help="Restrict to nodes of a single layer (e.g. DEX, CEX, mint_burn).")
+    parser.add_argument(
+        "--split-at", default=None,
+        metavar="ISO_DATE",
+        help=(
+            "Restrict analysis to rows BEFORE this ISO date (YYYY-MM-DD).  "
+            "Used for pre-drain sub-window analysis (e.g. Terra/LUNA: --split-at 2022-05-11).  "
+            "The sub_window column in the output records the effective window end date."
+        ),
+    )
+    parser.add_argument(
+        "--block-shuffle", action="store_true",
+        help=(
+            "Use block-shuffled permutations (24-hour blocks) instead of "
+            "individual observation shuffles.  Controls for serial correlation.  "
+            "Adds block_shuffle_p column to output."
+        ),
+    )
+    parser.add_argument(
+        "--loeo", default=None,
+        metavar="EXCLUDED_EVENT",
+        help=(
+            "Leave-one-event-out mode.  Pass the event_id to exclude from the "
+            "aggregate pattern check.  Appended as loeo_excluded column in output."
+        ),
+    )
     args = parser.parse_args()
+
+    from stressnet.config import load_events as _load_events
+    _events_cfg = _load_events()
 
     panel_path = gold_root() / f"dataset_contagion_features_{args.event}.parquet"
     if not panel_path.exists():
@@ -57,6 +85,25 @@ def main() -> None:
         panel = panel.filter(pl.col("event_phase") == args.phase)
         if panel.height == 0:
             raise SystemExit(f"No rows found for phase '{args.phase}'.")
+
+    # ── Sub-window filtering (--split-at) ───────────────────────────────────
+    sub_window_end: str | None = None
+    if args.split_at:
+        if "wall_clock_utc" not in panel.columns:
+            raise SystemExit("--split-at requires a wall_clock_utc column in the panel.")
+        split_dt = pl.lit(args.split_at).str.strptime(pl.Datetime("us"), "%Y-%m-%d") \
+                     .dt.replace_time_zone("UTC")
+        panel = panel.filter(pl.col("wall_clock_utc") < split_dt)
+        if panel.height == 0:
+            raise SystemExit(
+                f"No rows found before --split-at {args.split_at}. "
+                "Check the split date against the event window."
+            )
+        sub_window_end = args.split_at
+        logger.info(
+            "--split-at %s: restricted panel to %d rows before drain onset",
+            args.split_at, panel.height,
+        )
     nodes = nodes_for_event(args.event)
 
     panel_node_ids = set(panel["node_id"].unique().to_list())
@@ -118,11 +165,24 @@ def main() -> None:
     results = pl.concat(frames, how="diagonal").with_columns(
         pl.lit(args.event).alias("event_id"),
         pl.lit(args.phase or "all").alias("event_phase"),
+        # Sub-window annotation: records the effective window end for pre-drain splits
+        pl.lit(sub_window_end).alias("sub_window_end"),
+        # Block-shuffle flag: indicates whether serial-correlation-robust inference was used
+        pl.lit(args.block_shuffle).alias("block_shuffle_used"),
+        # LOEO annotation: which event was excluded (for leave-one-event-out robustness)
+        pl.lit(args.loeo).alias("loeo_excluded"),
     )
 
     out_dir = results_root() / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"table_leadlag_tests_{args.event}.csv"
+
+    # File suffix encodes sub-window and LOEO for non-overwriting outputs
+    suffix = ""
+    if sub_window_end:
+        suffix += f"_split_{sub_window_end}"
+    if args.loeo:
+        suffix += f"_loeo_{args.loeo}"
+    out_path = out_dir / f"table_leadlag_tests_{args.event}{suffix}.csv"
     results.write_csv(out_path)
     logger.info("Wrote %s (%d rows)", out_path, len(results))
 

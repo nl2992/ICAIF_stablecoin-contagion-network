@@ -144,3 +144,34 @@ features:
     tier: B
     evidence_type: aggregate_flow
     claim_language: "CoinMetrics exchange outflow"
+
+# ---------------------------------------------------------------------------
+# Node-specific encoding configs
+# (analogous to PoolConfig in curve.py — documents how each node's features
+# are sourced and what decoding is required)
+# ---------------------------------------------------------------------------
+
+node_configs:
+
+  usdt_mint_burn:
+    feature: mint_burn_net_1h
+    tier: A
+    event_encoding: issue_redeem
+    contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    issue_topic:  "0xcb8241adb0c3fdb35b70c24ce35c5eb0c17af7431c99f827d44a445ca624176a"
+    redeem_topic: "0x702d5967f45f6513a38ffc42d6ba9bf230bd40e8f53b16363c7eb4fd2deb9a44"
+    decimals: 6
+    notes: >
+      Tether USDT mainnet.  Issue(uint256) = positive supply injection;
+      Redeem(uint256) = negative (burn).  Both decoded via eth_getLogs and
+      aggregated to hourly mint_burn_net_1h.  Tier A because events are
+      directly observable on-chain with block-level timestamps.
+
+  usdc_mint_burn:
+    feature: mint_burn_net_1h
+    tier: A
+    event_encoding: erc20_transfer
+    contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    notes: >
+      Circle USDC mainnet.  Standard ERC-20 Transfer events (mint = from null
+      address, burn = to null address) queried via tokentx endpoint.  Tier A.

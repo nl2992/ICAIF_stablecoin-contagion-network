@@ -76,9 +76,14 @@ def main() -> None:
         node_ids = [nid for nid in node_ids if nid in layer_node_ids]
         logger.info("--layer-filter %s: restricting to %d nodes", args.layer_filter, len(node_ids))
 
-    if args.paper_mode and len(node_ids) < 3:
+    # Bivariate TE needs only 2 nodes when a single layer is targeted
+    # (mirrors the lead-lag min-node logic).  Require 3 only for the
+    # unfiltered multi-node case.
+    min_nodes = 2 if args.layer_filter else 3
+    if args.paper_mode and len(node_ids) < min_nodes:
         raise SystemExit(
-            f"--paper-mode requires at least 3 real nodes for transfer entropy; found {len(node_ids)}."
+            f"--paper-mode requires at least {min_nodes} real nodes for transfer entropy "
+            f"({'layer-filtered' if args.layer_filter else 'full'}); found {len(node_ids)}."
         )
 
     node_pairs = list(itertools.permutations(node_ids, 2))

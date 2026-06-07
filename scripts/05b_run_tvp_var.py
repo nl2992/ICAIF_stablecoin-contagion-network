@@ -22,7 +22,20 @@ logger = get_logger(__name__)
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run TVP-VAR for one event.")
     parser.add_argument("--event", required=True)
-    parser.add_argument("--feature-col", default="basis_vs_usd")
+    parser.add_argument(
+        "--feature-col", default="basis_vs_usd",
+        help=(
+            "Feature column to use for TVP-VAR.  Defaults to 'basis_vs_usd'.  "
+            "For DEX-layer paper-mode runs use 'usdc_net_sold_1h'.  "
+            "When 'auto' is passed, the script selects the first column in "
+            "[usdc_net_sold_1h, basis_vs_usd, exchange_netflow_1h] that has "
+            "non-null data for at least half the selected nodes."
+        ),
+    )
+    parser.add_argument(
+        "--layer-filter", default=None,
+        help="Restrict TVP-VAR to nodes of a single layer (e.g. DEX, CEX).",
+    )
     parser.add_argument(
         "--window-type",
         default="rolling",
@@ -61,6 +74,59 @@ def main() -> None:
     else:
         node_ids = [n.id for n in nodes if n.id in panel["node_id"].unique().to_list()]
 
+    # Optional layer filter (e.g. --layer-filter DEX for AMM-only TVP-VAR)
+    if args.layer_filter:
+        layer_node_ids = {n.id for n in nodes if n.layer == args.layer_filter}
+        node_ids = [nid for nid in node_ids if nid in layer_node_ids]
+        logger.info("--layer-filter %s: %d nodes remaining", args.layer_filter, len(node_ids))
+
+    feature_col = args.feature_col
+
+    # Auto-select feature column: pick the first column that has non-null data
+    # for at least half the selected nodes.  Resolves the common failure mode
+    # where basis_vs_usd (the default) is null for DEX nodes but
+    # usdc_net_sold_1h is not.
+    _FEATURE_PRIORITY = ["usdc_net_sold_1h", "basis_vs_usd", "exchange_netflow_1h",
+                         "mint_burn_net_1h", "reserve_imbalance"]
+    if feature_col == "auto":
+        node_panel = panel.filter(pl.col("node_id").is_in(node_ids))
+        for cand in _FEATURE_PRIORITY:
+            if cand not in node_panel.columns:
+                continue
+            n_with_data = (
+                node_panel.group_by("node_id")
+                .agg((pl.col(cand).drop_nulls().len() > 10).alias("has_data"))
+                .filter(pl.col("has_data"))
+                .height
+            )
+            if n_with_data >= max(1, len(node_ids) // 2):
+                feature_col = cand
+                logger.info("--feature-col auto: selected '%s' (%d/%d nodes have data)",
+                            cand, n_with_data, len(node_ids))
+                break
+        if feature_col == "auto":
+            logger.warning("--feature-col auto: no suitable column found; falling back to basis_vs_usd")
+            feature_col = "basis_vs_usd"
+    elif feature_col == "basis_vs_usd":
+        # Proactive check: if basis_vs_usd is missing/null for most selected nodes
+        # AND usdc_net_sold_1h is available, switch automatically and warn.
+        node_panel = panel.filter(pl.col("node_id").is_in(node_ids))
+        if "basis_vs_usd" in node_panel.columns:
+            n_basis = (
+                node_panel.group_by("node_id")
+                .agg((pl.col("basis_vs_usd").drop_nulls().len() > 10).alias("has_data"))
+                .filter(pl.col("has_data")).height
+            )
+        else:
+            n_basis = 0
+        if n_basis < max(1, len(node_ids) // 2) and "usdc_net_sold_1h" in node_panel.columns:
+            logger.warning(
+                "basis_vs_usd has data for only %d/%d selected nodes; "
+                "auto-switching to usdc_net_sold_1h for TVP-VAR (use --feature-col to override).",
+                n_basis, len(node_ids),
+            )
+            feature_col = "usdc_net_sold_1h"
+
     if len(node_ids) < 2:
         logger.warning(
             "Fewer than 2 nodes for event '%s'%s — skipping TVP-VAR.",
@@ -69,7 +135,6 @@ def main() -> None:
         )
         return
 
-    feature_col = args.feature_col
     ts_col = "event_time_seconds"
 
     # Build (T, N) matrix from pivot — hourly grid to align mixed-resolution series

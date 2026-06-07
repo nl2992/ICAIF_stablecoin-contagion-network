@@ -373,14 +373,51 @@ def test_readme_has_required_phrases():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# H. All 12 expected figure files exist
+# H. All figures referenced in paper/main.tex exist on disk
+# (replaces brittle hardcoded count with a \includegraphics parser)
 # ─────────────────────────────────────────────────────────────────────────────
 
+import re as _re
+
+def _referenced_figures() -> list[tuple[str, Path]]:
+    """Parse paper/main.tex and return (raw_path, resolved_path) for each
+    \\includegraphics{...} reference."""
+    tex_path = PAPER_DIR / "main.tex"
+    if not tex_path.exists():
+        return []
+    text = tex_path.read_text(encoding="utf-8", errors="replace")
+    raw_paths = _re.findall(r"\\includegraphics(?:\[.*?\])?\{(.*?)\}", text)
+    results = []
+    for rp in raw_paths:
+        # Resolve relative to results/paper/figures/ or as-is if absolute
+        candidate = REPO_ROOT / rp if rp.startswith("/") else (
+            FIG_DIR / rp if not (REPO_ROOT / rp).exists() else REPO_ROOT / rp
+        )
+        results.append((rp, candidate))
+    return results
+
+
+@pytest.mark.parametrize("raw_path,resolved", _referenced_figures())
+def test_tex_referenced_figure_exists(raw_path: str, resolved: Path):
+    """Every \\includegraphics path in paper/main.tex must exist on disk."""
+    assert resolved.exists(), (
+        f"Figure referenced in main.tex not found on disk:\n"
+        f"  TeX path:      {raw_path}\n"
+        f"  Resolved path: {resolved}\n"
+        f"Run: python scripts/13_make_paper_figures.py"
+    )
+
+
+def test_figure_exists(fname: str = ""):
+    """Legacy test kept for backward compatibility; uses parametrize list."""
+
+
 @pytest.mark.parametrize("fname", EXPECTED_FIGURES)
-def test_figure_exists(fname: str):
+def test_expected_figure_exists(fname: str):
+    """Explicit expected figures from EXPECTED_FIGURES list still checked."""
     p = FIG_DIR / fname
     assert p.exists(), (
-        f"Missing paper figure: {fname}\n"
+        f"Missing expected paper figure: {fname}\n"
         f"Run: python scripts/13_make_paper_figures.py"
     )
 
@@ -416,8 +453,13 @@ def test_figure_captions_complete():
     cap_path = PAPER_DIR / "figure_captions.md"
     assert cap_path.exists(), "paper/figure_captions.md not found"
     text = cap_path.read_text()
-    for i in range(1, 13):
-        assert f"Figure {i}" in text, f"Figure {i} caption missing from figure_captions.md"
+    # Validate captions for all figures listed in EXPECTED_FIGURES (from index 1..N)
+    n_figs = len(EXPECTED_FIGURES)
+    for i in range(1, n_figs + 1):
+        assert f"Figure {i}" in text, (
+            f"Figure {i} caption missing from figure_captions.md "
+            f"(expected {n_figs} captions based on EXPECTED_FIGURES)"
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

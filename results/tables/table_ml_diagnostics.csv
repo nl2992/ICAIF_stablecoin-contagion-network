@@ -1,0 +1,6 @@
+event_id,within_event_auroc,pricedev_calm,pricedev_panic,panic_calm_ratio,panic_prevalence
+usdt_curve_2023,0.9175,0.0431,0.0853,1.981,0.1741
+terra_luna_2022,0.9682,0.1403,0.2684,1.913,0.0593
+ftx_2022,0.6053,0.1042,0.0875,0.84,0.0891
+busd_2023,0.6784,0.0379,0.0203,0.535,0.0764
+usdc_svb_2023,0.9077,0.0696,0.1998,2.87,0.0948

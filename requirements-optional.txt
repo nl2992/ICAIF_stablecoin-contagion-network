@@ -1,0 +1,19 @@
+# Optional dependencies for stablecoin-contagion-network
+#
+# These are NOT required for the primary paper results (lead-lag, TE, claim gate,
+# VAR/Granger, event study, TVP-VAR).  Install them for the Hawkes and GNN analyses.
+#
+# Hawkes process (requires a C++ compiler)
+# On Ubuntu/Debian: sudo apt-get install g++ && pip install tick
+# On macOS:         xcode-select --install && pip install tick
+# On Windows:       install Build Tools for Visual Studio, then pip install tick
+tick>=0.7
+# hawkeslib>=0.1    # older alternative if tick compilation fails
+
+# Temporal GNN (requires GPU for reasonable training time; CPU-only is possible)
+# See https://pytorch.org/get-started/ for CUDA-specific wheels
+torch>=2.2
+torch-geometric>=2.5
+
+# Hidden Markov Model for unsupervised stress-regime detection (script 27)
+hmmlearn>=0.3

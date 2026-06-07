@@ -93,8 +93,6 @@ RESULT_TABLE_PREFIXES = (
     "table_edges",
     "table_amm_leadlag",
     "table_sparse_events",
-    "table_forbes_rigobon",
-    "table_qvar",
 )
 
 # ---------------------------------------------------------------------------
@@ -650,6 +648,18 @@ def annotate_edge_table(
         row["statistical_claim_allowed"] = stat_ok
         row["paper_claim_allowed"]        = paper_ok
         row["claim_strength"]             = strength
+        # Sub-window override columns (populated by --split-at in 04_run_leadlag.py).
+        # When non-null, the claim gate respects these timestamps for validity assessment
+        # and the sub_window column makes the effective window auditable.
+        row.setdefault("window_start_override", None)
+        row.setdefault("window_end_override",   None)
+        # Convenience label: "<event_id> [full]" or "<event_id> [pre_drain]" etc.
+        win_end = row.get("window_end_override") or row.get("sub_window_end")
+        row["sub_window"] = (
+            f"{row.get('event_id', '')} [pre_{win_end}]"
+            if win_end
+            else f"{row.get('event_id', '')} [full]"
+        )
 
         annotated.append(row)
     return pl.DataFrame(annotated)

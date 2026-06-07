@@ -1,7 +1,7 @@
-table,event_id,status,rows,blocked_rows,fixture_or_missing_rows,claimable_rows
-table_granger_usdt_curve_2023.csv,usdt_curve_2023,annotated,6,0,0,6
-table_leadlag_tests_usdt_curve_2023.csv,usdt_curve_2023,annotated,6,0,0,6
-table_transfer_entropy_usdt_curve_2023.csv,usdt_curve_2023,annotated,6,0,0,6
-table_tvp_var_spillovers_usdt_curve_2023.csv,usdt_curve_2023,annotated,54,0,0,54
-table_tvp_var_summary_usdt_curve_2023.csv,usdt_curve_2023,annotated,6,0,0,6
-table_var_spillovers_usdt_curve_2023.csv,usdt_curve_2023,annotated,9,0,0,9
+table,event_id,status,rows,blocked_rows,fixture_or_missing_rows,claimable_rows,paper_claimable_rows
+table_granger_usdt_curve_2023.csv,usdt_curve_2023,annotated,6,0,0,6,1
+table_leadlag_tests_usdt_curve_2023.csv,usdt_curve_2023,annotated,2,0,0,2,2
+table_transfer_entropy_usdt_curve_2023.csv,usdt_curve_2023,annotated,2,0,0,2,1
+table_tvp_var_spillovers_usdt_curve_2023.csv,usdt_curve_2023,annotated,24,0,0,24,0
+table_tvp_var_summary_usdt_curve_2023.csv,usdt_curve_2023,annotated,2,0,0,2,0
+table_var_spillovers_usdt_curve_2023.csv,usdt_curve_2023,annotated,9,0,0,9,0

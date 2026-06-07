@@ -134,47 +134,36 @@ nodes:
         crvUSD/USDT StableSwap-ng pool. Contract 0x390f…BF4 deployed May 2023.
         Relevant for June 2023 USDT stress in crvUSD pools.
 
-    - id: curve_frax_usdc
+    - id: curve_fraxusdc
       venue: Curve
       layer: DEX
       chain: Ethereum
       assets: ["FRAX", "USDC"]
-      contract: "0xDcEF968d416a41Cdac0ED8702fAC8128A64241A2"
+      contract: "0xDcEF968d416a41Cdac0ED8702fAC8128A64241A"
       provenance_best: "dex_pool_onchain"
       tier: A
-      events_covered: [usdc_svb_2023, busd_2023]
+      events_covered: [ftx_2022, busd_2023]
       notes: >
-        Curve FRAX/USDC pool (frxUSD). Peak TVL ~$300M. USDC is the fiat-backed
-        counterpart; pool imbalance during SVB shock is a clean fiat-backed
-        design-heterogeneity comparator. TokenExchange logs are Tier-A.
+        Curve FRAX/USDC plain pool, deployed April 2022.  Active during both the
+        FTX collapse (November 2022) and BUSD wind-down (February 2023).  Provides
+        a second Tier-A DEX node for these events, enabling A/A lead-lag claims.
+        Contract: 0xDcEF…41A.
 
     - id: curve_lusd_3crv
       venue: Curve
       layer: DEX
       chain: Ethereum
       assets: ["LUSD", "3CRV"]
-      contract: "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0cA"
+      contract: "0xEd279fDD11cA84bEef15AF5D39BB4d4bEE23F0CA"
       provenance_best: "dex_pool_onchain"
       tier: A
-      events_covered: [usdc_svb_2023, ftx_2022]
+      events_covered: [ftx_2022, busd_2023]
       notes: >
-        Liquity LUSD/3CRV pool. LUSD is overcollateralized ETH-backed; provides
-        a non-algorithmic, non-fiat comparator for design-heterogeneity analysis.
-        3CRV leg links pool stress to DAI/USDC/USDT imbalances.
-
-    - id: curve_susd_4pool
-      venue: Curve
-      layer: DEX
-      chain: Ethereum
-      assets: ["sUSD", "DAI", "USDC", "USDT"]
-      contract: "0xA5407eAE9Ba41422680e2e00537571bcC53efBfD"
-      provenance_best: "dex_pool_onchain"
-      tier: A
-      events_covered: [usdc_svb_2023, usdt_curve_2023]
-      notes: >
-        Synthetix sUSD 4-pool. sUSD is synthetically backed; pool includes
-        DAI/USDC/USDT, creating a natural cross-mechanism stress transmitter.
-        TokenExchange logs are Tier-A. sUSD tracked as the stress indicator.
+        Curve LUSD/3CRV metapool, deployed March 2021.  Active during FTX 2022
+        and BUSD 2023.  LUSD is Liquity's USD-denominated stablecoin backed by ETH
+        collateral; its pool activity reflects ETH-backed stablecoin stress dynamics
+        distinct from fiat-backed USDC/USDT mechanics.  Second A/A pair candidate
+        for FTX 2022 and BUSD 2023.  Contract: 0xEd27…CA.
 
   # ---------------------------------------------------------------------------
   # Flow nodes — settlement, bridge, and on-chain flow channels
@@ -243,8 +232,16 @@ nodes:
       asset: USDT
       issuer: "Tether"
       token_contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-      sources: ["etherscan", "the_graph"]
+      # Tether emits Issue(uint256) and Redeem(uint256) rather than standard
+      # ERC-20 Transfer events.  The issue_redeem encoding dispatches to
+      # ingest_tether_issue_redeem() in etherscan.py (uses eth_getLogs).
+      event_encoding: "issue_redeem"
+      sources: ["etherscan"]
       provenance_best: "onchain_event"
       tier: A
       events_covered: [usdt_curve_2023]
-      notes: "Mint/burn from Issue/Redeem events on Tether ERC20 contract."
+      notes: >
+        Mint/burn from Issue(uint256)/Redeem(uint256) events on the Tether
+        mainnet ERC-20 contract.  Decoded via eth_getLogs with topic hashes
+        from TETHER_MINT_CONFIGS in etherscan.py.  Tier A: directly observable
+        on-chain events with no off-chain intermediary.

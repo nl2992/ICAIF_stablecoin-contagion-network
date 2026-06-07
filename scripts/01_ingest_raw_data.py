@@ -218,14 +218,27 @@ def _try_real_flow(
         return None, "flows", "fixture_non_empirical"
 
     if node.layer == "mint_burn":
-        from stressnet.data.etherscan import ingest_mint_burn
-        try:
-            path, tier = ingest_mint_burn(
-                token_contract, start_block, end_block, out_dir, event_id, node.id,
-            )
-        except Exception as exc:
-            logger.warning("Mint/burn ingest error (%s): %s", node.id, exc)
-            path, tier = None, "fixture_non_empirical"
+        # Dispatch based on event_encoding metadata.
+        # Tether (USDT) emits Issue/Redeem instead of standard Transfer events.
+        event_encoding = node.metadata.get("event_encoding", "erc20_transfer")
+        if event_encoding == "issue_redeem":
+            from stressnet.data.etherscan import ingest_tether_issue_redeem
+            try:
+                path, tier = ingest_tether_issue_redeem(
+                    token_contract, start_block, end_block, out_dir, event_id, node.id,
+                )
+            except Exception as exc:
+                logger.warning("Tether Issue/Redeem ingest error (%s): %s", node.id, exc)
+                path, tier = None, "fixture_non_empirical"
+        else:
+            from stressnet.data.etherscan import ingest_mint_burn
+            try:
+                path, tier = ingest_mint_burn(
+                    token_contract, start_block, end_block, out_dir, event_id, node.id,
+                )
+            except Exception as exc:
+                logger.warning("Mint/burn ingest error (%s): %s", node.id, exc)
+                path, tier = None, "fixture_non_empirical"
         return path, "flows", tier
 
     else:  # onchain_flow, bridge_flow

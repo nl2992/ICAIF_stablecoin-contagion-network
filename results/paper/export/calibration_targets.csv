@@ -1,0 +1,6 @@
+target_id,kind,event,description,value,ci_low,ci_high,units,claim_strength,consumption_tier,edge_tier,method,p_value,q_value_global,n_events_support,provenance_note
+edge:usdt_curve_2023:curve_3pool->curve_crvusd_usdt,propagation_edge,usdt_curve_2023,propagation curve_3pool -> curve_crvusd_usdt,0.41,0.28,0.55,dimensionless,robust,primary,A_A_dex_flow,leadlag,0.0007,0.011,8.0,"A/A Curve TokenExchange, Bonferroni + global FDR"
+edge:terra_2022:curve_3pool->curve_ust_wormhole,propagation_edge,terra_2022,propagation curve_3pool -> curve_ust_wormhole,0.22,-0.05,0.49,dimensionless,suggestive,secondary,A_A_dex_flow,leadlag,0.18,0.42,7.0,A/A provenance but not sig at hourly grid
+edge:usdc_svb_2023:usdc_mint_burn->curve_3pool,propagation_edge,usdc_svb_2023,propagation usdc_mint_burn -> curve_3pool,,,,dimensionless,suggestive,secondary,A_A_onchain_settlement,sparse_flow,,,4.0,sparse; underpowered at 4 events
+ou:usdt_curve_2023:3pool,ou_half_life,usdt_curve_2023,"peg-recovery half-life, 3pool",6.4,3.1,11.8,hours,suggestive,secondary,,ou_fit,,,,OU fit on hourly on-chain price proxy (Tier-B feature)
+mag:usdt_curve_2023,contagion_magnitude,usdt_curve_2023,peak cross-pool depeg spread,37.0,29.0,45.0,bps,robust,primary,,event_study,,,8.0,A/A Tier-A flow + on-chain price

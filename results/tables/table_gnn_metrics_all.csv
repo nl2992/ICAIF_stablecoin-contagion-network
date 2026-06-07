@@ -1,0 +1,6 @@
+event_id,model,status,reason,AUROC,AUPRC,n_train_snapshots,n_test_snapshots,node_feat_dim,epochs,uses_fixture_data,passes_gnn_gate,n_fixture_rows_dropped,baseline_auroc,auroc_lift_pp
+usdt_curve_2023,SnapshotGCN,trained,"",0.49337003317100714,0.015304465431161818,307,77,9,80,false,false,1872,0.509,-1.56
+usdc_svb_2023,SnapshotGCN,trained,"",0.7064032103288842,0.9998501137311941,250,63,9,80,false,false,2664,0.859,-15.26
+terra_luna_2022,SnapshotGCN,trained,"",0.4656134671544559,0.02972980638499852,595,149,9,80,false,false,0,0.736,-27.04
+ftx_2022,SnapshotGCN,trained,"",0.4999916002206281,0.5163028507926047,576,144,9,80,false,false,72,0.964,-46.4
+busd_2023,SnapshotGCN,trained,"",0.0448068585637484,0.4082014668999168,691,173,9,80,false,false,0,0.647,-60.22

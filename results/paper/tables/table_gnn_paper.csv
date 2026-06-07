@@ -1,0 +1,6 @@
+Event,GNN AUROC,GNN AUPRC,Baseline AUROC,Lift (pp),Passes gate,Uses fixture,Train snapshots,Test snapshots
+usdt_curve_2023,0.493,0.015,0.509,-1.56,false,false,307,77
+usdc_svb_2023,0.706,1.0,0.859,-15.26,false,false,250,63
+terra_luna_2022,0.466,0.03,0.736,-27.04,false,false,595,149
+ftx_2022,0.5,0.516,0.964,-46.4,false,false,576,144
+busd_2023,0.045,0.408,0.647,-60.22,false,false,691,173

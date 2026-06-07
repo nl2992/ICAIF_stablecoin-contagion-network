@@ -1,2 +1,2 @@
 event_id,model,status,reason,AUROC,AUPRC,n_train_snapshots,n_test_snapshots,node_feat_dim,epochs,uses_fixture_data,passes_gnn_gate
-usdt_curve_2023,SnapshotGCN,trained,fixture_data,NaN,NaN,307,77,9,30,true,false
+usdt_curve_2023,SnapshotGCN,trained,"",0.49337003317100714,0.015304465431161818,307,77,9,80,false,false

@@ -119,7 +119,14 @@ Four distinct stablecoin systems experienced significant stress across these
 episodes: the algorithmic UST/Terra collapsed in May 2022; FTX's implosion
 triggered exchange runs in November 2022; USDC briefly de-pegged following
 Silicon Valley Bank's failure in March 2023; and Curve Finance pools became
-severely imbalanced in June 2023.  Each episode prompted real-time claims of
+severely imbalanced in June 2023.  \emph{Curve Finance} is an \emph{automated
+market maker} (AMM)---a decentralised exchange whose prices are set not by
+matching buyers and sellers, but by a mathematical formula (StableSwap~\cite{Egorov2019})
+applied to the ratio of token reserves held in a liquidity pool.  When one
+stablecoin in the pool is in excess demand, the pool's balance tilts, its
+price deviates from the reference exchange, and arbitrageurs flow in or out
+to restore parity---generating the on-chain flow signals we study.
+Each episode prompted real-time claims of
 \emph{contagion}---stress spreading from one venue or asset to another.
 
 Most empirical analyses of these events rely on price data alone and treat all
@@ -188,16 +195,32 @@ exogenous shocks require market signals.  Both layers are necessary.
 \label{sec:related}
 %% -----------------------------------------------------------------------
 
-\textbf{Stablecoin stress and AMM microstructure.}  Stablecoin stability has
-been studied through runs, reserve adequacy, and safe-asset economics~\cite{Gorton2023,Lyons2023,Cao2024}.
-AMM microstructure analyzes loss-versus-rebalancing and constant-function pricing~\cite{Milionis2022,Angeris2020}.
-We build on Curve's StableSwap design~\cite{Egorov2019} and treat on-chain logs as
-execution-grade evidence in the spirit of tick-data econometrics~\cite{AitSahalia2010}.
+\textbf{Stablecoin stress and AMM microstructure.}  Prior work studies stablecoin
+stability through runs, reserve adequacy, and safe-asset economics~\cite{Gorton2023,Lyons2023,Cao2024},
+and AMM microstructure through loss-versus-rebalancing and constant-function pricing~\cite{Milionis2022,Angeris2020}.  These studies establish the economic mechanisms
+but rely on market-price data; they do not exploit on-chain flow logs as a
+\emph{direct, execution-grade} observation of the trading that produces the price
+move.  Egorov~\cite{Egorov2019} describes Curve's StableSwap invariant that governs
+pool pricing; we treat the resulting \texttt{TokenExchange} logs as tick-data
+econometrics~\cite{AitSahalia2010}---execution-grade evidence that market proxies
+can only approximate---and apply them to the contagion question these studies raise
+but do not settle.
 
-\textbf{On-chain contagion measurement.}  Forbes and Rigobon~\cite{Forbes2002} distinguish
-contagion (crisis-driven linkage shift) from interdependence. We make this operational
-on Tier-A on-chain flow, explicitly gating claims by data provenance rather than
-conflating execution-grade logs with market proxies.
+\textbf{On-chain contagion measurement.}  Forbes and Rigobon~\cite{Forbes2002}
+distinguish \emph{contagion}---a genuine increase in cross-market linkage caused by
+the crisis---from \emph{interdependence}, a stable background correlation that merely
+appears elevated during stress because crisis periods exhibit higher variance.  Their
+test corrects for this heteroskedasticity bias and compares the adjusted
+calm-window correlation $\hat\rho_{\text{calm}}$ against the panic-window correlation
+$\hat\rho_{\text{panic}}$ using a Fisher $z$-to-$z$ two-sample statistic:
+\begin{equation}
+  z_{\text{Fisher}} = \frac{f(\hat\rho_{\text{panic}}) - f(\hat\rho_{\text{calm}})}
+    {\sqrt{1/(n_{\text{panic}}{-}3) + 1/(n_{\text{calm}}{-}3)}}, \quad
+    f(\hat\rho) = \tfrac{1}{2}\ln\!\frac{1+\hat\rho}{1-\hat\rho}.
+\end{equation}
+A significant positive $z_{\text{Fisher}}$ means the linkage \emph{genuinely increased}---contagion in the Forbes--Rigobon sense.  We make this operational on Tier-A on-chain
+flow, explicitly gating claims by data provenance rather than conflating
+execution-grade logs with market proxies.
 
 \textbf{Methodological rigour in financial AI.}  Recent ICAIF work emphasizes trustworthiness
 over raw performance~\cite{Faloughi2025,LeeBias2025,LeeDFL2025}. Our provenance gate
@@ -617,9 +640,14 @@ answer, and that a surveillance system actually needs.  Framed as \emph{online,
 unsupervised detection}, does execution-grade Tier-A on-chain data reveal stress
 that Tier-B market data misses --- and sooner?
 
-Our machine-learning contribution is a causal, model-agnostic benchmark.  We run
-one unsupervised detector --- a three-state Gaussian Hidden Markov Model ---
-\emph{identically} on Tier-A on-chain pool state and on Tier-B market state, and
+Our machine-learning contribution is a causal, model-agnostic benchmark.  A
+\emph{Hidden Markov Model} (HMM) is a generative model that assumes the data are
+produced by a hidden state sequence (here: calm, transition, panic) evolving via
+fixed transition probabilities, with each state emitting observations from a
+Gaussian distribution.  The key property for online detection is the \emph{filtered
+posterior}: $P(\text{stress}\mid x_{1:t})$ is computed forward-only, using only data
+up to time $t$, so the detector cannot look ahead.  We run one three-state Gaussian
+HMM \emph{identically} on Tier-A on-chain pool state and on Tier-B market state, and
 score it on its \emph{filtered} (forward-only) posterior, so the decision at hour
 $t$ uses only information available by $t$.  Because the model is fixed and only
 the data source varies, any performance gap is attributable to the \emph{data},

@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Signal taxonomy: when on-chain AMM signals detect stablecoin stress.
+Rows are grouped by shock origin (endogenous pool imbalance vs exogenous market shock).
+``Lead'' is hours before the labelled panic onset; positive = fires before onset.
+``Advantage'' is how many hours earlier the on-chain AMM signal fires relative to the CEX basis signal.}
+\label{tab:taxonomy}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccccc}
+\toprule
+ & & \multicolumn{4}{c}{On-chain AMM signal} & \multicolumn{2}{c}{CEX market signal} & & \\
+\cmidrule(lr){3-6}\cmidrule(lr){7-8}
+Event & Mechanism & Detected & AUROC & FR $z$ & Lead & AUROC & Lead & Adv.\ (h) & Arb.\ flip \\
+\midrule
+\multicolumn{10}{l}{\textit{Endogenous shock (pool-level origin)}} \\
+
+    usdt\_curve\_2023 & DEX pool imbalance & \checkmark & 0.927 & +2.82 & -123h & 0.937 & -121h & +2h & yes \\
+    terra\_luna\_2022 & Algorithmic reflexive & \checkmark & 0.955 & +0.18 & -34h & 0.499 & +82h & +116h & no \\
+\midrule
+\multicolumn{10}{l}{\textit{Exogenous shock (external market origin)}} \\
+
+    ftx\_2022 & Exchange credit shock & --- & 0.389 & -0.90 & -108h & 0.868 & -126h & -18h & no \\
+    busd\_2023 & Regulatory issuer wind-down & --- & 0.618 & -1.93 & -150h & 0.887 & -165h & -15h & yes \\
+    usdc\_svb\_2023 & Fiat reserve bank shock & \checkmark & 0.916 & --- & -330h & 0.909 & -390h & -60h & no \\
+\bottomrule
+\end{tabular}}
+\end{table}

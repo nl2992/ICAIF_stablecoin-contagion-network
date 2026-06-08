@@ -1,0 +1,4 @@
+position,entry_price,price_at_hmm_alert,price_at_market_alert,loss_if_hmm_alert_usd,loss_if_market_alert_usd,loss_if_no_signal_usd,loss_avoided_vs_market_usd,data_source
+long_luna,80.0,68.0,7.0,150000.0,912500.0,999875.0,762500.0,public_anchor
+long_ust,1.0,0.9997,0.4965,251.0,503497.0,461372.0,503247.0,gold_ust_binance_mid_price
+curve_pool,1.0,1.0,1.0,0.0,0.0,0.0,0.0,gold_curve_ust_wormhole_implied_price

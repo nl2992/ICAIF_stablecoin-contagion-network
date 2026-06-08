@@ -1,0 +1,6 @@
+event_id,n_hours,window_h,corr_flow_basis_pre,corr_flow_basis_panic,arb_regime_flip,r_rolling_vs_basis,p_rolling_vs_basis
+usdt_curve_2023,379,6,-0.2178,0.3634,True,0.1206,0.0199
+terra_luna_2022,1045,6,0.0124,0.0496,False,0.1389,0.0
+ftx_2022,718,6,-0.1274,-0.5159,False,-0.0065,0.8615
+busd_2023,864,6,-0.0686,0.4462,True,-0.0486,0.2733
+usdc_svb_2023,226,6,,0.0108,False,0.1169,0.0829

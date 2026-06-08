@@ -1,0 +1,11 @@
+event_id,tier,node,auroc,detects
+usdt_curve_2023,A,curve_3pool,0.9271,True
+usdt_curve_2023,B,usdt_binance,0.984,True
+terra_luna_2022,A,curve_3pool,0.9545,True
+terra_luna_2022,B,ust_binance,0.9136,True
+ftx_2022,A,curve_3pool,0.3888,False
+ftx_2022,B,usdt_binance,0.9033,True
+busd_2023,A,curve_3pool,0.6176,False
+busd_2023,B,busd_binance,0.9168,True
+usdc_svb_2023,A,curve_3pool,0.9165,True
+usdc_svb_2023,B,usdc_coinbase,0.9392,True

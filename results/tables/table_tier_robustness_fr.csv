@@ -1,0 +1,9 @@
+event_id,tier,node_a,node_b,feature,n_pre,rho_pre,n_panic,rho_panic,fisher_z,p_value,contagion
+usdt_curve_2023,A,curve_3pool,curve_crvusd_usdt,usdc_net_sold_1h,95,0.0905,53,0.5273,2.8209,0.0048,True
+terra_luna_2022,A,curve_3pool,curve_ust_wormhole,usdc_net_sold_1h,9,0.0063,20,0.0928,0.1828,0.855,False
+terra_luna_2022,B,ust_binance,usdt_binance,basis_bps,552,-0.7491,66,-0.1421,6.2225,0.0,True
+ftx_2022,A,curve_3pool,curve_lusd_3crv,usdc_net_sold_1h,6,0.3664,10,-0.2291,-0.8948,0.3709,False
+ftx_2022,B,usdt_binance,busd_binance,basis_bps,120,-0.6187,66,0.6435,9.5156,0.0,True
+busd_2023,A,curve_3pool,curve_lusd_3crv,usdc_net_sold_1h,15,0.0911,15,-0.6032,-1.9339,0.0531,False
+busd_2023,B,busd_binance,usdt_binance,basis_bps,0,,0,,,,False
+usdc_svb_2023,B,usdc_binance,usdc_coinbase,basis_bps,0,,40,-0.2514,,,False

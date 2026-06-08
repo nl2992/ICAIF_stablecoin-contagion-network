@@ -1,0 +1,6 @@
+event_id,shock_type,mechanism,onchain_fr_detected,onchain_hmm_detected,onchain_hmm_auroc,onchain_fisher_z,onchain_lead_h,market_auroc,market_lead_h,onchain_earlier_by_h,signal_winner,arb_regime_flip
+usdt_curve_2023,endogenous,DEX pool imbalance,True,True,0.927,2.821,-123,0.937,-121,2,on-chain AMM,True
+terra_luna_2022,endogenous,Algorithmic reflexive,False,True,0.955,0.183,-34,0.499,82,116,on-chain AMM,False
+ftx_2022,exogenous,Exchange credit shock,False,False,0.389,-0.895,-108,0.868,-126,-18,CEX market,False
+busd_2023,exogenous,Regulatory issuer wind-down,False,False,0.618,-1.934,-150,0.887,-165,-15,CEX market,True
+usdc_svb_2023,exogenous,Fiat reserve bank shock,False,True,0.916,,-330,0.909,-390,-60,CEX market,False

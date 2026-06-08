@@ -1,0 +1,4 @@
+event_id,pool_a,pool_b,n_pre,n_panic,rho_pre,rho_panic,fisher_z_obs,ci_lo_95,ci_hi_95,boot_se,n_bootstrap,p_gt0_bootstrap,contagion_ci
+usdt_curve_2023,curve_3pool,curve_crvusd_usdt,95,53,0.0905,0.5273,2.8209,-0.0988,4.7665,1.2656,2000,0.965,False
+terra_luna_2022,curve_3pool,curve_ust_wormhole,9,20,0.0063,0.0928,0.1828,-2.7907,1.0183,0.846,2000,0.622,False
+busd_2023,curve_3pool,curve_lusd_3crv,15,15,0.0911,-0.6032,-1.9339,-4.276,1.6824,1.6956,2000,0.245,False

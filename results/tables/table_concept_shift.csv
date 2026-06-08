@@ -1,0 +1,2 @@
+n_train_test_pairs,n_usable_events,mean_within_event_auroc,mean_cross_event_auroc,pearson_r_kl_auroc,p_kl_auroc,pearson_r_mmd_auroc,p_mmd_auroc,shift_predicts_failure
+20,5,0.8154,0.5007,0.5251,0.0174,0.0554,0.8166,True

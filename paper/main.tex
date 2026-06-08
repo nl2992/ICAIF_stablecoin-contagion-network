@@ -908,6 +908,11 @@ mechanism rather than data quality.  HMM model choice is validated by ablation o
 events (AUROC $0.92$--$0.96$) and beats a CUSUM changepoint baseline on 4 of 5
 events (mean margin $+0.28$); CUSUM outperforms on BUSD only, where a
 fixed-threshold detector is more appropriate for the regulatory shock.
+Across all 9 configurations tested (2-, 3-, 4-state $\times$ diagonal/full/spherical
+covariance), the 3-state diagonal model is within $\pm0.02$ AUROC of the best
+per-event configuration on each of the four detectable events, confirming that the
+default choice is robust and that no alternative parameterisation produces a
+qualitatively different result.
 
 
 

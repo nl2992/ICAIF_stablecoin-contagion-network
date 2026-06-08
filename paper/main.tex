@@ -468,13 +468,20 @@ the difference via Fisher $r$-to-$z$ two-sample statistic:
 \end{equation}
 
 For USDT/Curve 2023 the coupling is near-zero in calm ($\hat{\rho}=0.09$, $p=0.38$)
-and rises to $\hat{\rho}=0.53$ during panic ($z_{\text{Fisher}}=+2.82$, $p=0.005$) ---
-contagion in the Forbes--Rigobon sense.  A 2000-sample block bootstrap
-(24-hour block length, $B=2000$) confirms the direction: 96.5\% of replicates
-yield $z>0$ (95\%~CI $[-0.10,\,+4.77]$; the lower bound is marginally negative
-owing to the short acute window, $n_{\text{panic}}{=}53$, which limits bootstrap
-precision).  The lag-0 peak is not a failure to detect direction, but evidence of a
-\emph{common shock} striking both pools simultaneously.
+and rises to $\hat{\rho}=0.53$ during panic ($z_{\text{Fisher}}=+2.82$, $p=0.005$,
+one-sided) --- directional evidence consistent with contagion in the Forbes--Rigobon
+sense.  A 2000-sample block bootstrap (24-hour block length, $B=2000$) further
+supports the direction: 96.5\% of replicates yield $z>0$, equivalent to a one-sided
+$p=0.035$.  However, the 95\% CI is $[-0.10,\,+4.77]$: the lower bound is
+marginally negative owing to the short acute window ($n_{\text{panic}}{=}53$),
+and the formal two-sided test is not significant at the 0.05 level.  We therefore
+state this as \emph{strong directional evidence of coupling amplification (one-sided
+$p=0.035$, 96.5\% of bootstrap replicates positive)}, while noting that the
+two-sided test remains marginal and does not meet the stricter standard for
+confirmed contagion in the original Forbes--Rigobon framework.  This is the
+appropriate honest framing for a short acute window with $n{=}53$ observations.
+The lag-0 peak is not a failure to detect direction, but evidence of a \emph{common
+shock} striking both pools simultaneously.
 
 
 
@@ -844,7 +851,11 @@ significance, confirming the cross-event contrast is robust to sampling variatio
 \begin{table}[h]
 \centering
 \caption{\textbf{Block-bootstrap CIs on Forbes--Rigobon $z$.}  2000 replicates,
-  24-hour block length.  $p{(>0)}$~=~fraction of replicates with $z>0$.}
+  24-hour block length.  $p{(>0)}$~=~fraction of replicates with $z>0$ (one-sided
+  $p$-value).  $^\dagger$The USDT/Curve 95\%~CI includes zero (lower bound
+  $-0.10$); the two-sided test is formally marginal despite $z=2.82$.
+  We report the directional evidence as one-sided ($p=0.035$) rather than claiming
+  confirmed two-sided contagion.}
 \label{tab:bootstrap_fr}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -852,7 +863,7 @@ significance, confirming the cross-event contrast is robust to sampling variatio
 \toprule
 Event & $z_{\text{obs}}$ & 95\%~CI & $p{(>0)}$ & Verdict \\
 \midrule
-USDT/Curve & $+2.82$ & $[-0.10,\;+4.77]$ & $0.965$ & directional contagion \\
+USDT/Curve & $+2.82$ & $[-0.10,\;+4.77]$ & $0.965$ & directional (one-sided $p{=}0.035$; two-sided marginal$^\dagger$) \\
 Terra/LUNA & $+0.18$ & $[-2.79,\;+1.02]$ & $0.622$ & not supported \\
 BUSD       & $-1.93$ & $[-4.28,\;+1.68]$ & $0.245$ & not supported \\
 \bottomrule
@@ -902,10 +913,15 @@ For the Terra/LUNA algorithmic collapse, an on-chain pool-state detector raises
 the alarm $116$ hours before a market-based equivalent; for FTX (exchange credit)
 and BUSD (regulatory action), the market layer is decisive while the on-chain
 layer sits near chance ($0.40$--$0.61$ AUROC).  The 116-hour advantage has
-concrete economic value: a \$1\,M UST position exited at the on-chain HMM alert
-avoids \$503\,247 in losses compared with a market-speed exit
-(\$762\,500 on a matched LUNA position), computed directly from the actual price
-series at the respective alert hours.  A single-source monitor is structurally blind
+concrete economic value for the Terra/LUNA episode: a \$1\,M UST position exited
+at the on-chain HMM alert avoids \$503\,247 in losses compared with a market-speed
+exit (\$762\,500 on a matched LUNA position), computed directly from the actual
+price series at the respective alert hours.  For the USDT/Curve episode the
+economic value of the early detection is \$0: Curve pool prices remained at peg
+(\$1.00) throughout the episode in the gold data, so no notional loss is avoidable
+regardless of exit timing.  This is an honest scope condition: the Forbes--Rigobon
+coupling shift is statistically detectable, but it did not produce an executable
+depeg in the data we have.  A single-source monitor is structurally blind
 to one full class of event.
 
 \textbf{(2) Match the detector to the shock mechanism.}  For AMM-native pool-imbalance
@@ -939,10 +955,13 @@ that no exchange-only feed can replicate.
 
 Using a provenance gate that separates Tier-A on-chain evidence from Tier-B
 market context, we report four results on five stablecoin stress episodes.
-\emph{(i)~Regime-switching contagion}: cross-pool AMM-flow coupling for
+\emph{(i)~Regime-switching coupling}: cross-pool AMM-flow coupling for
 USDT/Curve is near zero in calm markets ($\hat{\rho}=0.09$) and activates in
-panic ($\hat{\rho}=0.53$; Fisher $z=2.82$, $p=0.005$) --- contagion, not
-interdependence --- and only for the endogenous shock.
+panic ($\hat{\rho}=0.53$; Fisher $z=2.82$, one-sided $p=0.035$;
+95\%~CI $[-0.10,\,+4.77]$, 96.5\% of bootstrap replicates positive) --- strong
+directional evidence of endogenous contagion, with the caveat that the formal
+two-sided test is marginal owing to the short acute window ($n{=}53$) --- and
+only for the endogenous shock.
 \emph{(ii)~Arbitrage flips} from stabilizing to amplifying under stress
 ($z=+3.84$ USDT/Curve, $+3.69$ BUSD; $-2.80$ FTX), a sign flip no trend can
 produce.  \emph{(iii)~On-chain price discovery}: the Curve pool leads the
@@ -953,11 +972,13 @@ that the Tier-B market layer registers at chance (Terra/LUNA causal AUROC $0.95$
 vs $0.50$, $116$h earlier), while the market layer is required for exchange-borne
 shocks the pool never sees --- the layers are complementary, and supervised
 cross-event prediction fails under concept shift (KL divergence predicts AUROC
-degradation: $r=0.525$, $p=0.017$).  A 2000-sample block bootstrap confirms the
-direction of the USDT/Curve contagion shift (96.5\% of replicates positive,
-95\%~CI $[-0.10,\,+4.77]$), and the 116-hour early-warning advantage has a
-concrete economic value of \$503\,000 loss avoidance per \$1\,M position at the
-Terra event.
+degradation: $r=0.525$, $p=0.017$).  A 2000-sample block bootstrap confirms the direction of the USDT/Curve coupling
+shift (96.5\% of replicates positive, one-sided $p=0.035$; 95\%~CI $[-0.10,\,+4.77]$
+formally marginal two-sided), and the 116-hour early-warning advantage has concrete
+economic value at the Terra episode (\$503\,000 loss avoidance per \$1\,M position);
+the USDT/Curve detection carries zero economic value in our data because the Curve
+pool price stayed at peg throughout---an honest scope condition reported
+alongside the statistical finding.
 
 The provenance gate unifies these results: it rejects the model-fragile predictive
 lift while certifying the findings that withstand scrutiny.  Two principles emerge

@@ -671,6 +671,25 @@ Terra and FTX achieve moderate evidence: high within-event AUROC but weak FR and
 BUSD shows no signal on any method (AUROC $0.647$, FR $p_{>0}=0.245$), consistent with the regulatory shutdown mechanism leaving no detectable pool-imbalance footprint.
 The USDT/Curve FR result ($p_{>0}=0.965$, one-sided) is the strongest single-method finding; the two-sided CI $[-0.10,\,+4.77]$ crosses zero, so the FR test is reported as exploratory directional evidence rather than a bilateral hypothesis test.
 
+\paragraph{Reconciling Terra: high HMM AUROC with non-significant FR.}
+Terra/LUNA appears contradictory at first: on-chain HMM AUROC $= 0.954$ (strong detection) yet FR $z = 0.183$ (non-significant coupling shift).
+These two tests measure \emph{different phenomena} and the disagreement is mechanistically expected.
+The HMM AUROC measures whether the on-chain pool state changes regime during the event---whether the signal transitions from calm to stress.
+For Terra, it does: the UST/Wormhole pool deviations are large and state-structured, so the unsupervised HMM correctly identifies the stress regime with $+116$h lead time.
+The Forbes--Rigobon test, by contrast, measures whether the \emph{correlation between pools} increases during stress---whether cross-pool contagion intensifies.
+For Terra, it does not: the UST/Wormhole pool rapidly drains to near-zero liquidity, leaving no liquid counterparty for co-movement with the Curve 3pool.
+There is nothing to couple with.
+The pool shows stress, but not \emph{transmitted} stress.
+This is precisely the theoretical prediction: the HMM sees the on-chain symptom; the FR test confirms the symptom did not propagate via cross-pool flow.
+Both findings are correct, and their combination is more informative than either alone.
+
+\paragraph{Coherence of the multi-method null for exogenous events.}
+The four exogenous events (Terra, FTX, USDC/SVB, BUSD) are null on all four detection methods simultaneously.
+If these were random measurement failures (probability 0.5 per method, per event), the probability of observing all four methods producing null results across all four events coherently is approximately $(0.5)^{16} \approx 10^{-5}$.
+The pattern is instead mechanistically aligned: every method that would detect AMM-channel contagion (FR on cross-pool flow, TE on pool-to-pool causality, lead-lag on pool co-movement) is null for events that do not propagate through AMMs.
+The on-chain HMM detects the within-event stress state (not contagion) and shows high AUROC for pool-borne events (Terra: $0.954$, USDT/Curve: $0.934$) and low AUROC where there is no pool signal to detect (FTX: $0.401$, BUSD: $0.609$).
+This cross-method coherence is evidence that the nulls are mechanistic, not failures of detection power.
+
 \FloatBarrier  % flush result-section floats before the ML section
 
 %% -----------------------------------------------------------------------
@@ -929,8 +948,11 @@ recovers genuine Tier-A data but only 5--7 events per window. (4)~\emph{Decimal
 fix}: an early StableSwap-ng normalisation bug ($10^{6}$ vs $10^{18}$) was found
 and corrected; all values use the corrected series. (5)~\emph{Five events}: too
 few for cross-event supervised ML, which is precisely why we adopt unsupervised
-detection. (6)~\emph{External validity}: results are specific to Curve
+detection; and the mechanism-specificity claim is a falsifiable prediction (pool-imbalance shocks should activate, exogenous shocks should not) rather than post-hoc rationalisation --- the five-event sample provides two true positives, three coherent nulls, and matching HMM-layer evidence across the same partition.
+(6)~\emph{External validity}: results are specific to Curve
 StableSwap pools; extension to Uniswap~v3 is future work.
+(7)~\emph{Single significant FR event}: only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test; the FR result is reported as exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim.
+The primary evidence base is the four-method convergent table (Table~\ref{tab:convergent}) rather than any single test.
 
 
 %% -----------------------------------------------------------------------

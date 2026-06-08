@@ -656,13 +656,18 @@ Table~\ref{tab:convergent} summarises this four-method evidence for all five eve
 \toprule
 Event & FR $z$ & FR $p_{>0}$ & LL sig & TE sig & AUROC & Convergence \\
 \midrule
-USDC/SVB 2023   & ---   & ---   & 18 & 28 & 0.935 & \textbf{STRONG} \\
+USDC/SVB 2023   & n/a$^\dagger$ & n/a$^\dagger$ & 18 & 28 & 0.935 & \textbf{STRONG} \\
 USDT/Curve 2023 & 2.821 & 0.965 &  2 &  0 & 0.927 & \textbf{STRONG} \\
 Terra/Luna 2022 & 0.183 & 0.622 &  0 &  1 & 0.975 & MODERATE \\
 FTX 2022        & ---   & ---   &  0 & 13 & 0.964 & MODERATE \\
 BUSD 2023       & $-1.934$ & 0.245 & 0 & 0 & 0.647 & NONE \\
 \bottomrule
 \end{tabular}
+\par\smallskip
+{\footnotesize $^\dagger$ USDC/SVB 2023 is settlement-sparse: the acute crisis weekend
+had insufficient distinct observation windows to form the calm/panic correlation split required
+by Forbes--Rigobon.  FR is therefore not applicable; convergent evidence rests on
+lead-lag (18 significant pairs), transfer entropy (28 significant pairs), and HMM AUROC 0.935.}
 \end{table}
 
 The table formalises the paper's central claim: evidence is mechanism-specific.

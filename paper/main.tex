@@ -615,11 +615,8 @@ crisis that has already manifested elsewhere. Table~\ref{tab:cross_event} tests 
 
 \textbf{The non-detections are mechanism findings, not failures.}  Every event now carries a genuine Tier-A A/A pair (Table~\ref{tab:cross_event}), yet only the endogenous USDT/Curve shock activates.  Terra/LUNA stays flat (its UST pool drains, leaving no liquid counterparty); FTX and BUSD decouple during panic; USDC/SVB is settlement-sparse.  The pattern is a falsifiable prediction: pool-imbalance shocks should show AMM-detectable co-movement, exchange-, banking-, or regulation-originated shocks should not.
 
-
-
-
 %%
-%% Cross-event mechanism comparison table (TODO 4.4)
+%% Cross-event mechanism comparison table
 %%
 \begin{table}[t]
 \centering
@@ -641,6 +638,38 @@ BUSD       & regulatory          & $\hat{\rho}\!=\!-0.15$, n.s.       & not clai
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Convergent evidence across detection layers.}
+Each event is assessed by four independent methods: Forbes--Rigobon bootstrap ($z$-statistic and $p_{>0}$ across 2,000 replicates), cross-correlation lead-lag (Bonferroni-corrected pair count), transfer-entropy block-FDR significance, and within-event HMM AUROC.
+Table~\ref{tab:convergent} summarises this four-method evidence for all five events.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Convergent evidence: 5 events $\times$ 4 methods.}
+  FR $p_{>0}$: bootstrap fraction of replicates with positive Fisher $z$.
+  LL sig: Bonferroni-corrected lead-lag pairs.  TE sig: block-FDR transfer entropy pairs.
+  AUROC: best within-event HMM detection.  Convergence: count of signals exceeding threshold.}
+\label{tab:convergent}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrll@{}}
+\toprule
+Event & FR $z$ & FR $p_{>0}$ & LL sig & TE sig & AUROC & Convergence \\
+\midrule
+USDC/SVB 2023   & ---   & ---   & 18 & 28 & 0.935 & \textbf{STRONG} \\
+USDT/Curve 2023 & 2.821 & 0.965 &  2 &  0 & 0.927 & \textbf{STRONG} \\
+Terra/Luna 2022 & 0.183 & 0.622 &  0 &  1 & 0.975 & MODERATE \\
+FTX 2022        & ---   & ---   &  0 & 13 & 0.964 & MODERATE \\
+BUSD 2023       & $-1.934$ & 0.245 & 0 & 0 & 0.647 & NONE \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The table formalises the paper's central claim: evidence is mechanism-specific.
+USDC/SVB and USDT/Curve show strong multi-method evidence (HMM AUROC $>0.92$, significant lead-lag or TE in both cases).
+Terra and FTX achieve moderate evidence: high within-event AUROC but weak FR and conflicting TE/lead-lag signatures, consistent with the theory that exogenous shocks bypass the AMM transmission channel.
+BUSD shows no signal on any method (AUROC $0.647$, FR $p_{>0}=0.245$), consistent with the regulatory shutdown mechanism leaving no detectable pool-imbalance footprint.
+The USDT/Curve FR result ($p_{>0}=0.965$, one-sided) is the strongest single-method finding; the two-sided CI $[-0.10,\,+4.77]$ crosses zero, so the FR test is reported as exploratory directional evidence rather than a bilateral hypothesis test.
 
 \FloatBarrier  % flush result-section floats before the ML section
 

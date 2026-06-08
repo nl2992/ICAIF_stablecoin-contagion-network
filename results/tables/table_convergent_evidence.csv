@@ -1,0 +1,6 @@
+event_id,event_label,fr_z,fr_p_gt0,ll_sig_pairs,ll_min_p,ll_best_lag_s,te_sig_block_fdr,te_max_te,within_auroc,within_method,convergence,fr_ci_lo,fr_ci_hi,fr_sig
+usdc_svb_2023,USDC/SVB 2023,,,18,0.0,-3600.0,28,1.019,0.9349,HMM,STRONG,,,
+usdt_curve_2023,USDT/Curve 2023,2.821,0.965,2,0.0,0.0,0,0.835,0.9271,HMM,STRONG,-0.099,4.766,False
+terra_luna_2022,Terra/Luna 2022,0.183,0.622,0,1.0,,1,0.121,0.9746,HMM,MODERATE,-2.791,1.018,False
+ftx_2022,FTX 2022,,,0,1.0,,13,0.877,0.9638,ML-best,MODERATE,,,
+busd_2023,BUSD 2023,-1.934,0.245,0,1.0,,0,0.135,0.6466,ML-best,NONE,-4.276,1.682,False

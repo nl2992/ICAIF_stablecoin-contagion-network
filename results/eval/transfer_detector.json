@@ -1,0 +1,42 @@
+{
+  "label": "label_downstream_gt50bps_5m",
+  "n_features": 25,
+  "RAW_standardscaler": {
+    "per_fold": {
+      "busd_2023": 0.2278,
+      "ftx_2022": 0.0806,
+      "terra_luna_2022": 0.462,
+      "usdc_svb_2023": 0.5627
+    },
+    "mean_auroc": 0.3333
+  },
+  "PEN_per_event_rank_transductive": {
+    "per_fold": {
+      "busd_2023": 0.5832,
+      "ftx_2022": 0.5024,
+      "terra_luna_2022": 0.767,
+      "usdc_svb_2023": 0.5976
+    },
+    "mean_auroc": 0.6125
+  },
+  "CPEN_per_event_causal_zscore": {
+    "per_fold": {
+      "busd_2023": 0.0217,
+      "ftx_2022": 0.0126,
+      "terra_luna_2022": 0.2497,
+      "usdc_svb_2023": 0.5205
+    },
+    "mean_auroc": 0.2011
+  },
+  "CPENR_per_event_causal_rolling_rank": {
+    "per_fold": {
+      "busd_2023": 0.1635,
+      "ftx_2022": 0.1146,
+      "terra_luna_2022": 0.5021,
+      "usdc_svb_2023": 0.6436
+    },
+    "mean_auroc": 0.3559
+  },
+  "delta_PEN_minus_RAW": 0.2792,
+  "delta_CPENR_minus_RAW": 0.0226
+}

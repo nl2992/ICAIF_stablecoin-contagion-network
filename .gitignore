@@ -41,3 +41,13 @@ paper/*.lot
 paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.out
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.fls

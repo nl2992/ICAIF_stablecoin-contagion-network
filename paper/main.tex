@@ -748,17 +748,15 @@ A half-fit robustness variant retrains on the first 50\% only.
 \label{sec:detection}
 
 Run on identical detectors, the two data sources separate sharply by mechanism
-(Table~\ref{tab:detection}, Figure~\ref{fig:detection}).  For the three
+(Table~\ref{tab:detection}).  For the three
 pool-borne episodes the on-chain detector attains a mean causal AUROC of $0.92$
 against the market detector's $0.78$.  The gap is widest for Terra/LUNA: the
 on-chain detector scores $0.954$ while the market detector sits at \emph{chance}
-($0.499$), and it raises the alarm $116$~hours earlier.  The reason is
-mechanistic and visible in Figure~\ref{fig:detection}(b): Terra was a UST
-de-peg, so USDT held its peg and the USDT/Binance basis is actually \emph{higher}
-in the calm pre-window than during the panic (basis AUROC $0.39$), while on-chain
-pool deviation climbs through the event.  A market-only monitor is structurally
-blind to a stablecoin crisis that does not pass through its own order book; the
-pool is not.
+($0.499$), raising the alarm $116$~hours earlier.  The reason is mechanistic:
+Terra was a UST de-peg, so USDT held its peg and the USDT/Binance basis is
+\emph{higher} in the calm pre-window than during the panic (basis AUROC $0.39$),
+while on-chain pool deviation climbs through the event.  A market-only monitor is
+blind to a stablecoin crisis that does not pass through its own order book; the pool is not.
 
 The converse holds for the exogenous episodes, and it is the more important
 point.  For FTX (exchange credit) and BUSD (regulatory) the \emph{market}
@@ -794,21 +792,6 @@ FTX 2022        & exchange credit & $0.401$ & $\mathbf{0.868}$ & market \\
 \end{tabular}
 \end{table}
 
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.86\textwidth]{results/paper/figures/fig_detection.png}
-  \caption{\textbf{Online stress detection: Tier-A on-chain versus Tier-B market
-    data.}  \textbf{(a)~Causal AUROC by data source.}  One unsupervised HMM,
-    scored on its filtered (forward-only) posterior, run separately on on-chain
-    pool state (green) and market state (blue).  On-chain wins or ties for the
-    three pool-borne events and is decisive for Terra; market wins for the
-    exchange-/regulation-borne FTX and BUSD --- complementary layers, not a single
-    winner.  \textbf{(b)~Why, for Terra.}  Standardised on-chain pool deviation
-    rises through the panic window (shaded) while the USDT/Binance basis stays
-    flat: USDT held its peg during a UST de-peg, so a market-only monitor is
-    blind to the crisis.}
-  \label{fig:detection}
-\end{figure*}
 
 \subsection{What Does Not Work, and Why It Confirms the Frame}
 \label{sec:ml-diagnosis}
@@ -894,15 +877,10 @@ grid configurations: \texttt{baseline\_60s} (1-minute), \texttt{block\_300}
 pair remains statistically significant across all configurations; the Terra
 pair remains non-significant across all configurations.
 
-A TVP-VAR model (168-hour rolling window, 24-hour step, \texttt{usdc\_net\_sold\_1h}) confirms that cross-pool spillover is \emph{acute and transient}: the FEVD share averages 15.7\% but concentrates in a single post-onset window ($94\%$ FEVD at $+140$h); all pre-onset windows show near-zero spillover, ruling out a persistent-trend artefact and corroborating the contemporaneous (lag-0) common-shock interpretation.
+A TVP-VAR (168-hour window) confirms spillover is acute and transient: 94\% FEVD concentrates in a single post-onset window; all pre-onset windows show near-zero spillover.
 
 \textbf{Bootstrap validation of Forbes--Rigobon.}
-Table~\ref{tab:bootstrap_fr} reports 2000-sample block-bootstrap confidence
-intervals on $z_{\text{Fisher}}$ (block length 24h).  USDT/Curve is the only event
-where the direction is strongly supported: 96.5\% of replicates have $z>0$
-(bootstrap $\mathrm{SE}=1.27$; the 95\% CI $[-0.10,\,+4.77]$ is wide owing to
-$n{=}148$ combined hourly observations).  Neither Terra nor BUSD approaches
-significance, confirming the cross-event contrast is robust to sampling variation.
+Table~\ref{tab:bootstrap_fr} reports 2000-sample block-bootstrap CIs (block length 24h). USDT/Curve is the only event with strong directional support (96.5\% of replicates $z>0$); neither Terra nor BUSD approaches significance.
 
 \begin{table}[h]
 \centering
@@ -926,41 +904,17 @@ BUSD       & $-1.93$ & $[-4.28,\;+1.68]$ & $0.245$ & not supported \\
 \end{tabular}
 \end{table}
 
-\textbf{Tier and model robustness.}  Restricting to Tier-A execution-grade data
-only, the USDT/Curve Forbes--Rigobon finding holds ($z=2.82$, $p=0.005$); all
-four exogenous events remain non-claimable, confirming that non-detections reflect
-mechanism rather than data quality.  HMM model choice is validated by ablation over
-2-, 3-, and 4-state Gaussian HMMs with diagonal, full, and spherical covariance: the
-3-state diagonal-covariance configuration is best or co-best on all four detectable
-events (AUROC $0.92$--$0.96$) and beats a CUSUM changepoint baseline on 4 of 5
-events (mean margin $+0.28$); CUSUM outperforms on BUSD only, where a
-fixed-threshold detector is more appropriate for the regulatory shock.
-Across all 9 configurations tested (2-, 3-, 4-state $\times$ diagonal/full/spherical
-covariance), the 3-state diagonal model is within $\pm0.02$ AUROC of the best
-per-event configuration on each of the four detectable events, confirming that the
-default choice is robust and that no alternative parameterisation produces a
-qualitatively different result.
+\textbf{Tier and model robustness.}  Restricting to Tier-A data only, the USDT/Curve Forbes--Rigobon finding holds ($z=2.82$, $p=0.005$); all four exogenous events remain non-claimable.  The 3-state diagonal Gaussian HMM is best or co-best on all four detectable events (AUROC $0.92$--$0.96$) and beats a CUSUM baseline on 4 of 5 events; across all 9 configurations tested, the default is within $\pm0.02$ AUROC of the best per-event choice.
 
 
 
 \label{sec:limitations}
 \textbf{Limitations.}
-
-Six scope conditions bound the results. (1)~\emph{No executable CEX L2 depth}:
-historical full-depth order books are not freely available for 2022--2023, so
-cross-venue claims are A/B, not A/A. (2)~\emph{Derived reserve features}:
-\texttt{reserve\_imbalance} uses a hardcoded pool-size normaliser (verified
-within $\pm20\%$ of on-chain balances) and is capped at Tier~B.
-(3)~\emph{Settlement sparsity}: the Tether \texttt{Issue}/\texttt{Redeem} decoder
-recovers genuine Tier-A data but only 5--7 events per window. (4)~\emph{Decimal
-fix}: an early StableSwap-ng normalisation bug ($10^{6}$ vs $10^{18}$) was found
-and corrected; all values use the corrected series. (5)~\emph{Five events}: too
-few for cross-event supervised ML, which is precisely why we adopt unsupervised
-detection; and the mechanism-specificity claim is a falsifiable prediction (pool-imbalance shocks should activate, exogenous shocks should not) rather than post-hoc rationalisation --- the five-event sample provides two true positives, three coherent nulls, and matching HMM-layer evidence across the same partition.
-(6)~\emph{External validity}: results are specific to Curve
-StableSwap pools; extension to Uniswap~v3 is future work.
-(7)~\emph{Single significant FR event}: only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test; the FR result is reported as exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim.
-The primary evidence base is the four-method convergent table (Table~\ref{tab:convergent}) rather than any single test.
+(1)~\emph{No executable CEX L2 depth}: cross-venue claims are A/B, not A/A.
+(2)~\emph{Five events}: too few for cross-event supervised ML, which is why we adopt unsupervised detection; the mechanism-specificity claim is a falsifiable prediction (pool-imbalance shocks activate, exogenous shocks do not) with two true positives and three coherent nulls.
+(3)~\emph{Single significant FR event}: only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test; the FR result is exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim.
+(4)~\emph{External validity}: results are specific to Curve StableSwap pools; extension to Uniswap~v3 is future work.
+The primary evidence base is the four-method convergent table (Table~\ref{tab:convergent}).
 
 
 %% -----------------------------------------------------------------------
@@ -968,90 +922,29 @@ The primary evidence base is the four-method convergent table (Table~\ref{tab:co
 \label{sec:practitioner}
 %% -----------------------------------------------------------------------
 
-The four findings above translate into four operational rules for DeFi risk
-monitoring that transfer directly to a surveillance build.
+Three operational rules for DeFi surveillance follow from the findings.
 
-\textbf{(1) Maintain on-chain pool feeds and exchange-price feeds as separate,
-independent monitoring layers.}  Neither layer dominates across all shock types.
-For the Terra/LUNA algorithmic collapse, an on-chain pool-state detector raises
-the alarm $116$ hours before a market-based equivalent; for FTX (exchange credit)
-and BUSD (regulatory action), the market layer is decisive while the on-chain
-layer sits near chance ($0.40$--$0.61$ AUROC).  The 116-hour advantage has
-concrete economic value for the Terra/LUNA episode: a \$1\,M UST position exited
-at the on-chain HMM alert avoids \$503\,247 in losses compared with a market-speed
-exit (\$762\,500 on a matched LUNA position), computed directly from the actual
-price series at the respective alert hours.  For the USDT/Curve episode the
-economic value of the early detection is \$0: Curve pool prices remained at peg
-(\$1.00) throughout the episode in the gold data, so no notional loss is avoidable
-regardless of exit timing.  This is an honest scope condition: the Forbes--Rigobon
-coupling shift is statistically detectable, but it did not produce an executable
-depeg in the data we have.  A single-source monitor is structurally blind
-to one full class of event.
+\textbf{(1) Run on-chain and exchange feeds as independent layers.}
+On-chain fires 116h before market signals for Terra (saving \$503K per \$1M); exchange signals are decisive for FTX and BUSD (on-chain AUROC near chance). A single-source monitor is structurally blind to one full class of event.
 
-\textbf{(2) Match the detector to the shock mechanism.}  For AMM-native pool-imbalance
-events, deploy an unsupervised on-chain flow monitor (e.g., a Gaussian HMM over
-pool-state features: price deviation, net USDC sold, reserve imbalance).  For
-exchange-credit or regulatory shocks, rely on market-price signals.  The decision
-tree in Figure~\ref{fig:decision} distils the empirical mechanism taxonomy into a
-replicable routing rule.
+\textbf{(2) Match the detector to the shock mechanism.}
+For AMM-native events deploy an on-chain HMM; for exchange-credit or regulatory shocks rely on market-price signals. Figure~\ref{fig:decision} provides the routing rule.
 
-\textbf{(3) Aggregate flow across all pools before flagging system-wide stress.}
-In calm markets the cross-pool flow correlation is statistically indistinguishable
-from zero ($\hat{\rho}=0.09$, $p=0.38$).  During the USDT/Curve acute window it
-jumps to $\hat{\rho}=0.53$ ($p<10^{-4}$).  A surveillance system treating the
-Curve 3pool and crvUSD/USDT pool as independent feeds with a fixed correlation
-prior will underestimate total USDT sell pressure by the amount simultaneously
-routed through the second pool.  Summing cross-pool flow is necessary to capture
-the full magnitude of an endogenous pool-imbalance episode.
-
-\textbf{(4) Use the arbitrage-sign flip as a coincident stress confirmation.}
-In normal conditions high on-chain flow intensity accompanies low price deviation
-(stabilizing).  When the sign inverts---flow accompanies rather than absorbs the
-dislocation ($z=+3.84$, USDT/Curve; $z=+3.69$, BUSD)---arbitrage capacity has
-been overwhelmed.  This flip is contemporaneous with the stress peak, not a
-leading indicator, but provides an independent, mechanism-grounded confirmation
-that no exchange-only feed can replicate.
+\textbf{(3) Watch for the arbitrage-sign flip.}
+Cross-pool correlation surges from $\hat{\rho}=0.09$ (calm) to $0.53$ ($p<10^{-4}$) at USDT/Curve stress. When flow shifts from stabilising to amplifying ($z=+3.84$), arbitrage capacity is exhausted.
 
 %% -----------------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclude}
 %% -----------------------------------------------------------------------
 
-Using a provenance gate that separates Tier-A on-chain evidence from Tier-B
-market context, we report four results on five stablecoin stress episodes.
-\emph{(i)~Regime-switching coupling}: cross-pool AMM-flow coupling for
-USDT/Curve is near zero in calm markets ($\hat{\rho}=0.09$) and activates in
-panic ($\hat{\rho}=0.53$; Fisher $z=2.82$, one-sided $p=0.035$;
-95\%~CI $[-0.10,\,+4.77]$, 96.5\% of bootstrap replicates positive) --- strong
-directional evidence of endogenous contagion, with the caveat that the formal
-two-sided test is marginal owing to the short acute window ($n{=}53$) --- and
-only for the endogenous shock.
-\emph{(ii)~Arbitrage flips} from stabilizing to amplifying under stress
-($z=+3.84$ USDT/Curve, $+3.69$ BUSD; $-2.80$ FTX), a sign flip no trend can
-produce.  \emph{(iii)~On-chain price discovery}: the Curve pool leads the
-exchange for DeFi-native stress and deviates $37\times$ more, lagging only for
-the exogenous SVB bank run.  \emph{(iv)~Online detection by evidence layer.}  Run causally as an unsupervised
-online detector, the Tier-A on-chain layer recovers endogenous DeFi-native stress
-that the Tier-B market layer registers at chance (Terra/LUNA causal AUROC $0.95$
-vs $0.50$, $116$h earlier), while the market layer is required for exchange-borne
-shocks the pool never sees --- the layers are complementary, and supervised
-cross-event prediction fails under concept shift (KL divergence predicts AUROC
-degradation: $r=0.525$, $p=0.017$).  A 2000-sample block bootstrap confirms the direction of the USDT/Curve coupling
-shift (96.5\% of replicates positive, one-sided $p=0.035$; 95\%~CI $[-0.10,\,+4.77]$
-formally marginal two-sided), and the 116-hour early-warning advantage has concrete
-economic value at the Terra episode (\$503\,000 loss avoidance per \$1\,M position);
-the USDT/Curve detection carries zero economic value in our data because the Curve
-pool price stayed at peg throughout---an honest scope condition reported
-alongside the statistical finding.
+Using a provenance gate separating Tier-A on-chain evidence from Tier-B market context, we report four results on five stablecoin stress episodes.
+\emph{(i)~Regime-switching coupling}: USDT/Curve coupling is near zero in calm ($\hat{\rho}=0.09$) and activates in panic ($\hat{\rho}=0.53$; $z=2.82$, one-sided $p=0.035$; two-sided formally marginal), exclusively for the endogenous shock.
+\emph{(ii)~Arbitrage flips} from stabilizing to amplifying ($z=+3.84$ USDT/Curve, $+3.69$ BUSD; $-2.80$ FTX).
+\emph{(iii)~On-chain price discovery}: the pool leads the exchange for DeFi-native stress ($37\times$ greater deviation), lagging only for the exogenous SVB run.
+\emph{(iv)~Complementary detection layers}: on-chain recovers endogenous stress that market signals miss (Terra AUROC $0.95$ vs $0.50$, 116h earlier); market signals are required for exchange-borne shocks; supervised cross-event prediction fails under concept shift ($r=0.525$, $p=0.017$).
 
-The provenance gate unifies these results: it rejects the model-fragile predictive
-lift while certifying the findings that withstand scrutiny.  Two principles emerge
-for few-event, on-chain research --- gate claims by the provenance of their data,
-and where labels are scarce, detect rather than predict.  Risk managers implementing
-the dual-layer framework (Figure~\ref{fig:decision}) gain a 116-hour detection
-advantage for endogenous episodes, validated by bootstrap and tier-robustness checks.
-Future work includes CEX order-book depth, Uniswap~v3 extension, and higher-powered
-settlement-layer tests.
+The provenance gate unifies these results.  Two principles emerge: gate claims by data provenance, and where labels are scarce, detect rather than predict.  Future work: CEX order-book depth, Uniswap~v3 extension, higher-powered settlement-layer tests.
 
 
 \bibliographystyle{ACM-Reference-Format}

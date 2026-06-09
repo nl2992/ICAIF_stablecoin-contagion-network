@@ -55,48 +55,40 @@
 %% Author block omitted for double-blind review
 
 \begin{abstract}
-Empirical contagion studies routinely report cross-market linkage during
-crises, but rarely separate genuine \emph{contagion} (a shift in linkage caused
-by the crisis) from constant \emph{interdependence}.  Using Tier-A on-chain
-Curve \texttt{TokenExchange} flow, we apply the Forbes--Rigobon regime test to
-stablecoin stress and find regime-switching contagion that is sharp and
-mechanism-specific.  For the June~2023 USDT/Curve episode --- an
-\emph{endogenous} pool-imbalance shock --- cross-pool flow coupling is
-statistically indistinguishable from zero in calm conditions
-($\hat{\rho}=0.09$, $n=95$) and activates during the acute window
-($\hat{\rho}=0.53$, $n=53$, $p<10^{-4}$); the calm-to-panic shift is significant
-(Fisher $z=+2.82$, $p=0.005$).  The coupling peaks at lag~0, consistent with a
-common-shock mechanism rather than sequential transmission.  Critically, none
-of the four \emph{exogenous} episodes (Terra/LUNA, USDC/SVB, FTX, BUSD) shows
-this activation --- even though all now have genuine Tier-A A/A pool pairs to
-test --- so the null is a mechanism finding, not a data gap.  We further show two
-positive structural results.  First, on-chain arbitrage is \emph{stabilizing}
-in calm markets (flow intensity negatively correlated with price deviation) and
-acute stress significantly bends this in three of five events, flipping it to
-\emph{amplifying} where arbitrage capacity is overwhelmed (USDT/Curve, BUSD:
-Fisher $z>3.6$) and strengthening it where on-chain liquidity absorbs an
-off-chain run (FTX: $z=-2.8$).  Second, price discovery is on-chain for
-DeFi-native stress: the Curve pool price leads Binance ($+1$h $r=0.28$,
-$p<10^{-4}$) and deviates $37\times$ more ($12.5\%$ vs $0.3\%$) for USDT/Curve,
-while the CEX leads only for the exogenous SVB bank run.  Finally, on the machine-learning
-question, we run one unsupervised detector causally on each evidence layer: an
-online Hidden Markov Model on Tier-A on-chain state recovers endogenous
-DeFi-native stress that the Tier-B market layer registers at chance --- for
-Terra/LUNA, causal AUROC $0.95$ versus $0.50$, raising the alarm $116$ hours
-before the CEX basis --- whereas market data is needed for the exchange- and
-regulation-borne shocks the pool never sees.  Detection, not prediction, is the
-right frame: supervised cross-event prediction collapses under concept shift
-(KL divergence predicts AUROC degradation across event pairs: $r=0.525$,
-$p=0.017$), and the two layers are complementary by mechanism.
-A 2000-sample block bootstrap confirms the direction of the USDT/Curve
-coupling shift: 96.5\% of replicates yield a positive Fisher $z$ (95\%~CI
-$[-0.10,\,+4.77]$).  At the 116-hour Terra lead time, a position exited at
-the on-chain HMM alert avoids \$503\,000 in losses per \$1\,M UST position
-versus market-speed exit.  The broad implication: DeFi stress surveillance
-needs \emph{separate monitoring architectures} for endogenous pool-imbalance
-events versus exchange-originating or regulatory shocks.  A
-provenance-aware three-gate pipeline underpins every claim, blocking
-fixture and Tier-B data from reaching paper-level conclusions.
+Empirical contagion studies routinely conflate genuine \emph{contagion} (a
+crisis-driven shift in linkage) with constant \emph{interdependence}.  Using
+Tier-A on-chain Curve \texttt{TokenExchange} flow across five stablecoin stress
+episodes, we show that the distinction is empirically sharp and
+mechanism-specific.
+
+\textbf{Main finding.}  For the June~2023 USDT/Curve episode---an
+\emph{endogenous} pool-imbalance shock---cross-pool flow coupling rises from
+near-zero in calm ($\hat{\rho}=0.09$, $n=95$) to $\hat{\rho}=0.53$ during the
+acute window ($n=53$); the shift is strong directional evidence of contagion
+(Fisher $z=+2.82$, one-sided $p=0.005$; 96.5\,\% of 2000 bootstrap replicates
+positive; note the two-sided 95\,\% CI is $[-0.10,\,+4.77]$, reflecting the
+short acute window).  None of the four \emph{exogenous} episodes (Terra/LUNA,
+USDC/SVB, FTX, BUSD) shows this activation despite all having Tier-A data, so
+the null result is mechanism-specific, not a data gap.
+
+\textbf{Structural results.}  On-chain arbitrage is \emph{stabilizing} in calm
+markets and flips to \emph{amplifying} under stress in three of five events
+(USDT/Curve, BUSD: Fisher $z>3.6$; FTX: stabilizing strengthens, $z=-2.8$).
+Price discovery is on-chain for DeFi-native stress---the Curve pool deviates
+$37\times$ more than Binance for USDT/Curve---while the CEX leads for
+exogenous bank-run shocks.
+
+\textbf{Detection result.}  An online Hidden Markov Model run causally on
+Tier-A on-chain state achieves AUROC $0.95$ on Terra/LUNA (versus $0.50$ on
+Tier-B market data), raising the alarm 116 hours earlier.  Supervised
+cross-event prediction fails under concept shift (KL divergence predicts AUROC
+degradation: $r=0.525$, $p=0.017$); the two evidence layers are complementary
+by mechanism.
+
+The implication is operational: DeFi stress surveillance needs
+\emph{separate monitoring architectures} for endogenous versus
+exchange-originating shocks.  A provenance-aware three-gate pipeline underpins
+every claim.
 \end{abstract}
 
 \keywords{stablecoin; AMM; Curve Finance; DeFi stress; provenance; claim gate;

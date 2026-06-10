@@ -62,7 +62,7 @@ episodes, we show the distinction is empirically sharp and, decisively,
 \emph{mechanism-specific}. For the June~2023 USDT/Curve episode, an
 \emph{endogenous} pool-imbalance shock, cross-pool flow coupling rises from
 near-zero in calm ($\hat{\rho}=0.09$) to $\hat{\rho}=0.53$ during the acute
-window (Fisher $z=+2.82$, one-sided $p=0.005$), whereas none of the four
+window (Fisher $z=+2.82$, block-bootstrap one-sided $p=0.035$), whereas none of the four
 \emph{exogenous} episodes (Terra/LUNA, USDC/SVB, FTX, BUSD) shows this
 activation despite identical Tier-A data, so the null is mechanism-specific,
 not a data gap. The same split governs structure and detection. On-chain
@@ -96,8 +96,8 @@ The pool was \textbf{$37\times$ more sensitive} to the stress than the exchange.
 A risk manager monitoring only exchange prices would have seen almost nothing.
 Thirteen months earlier, during the Terra/LUNA algorithmic collapse, on-chain
 pool-state data would have raised the alarm $116$ hours before exchange-based
-signals detected the crisis.  These two numbers, $37\times$ more amplitude,
-$116$ hours earlier, define the surveillance gap this paper measures.
+signals detected the crisis.  These two numbers, $37\times$ more amplitude on USDT/Curve and a $116$-hour detection
+lead on Terra/LUNA, define the surveillance gap this paper measures.
 
 Four distinct stablecoin systems experienced significant stress across these
 episodes. The algorithmic UST/Terra collapsed in May 2022. FTX's implosion
@@ -614,7 +614,7 @@ BUSD       & regulatory          & $\hat{\rho}\!=\!-0.15$, n.s.       & not clai
 \end{tabular}
 \end{table}
 
-\paragraph{Convergent evidence across detection layers.}
+\paragraph{Convergent evidence across detection layers}
 Each event is assessed by four independent methods. Forbes--Rigobon bootstrap ($z$-statistic and $p_{>0}$ across 2,000 replicates), cross-correlation lead-lag (Bonferroni-corrected pair count), transfer-entropy block-FDR significance, and within-event HMM AUROC.
 Table~\ref{tab:convergent} summarises this four-method evidence for all five events.
 
@@ -654,7 +654,7 @@ Terra and FTX achieve moderate evidence. High within-event AUROC but weak FR and
 BUSD shows no signal on any method (AUROC $0.647$, FR $p_{>0}=0.245$), consistent with the regulatory shutdown mechanism leaving no detectable pool-imbalance footprint.
 The USDT/Curve FR result ($p_{>0}=0.965$, one-sided) is the strongest single-method finding. The two-sided CI $[-0.10,\,+4.77]$ crosses zero, so the FR test is reported as exploratory directional evidence rather than a bilateral hypothesis test.
 
-\paragraph{Reconciling Terra. High HMM AUROC with non-significant FR.}
+\paragraph{Reconciling Terra. High HMM AUROC with non-significant FR}
 Terra/LUNA appears contradictory at first. On-chain HMM AUROC $= 0.954$ (strong detection) yet FR $z = 0.183$ (non-significant coupling shift).
 These two tests measure \emph{different phenomena} and the disagreement is mechanistically expected.
 The HMM AUROC measures whether the on-chain pool state changes regime during the event, whether the signal transitions from calm to stress.
@@ -666,7 +666,7 @@ The pool shows stress, but not \emph{transmitted} stress.
 This is precisely the theoretical prediction. The HMM sees the on-chain symptom. The FR test confirms the symptom did not propagate via cross-pool flow.
 Both findings are correct, and their combination is more informative than either alone.
 
-\paragraph{Coherence of the multi-method null for exogenous events.}
+\paragraph{Coherence of the multi-method null for exogenous events}
 The four exogenous events (Terra, FTX, USDC/SVB, BUSD) are null on all four detection methods simultaneously.
 If these were random measurement failures (probability 0.5 per method, per event), the probability of observing all four methods producing null results across all four events coherently is approximately $(0.5)^{16} \approx 10^{-5}$.
 The pattern is instead mechanistically aligned. Every method that would detect AMM-channel contagion (FR on cross-pool flow, TE on pool-to-pool causality, lead-lag on pool co-movement) is null for events that do not propagate through AMMs.

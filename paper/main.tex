@@ -62,7 +62,8 @@ episodes, we show the distinction is empirically sharp and, decisively,
 \emph{mechanism-specific}. For the June~2023 USDT/Curve episode, an
 \emph{endogenous} pool-imbalance shock, cross-pool flow coupling rises from
 near-zero in calm ($\hat{\rho}=0.09$) to $\hat{\rho}=0.53$ during the acute
-window (Fisher $z=+2.82$, block-bootstrap one-sided $p=0.035$), whereas none of the four
+window (a \emph{contemporaneous} lag-0 co-movement, not early warning; Fisher
+$z=+2.82$, block-bootstrap one-sided $p=0.035$), whereas none of the four
 \emph{exogenous} episodes (Terra/LUNA, USDC/SVB, FTX, BUSD) shows this
 activation despite identical Tier-A data, so the null is mechanism-specific,
 not a data gap. The same split governs structure and detection. On-chain
@@ -443,11 +444,12 @@ the difference via Fisher $r$-to-$z$ two-sample statistic.
 \end{equation}
 
 For USDT/Curve 2023 the coupling is near-zero in calm ($\hat{\rho}=0.09$, $p=0.38$)
-and rises to $\hat{\rho}=0.53$ during panic ($z_{\text{Fisher}}=+2.82$, $p=0.005$,
-one-sided), directional evidence consistent with contagion in the Forbes--Rigobon
-sense.  A 2000-sample block bootstrap (24-hour block length, $B=2000$) further
-supports the direction. 96.5\% of replicates yield $z>0$, equivalent to a one-sided
-$p=0.035$.  However, the 95\% CI is $[-0.10,\,+4.77]$. The lower bound is
+and rises to $\hat{\rho}=0.53$ during panic, directional evidence consistent with
+contagion in the Forbes--Rigobon sense. We take the \emph{conservative} block bootstrap
+as our primary test: a 2000-sample block bootstrap (24-hour block length, $B=2000$)
+gives a one-sided $p=0.035$, with $96.5\%$ of replicates yielding $z>0$. The parametric
+Fisher two-sample test agrees more optimistically as a secondary check
+($z_{\text{Fisher}}=+2.82$, analytic $p=0.005$). However, the 95\% CI is $[-0.10,\,+4.77]$. The lower bound is
 marginally negative owing to the short acute window ($n_{\text{panic}}{=}53$),
 and the formal two-sided test is not significant at the 0.05 level.  We therefore
 state this as \emph{strong directional evidence of coupling amplification (one-sided
@@ -467,7 +469,7 @@ shock} striking both pools simultaneously.
     red/green = panic).
     \textbf{(a)~Regime-switching contagion.}  Lag-0 cross-pool flow correlation
     in the calm vs.\ acute regime.  For USDT/Curve it jumps $0.09\!\to\!0.53$
-    ($*$. Fisher $z=2.82$, $p=0.005$). Only this endogenous shock activates,
+    ($*$. Fisher $z=2.82$; conservative block-bootstrap one-sided $p=0.035$). Only this endogenous shock activates,
     while the exogenous events stay flat or decouple.
     \textbf{(b)~Arbitrage flip.}  Contemporaneous flow-vs-price coupling.
     Negative (\emph{stabilizing}) in calm, turning positive (\emph{amplifying})

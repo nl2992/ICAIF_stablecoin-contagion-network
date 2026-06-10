@@ -10,8 +10,10 @@ from stressnet.config import results_root
 from stressnet.utils.logging import get_logger
 logger = get_logger(__name__)
 
-CA, CB, CFX = "#27AE60", "#B9D9EB", "#E0533D"   # Tier-A, Tier-B, blocked/fixture
-plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5})
+CA, CB, CFX = "#27AE60", "#B9D9EB", "#E0533D"   # Tier-A green, Tier-B Columbia Blue, blocked red
+_NAVY_INK = "#0A1F44"  # Columbia navy ink for text / arrows
+plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5,
+                     "text.color": _NAVY_INK, "axes.titlecolor": _NAVY_INK})
 
 def box(ax, x, y, w, h, text, fc, ec="#333", fs=7.5, lw=1.0, tc="black"):
     ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.012,rounding_size=0.02",

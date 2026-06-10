@@ -268,7 +268,7 @@ normaliser) is capped at Tier~B for that feature.
 
 \subsection{Event Windows and Node Inventory}
 
-We study five stress episodes (USDT/Curve, June 2023. Terra/LUNA, May 2022. USDC/SVB, March 2023. FTX, November 2022. BUSD, February 2023), each over an hourly window centred on its shock onset.
+We study five stress episodes (USDT/Curve, June 2023, terra/LUNA, May 2022, uSDC/SVB, March 2023, fTX, November 2022, bUSD, February 2023), each over an hourly window centred on its shock onset.
 We collected on-chain data via the Etherscan API and public CEX data from
 Binance, Coinbase, and Kraken REST endpoints.  All raw data hashes are
 recorded in manifest files. Synthetic fixture data (used for pipeline testing
@@ -690,7 +690,7 @@ that Tier-B market data misses, and sooner?
 
 Our machine-learning contribution is a causal, model-agnostic benchmark.  A
 \emph{Hidden Markov Model} (HMM) is a generative model that assumes the data are
-produced by a hidden state sequence (here. Calm, transition, panic) evolving via
+produced by a hidden state sequence (here, calm, transition, panic) evolving via
 fixed transition probabilities, with each state emitting observations from a
 Gaussian distribution.  The key property for online detection is the \emph{filtered
 posterior}. $P(\text{stress}\mid x_{1:t})$ is computed forward-only, using only data

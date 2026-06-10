@@ -42,7 +42,7 @@
 \begin{document}
 
 %% ACM conference metadata
-\acmConference[ICAIF '26]{7th ACM International Conference on AI in Finance}{November 2026}{New York, NY, USA}
+\acmConference[ICAIF '26]{ACM International Conference on AI in Finance}{November 14--17, 2026}{Milan, Italy}
 \acmYear{2026}
 \copyrightyear{2026}
 %% Copyright block suppressed for double-blind review
@@ -185,18 +185,11 @@ can only approximate, and apply them to the contagion question these studies rai
 but do not settle.
 
 \textbf{On-chain contagion measurement.}  Forbes and Rigobon~\cite{Forbes2002}
-distinguish \emph{contagion}, a genuine increase in cross-market linkage caused by
-the crisis, from \emph{interdependence}, a stable background correlation that merely
-appears elevated during stress because crisis periods exhibit higher variance.  Their
-test corrects for this heteroskedasticity bias and compares the adjusted
-calm-window correlation $\hat\rho_{\text{calm}}$ against the panic-window correlation
-$\hat\rho_{\text{panic}}$ using a Fisher $z$-to-$z$ two-sample statistic.
-\begin{equation}
-  z_{\text{Fisher}} = \frac{f(\hat\rho_{\text{panic}}) - f(\hat\rho_{\text{calm}})}
-    {\sqrt{1/(n_{\text{panic}}{-}3) + 1/(n_{\text{calm}}{-}3)}}, \quad
-    f(\hat\rho) = \tfrac{1}{2}\ln\!\frac{1+\hat\rho}{1-\hat\rho}.
-\end{equation}
-A significant positive $z_{\text{Fisher}}$ means the linkage \emph{genuinely increased}, contagion in the Forbes--Rigobon sense.  We make this operational on Tier-A on-chain
+distinguish \emph{contagion} (a genuine crisis-induced rise in cross-market linkage)
+from \emph{interdependence} (stable background correlation amplified by higher crisis variance),
+and provide a heteroskedasticity-corrected Fisher $z$-to-$z$ two-sample test (see Section~\ref{sec:regime}).
+A significant positive $z_{\text{Fisher}}$ means linkage \emph{genuinely increased}.
+We make this operational on Tier-A on-chain
 flow, explicitly gating claims by data provenance rather than conflating
 execution-grade logs with market proxies.  Recent ICAIF work applies graph neural
 networks to on-chain link prediction in Uniswap~v3~\cite{zhou2025bridge} and
@@ -382,50 +375,10 @@ methodologically distinct tests being the strongest available evidence given
 only 281 hourly observations and five events.
 
 \textbf{Mechanism interpretation.}
-The lag-0 peak is not a failure of the lead-lag method to detect a direction, 
-it is a positive finding about the \emph{mechanism} of within-AMM stress
-propagation.  Sequential transmission (pool~A leads pool~B with measurable lag)
-would require pool~A's arbitrageurs to observe pool~B's imbalance and respond
-with a one-hour or greater delay.  The lag-0 result rules this out.  The
-finding instead points to a \emph{common-information mechanism}. Large USDT
-holders facing the same signal about USDT redemption risk simultaneously
-transact in both Curve pools within the same hourly window, creating correlated
-USDC sell pressure without any pool-to-pool propagation delay.  This has a
-precise regulatory implication. Monitoring only one pool (e.g.\ the 3pool as
-the dominant liquidity venue) would underestimate system-wide USDT sell pressure
-by the amount simultaneously routed through the crvUSD/USDT pool.  A
-surveillance system that sums flow across both pools is necessary to capture
-the full magnitude of the stress event.
-
-The bidirectional lag-0 result establishes \emph{statistically supported
-simultaneous co-movement} at hourly resolution.  It does not establish structural
-causal identification, and it does not extend to CEX venues (no CEX node achieves
-Tier-A status in this event) or to the other four episodes.
+The lag-0 peak is a positive finding, not a direction-detection failure.  Both pools react simultaneously, consistent with a \emph{common-information mechanism}: USDT holders facing the same redemption-risk signal transact in both pools within the same hourly window rather than sequentially.  The result establishes statistically supported simultaneous co-movement; it does not establish causal identification and does not extend to CEX venues or the other four episodes.
 
 \textbf{Convergent evidence from independent statistical paradigms.}
-To test whether the co-movement finding is an artefact of the specific linear
-correlation measure used, we apply transfer entropy (TE) to the same node pair,
-same feature (\texttt{usdc\_net\_sold\_1h}), and same hourly grid.  TE is a
-model-free, nonlinear, information-theoretic measure. It makes no linearity
-assumption, does not require stationarity, and is estimated under a block-shuffle
-null distribution rather than a parametric one.  Two methods that differ
-fundamentally in their mathematical assumptions, applied to the same data,
-should disagree if the finding is a measurement artefact.  Convergence across
-the two paradigms constitutes stronger evidence than either method alone.
-
-The TE result is informative precisely because it does
-\emph{not} produce a robust direction.  Under the na\"ive permutation null,
-\texttt{curve\_3pool} $\rightarrow$ \texttt{curve\_crvusd\_usdt} is significant
-(TE${}=0.835$, $p=0.020$) while the reverse is not ($p=0.240$), hinting at
-asymmetry.  But under the block-shuffle null that controls for serial
-correlation, \emph{neither} direction survives ($p=0.575$ and $p=1.000$
-respectively).  This is convergent with, not contradictory to, the lead-lag
-finding. The lag-0 peak and the non-robust TE direction tell the same story.
-There is strong cross-pool association but no robust \emph{directional}
-transmission once serial dependence is accounted for, consistent with a
-common-factor (simultaneous) mechanism rather than sequential contagion.
-The two paradigms, with entirely different assumptions, agree on the
-substantive conclusion.
+Transfer entropy (TE, model-free, nonlinear) applied to the same pair and feature confirms the story: under the block-shuffle null that controls for serial correlation, \emph{neither} direction survives ($p=0.575$ and $p=1.000$), agreeing with the lag-0 result.  The combination---strong static association plus non-robust TE directionality---is consistent with a common-factor (simultaneous) mechanism rather than sequential contagion.  Two paradigms with entirely different assumptions agree on the substantive conclusion.
 
 
 
@@ -492,6 +445,12 @@ real Tier-A A/A pair (Section~\ref{sec:cross}), this contrast cannot be
 attributed to missing data. It is evidence that AMM-flow contagion is specific
 to stress that originates within the AMM layer.
 
+The rolling coupling $\hat{\rho}(\tau)$ through the USDT/Curve 2023 event is flat near zero in the
+calm period, rises sharply to $0.53$ at onset, and sustains that level through the acute window
+before partially relaxing---confirming the Forbes--Rigobon scalar contrast reflects a sustained
+regime shift, not a single outlier hour.  This time profile is consistent with exhaustion of
+arbitrage capacity: once capacity is exhausted the two pools co-move as a single illiquid market.
+
 %% -----------------------------------------------------------------------
 \subsection{Regime-Dependent Reversal of Arbitrage}
 \label{sec:arbflip}
@@ -526,13 +485,6 @@ correlations (Section~\ref{sec:robust}).
 
 
 
-This regime-dependent reversal (Figure~\ref{fig:findings}(b)) is a positive structural finding. The
-sign of the flow--price relationship is a regime indicator, and the direction
-in which acute stress bends it is informative about the shock, amplifying
-for supply and regulatory shocks where on-chain arbitrage is overrun, more
-strongly stabilizing for an exchange-credit shock where on-chain liquidity
-absorbs outflows.
-
 %% -----------------------------------------------------------------------
 \subsection{On-Chain Price Discovery}
 \label{sec:pricediscovery}
@@ -560,17 +512,7 @@ The fifth is the case where theory says it should not be.
 
 
 
-The deviation magnitudes (Figure~\ref{fig:findings}(c)) make the surveillance case concrete.  During the
-USDT/Curve episode the Curve pool price fell to $0.875$, a $12.5\%$
-deviation, while the matched Binance USDT price moved only $0.3\%$. The pool
-priced the stress \textbf{37$\times$ more strongly} than the exchange, and a
-price-only monitor watching Binance would have seen almost nothing.  BUSD shows
-a $34\times$ ratio.  This is the paper's thesis in a single number. On-chain
-flow and price data carry execution-grade stress information that
-exchange-price surveillance misses.  (FTX is inconclusive, its one-hour
-lead correlation is insignificant, $r=-0.02$, $p=0.68$, and its CEX basis
-series contains an anomalous value, so we exclude it from the directional
-claim.)
+The deviation magnitudes make the surveillance case concrete: the Curve pool fell to $0.875$ ($12.5\%$ deviation) while Binance USDT moved only $0.3\%$---a $\mathbf{37{\times}}$ ratio (BUSD: $34\times$).  On-chain data carry the stress signal that exchange-price surveillance misses.  FTX is excluded from the directional claim ($r=-0.02$, $p=0.68$, anomalous CEX basis).
 
 %% -----------------------------------------------------------------------
 \begin{table}[t]
@@ -774,50 +716,19 @@ FTX 2022        & exchange credit & $0.401$ & $\mathbf{0.868}$ & market \\
 \subsection{What Does Not Work, and Why It Confirms the Frame}
 \label{sec:ml-diagnosis}
 
-Three supervised alternatives fail, and their failure is exactly what makes
-unsupervised detection the right tool.  First, a \emph{within-event supervised
-probe} does show that adding Tier-A features to a market baseline raises
-detection AUROC, by up to $+0.37$ for Terra under a linear model, but the
-lift is model-dependent (only $+0.02$ for gradient-boosted trees, which recover
-the signal nonlinearly from the market features), so we do not rest a claim on
-its magnitude.  Second, \emph{cross-event prediction} collapses. A
-leave-one-event-out classifier reaches mean AUROC $\approx0.60$ (one held-out
-event at $0.11$), and a pairwise transfer matrix has a within-event diagonal of
-$0.92$--$0.97$ but an off-diagonal mean of $0.50$, chance.
-The cause is a cross-mechanism shift the learner cannot bridge \emph{online}, which a
-controlled normalisation ablation (downstream-stress label, gradient-boosted,
-leave-one-event-out) pins down. Raw features transfer below chance (mean ROC-AUC
-$0.33$). \emph{Transductively} rank-normalising each event to its own distribution
-recovers transfer to $\mathbf{0.61}$ (Terra $0.77$), so the barrier is a largely
-\emph{removable distributional} shift, not an irreducible feature-to-label
-remapping. But \emph{no causal} normalisation recovers it (expanding-$z$ $0.20$,
-trailing rolling-rank $0.36$). The discriminative scaling exists only \emph{after}
-the stress distribution is observed, and the train/test feature-distribution KL
-predicts the degradation ($r=0.525$, $p=0.017$). Online cross-event transfer is thus
-unattainable in real time, exactly why we deploy an unsupervised per-event online
-detector, not a supervised transfer model.
-Third, \emph{forecasting} adds nothing. A GRU
-sequence model over minute-level features at $15$--$60$-minute horizons yields no
-on-chain lift over a market baseline (splits are either degenerate or the market
-baseline already saturates).  With five heterogeneous events no transferable
-supervised rule can exist. An unsupervised, per-event, causal detector sidesteps
-the obstacle entirely.
+Three supervised alternatives fail, confirming the unsupervised per-event design.
+\emph{Cross-event prediction} collapses: leave-one-event-out mean AUROC $\approx0.60$
+(one fold at $0.11$); off-diagonal transfer $0.50$ (chance). A normalisation ablation shows the
+barrier is distributional not conceptual---transductive rank-normalisation recovers transfer to $0.61$
+(Terra $0.77$), but no causal online normalisation does (expanding-$z$ $0.20$), so real-time transfer
+is unattainable.  The KL between train/test feature distributions predicts degradation ($r=0.525$,
+$p=0.017$).  \emph{Forecasting} with a GRU over minute-level features adds no on-chain lift.
+\textbf{Graph neural baseline:} a SnapshotGCN with LSTM temporal head
+underperforms the detection baseline on every event (AUROC lift $-1.6$ to $-60.2$\,pp),
+confirming five heterogeneous episodes are too few to train a temporal graph network;
+the unsupervised per-event HMM on Tier-A data is the right regime choice.
 
-\textbf{Graph neural baseline (negative result).}
-As a modern point of comparison we train a SnapshotGCN over the
-\texttt{TokenExchange}-edge adjacency with an LSTM temporal head on the
-\emph{real} per-event panels (9 node features, 80 epochs, all five events). It
-\emph{underperforms the non-graph detection baseline on every event}, AUROC lift
-of $-1.6$, $-15.3$, $-27.0$, $-46.4$, and $-60.2$\,pp for USDT/Curve, USDC/SVB,
-Terra/LUNA, FTX, and BUSD respectively, and clears the pre-registered $+5$\,pp
-gate nowhere. On Terra, where the provenance-gated HMM reaches AUROC $0.95$, the
-GCN manages only $0.47$ (baseline $0.74$). The lesson is not that graphs are
-useless but that five heterogeneous episodes are far too few to fit a temporal
-graph network. In this small-$n$ regime an unsupervised, per-event causal detector
-on the right (Tier-A) data beats a learned graph model, exactly this paper's
-thesis.
-
-\FloatBarrier  % flush the dense ML-section floats before moving on
+\FloatBarrier
 
 
 %% -----------------------------------------------------------------------
@@ -873,9 +784,15 @@ Using a provenance gate separating Tier-A on-chain evidence from Tier-B market c
 
 The provenance gate unifies these results.  Two principles emerge. Gate claims by data provenance, and where labels are scarce, detect rather than predict.  Future work targets CEX order-book depth, a Uniswap~v3 extension, and higher-powered settlement-layer tests.
 
+\begin{acks}
+The full analysis pipeline, data-ingestion scripts, figure-generation code,
+and committed result artefacts are available at
+[anonymized repository; link provided at camera-ready].
+\end{acks}
 
+{\footnotesize\setlength{\bibsep}{0pt plus 0.1ex}
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{references}
+\bibliography{references}}
 
 
 

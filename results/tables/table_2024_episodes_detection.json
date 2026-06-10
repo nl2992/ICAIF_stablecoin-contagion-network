@@ -1,0 +1,69 @@
+{
+  "bybit_hack_2025": {
+    "event_id": "bybit_hack_2025",
+    "name": "ByBit hack 2025 (exchange-credit)",
+    "mechanism": "exchange_credit_hack",
+    "analysis_window": [
+      "2025-02-16",
+      "2025-03-01"
+    ],
+    "shock_onset_utc": "2025-02-21T06:00:00Z",
+    "expected_onchain_fires": false,
+    "n_pool_rows": 336,
+    "n_market_rows": 336,
+    "forbes_rigobon": {
+      "onchain": {
+        "z_fisher": -0.381,
+        "rho_calm": 0.177,
+        "rho_panic": 0.128,
+        "n_calm": 125,
+        "n_panic": 113,
+        "p_onesided": 0.6125,
+        "pct_positive": 0.3875,
+        "ci_lo": -2.521,
+        "ci_hi": 2.076,
+        "feature": "usdc_net_sold_1h",
+        "status": "ok"
+      },
+      "market": {
+        "z_fisher": -2.275,
+        "rho_calm": 0.978,
+        "rho_panic": 0.96,
+        "n_calm": 125,
+        "n_panic": 113,
+        "p_onesided": 0.817,
+        "pct_positive": 0.183,
+        "ci_lo": -7.741,
+        "ci_hi": 3.329,
+        "feature": "basis_bps",
+        "status": "ok"
+      }
+    },
+    "hmm": {
+      "onchain": {
+        "auroc": 0.602,
+        "stress_state": 0,
+        "lead_hours": null,
+        "n_calm": 222,
+        "n_panic": 114,
+        "status": "ok"
+      },
+      "market": {
+        "auroc": 0.66,
+        "stress_state": 1,
+        "lead_hours": null,
+        "n_calm": 222,
+        "n_panic": 114,
+        "status": "ok"
+      }
+    },
+    "paper_summary": {
+      "hmm_auroc_onchain": 0.602,
+      "hmm_auroc_market": 0.66,
+      "lead_hours": null,
+      "detects": "market",
+      "fr_z_fisher": -0.381,
+      "fr_p_onesided": 0.6125
+    }
+  }
+}

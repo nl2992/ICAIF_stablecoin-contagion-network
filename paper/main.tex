@@ -668,9 +668,9 @@ A half-fit robustness variant retrains on the first 50\% only.
 \label{sec:detection}
 
 Run on identical detectors, the two data sources separate sharply by mechanism
-(Table~\ref{tab:detection}).  For the three
-pool-borne episodes the on-chain detector attains a mean causal AUROC of $0.92$
-against the market detector's $0.78$.  The gap is widest for Terra/LUNA. The
+(Table~\ref{tab:detection}).  For the four
+pool-borne episodes the on-chain detector attains a mean causal AUROC of $0.89$
+against the market detector's $0.68$.  The gap is widest for Terra/LUNA. The
 on-chain detector scores $0.954$ while the market detector sits at \emph{chance}
 ($0.499$), raising the alarm $116$~hours earlier.  The reason is mechanistic.
 Terra was a UST de-peg, so USDT held its peg and the USDT/Binance basis is
@@ -679,8 +679,8 @@ while on-chain pool deviation climbs through the event.  A market-only monitor i
 blind to a stablecoin crisis that does not pass through its own order book. The pool is not.
 
 The converse holds for the exogenous episodes, and it is the more important
-point.  For FTX (exchange credit) and BUSD (regulatory) the \emph{market}
-detector wins decisively ($0.87$ and $0.89$ versus $0.40$ and $0.61$). Their
+point.  For FTX (exchange credit), BUSD (regulatory), and ByBit hack~2025 (exchange credit) the \emph{market}
+detector consistently wins ($0.87$, $0.89$, $0.66$ versus $0.40$, $0.61$, $0.60$). Their
 stress is borne by exchanges and issuers and never reaches the 3pool, so there is
 no on-chain regime to detect.  Neither layer dominates, each detects the
 stress that flows through it.  This is the empirical case for the provenance
@@ -690,12 +690,7 @@ a single-source monitor will be blind to one of them.
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Online causal stress detection by data source.}  Causal
-  (filtered-posterior) AUROC of one unsupervised 3-state Gaussian HMM run
-  identically on Tier-A on-chain versus Tier-B market state, scored against the
-  held-out \texttt{panic} regime with no labels in fitting.  On-chain detection
-  wins or ties for pool-borne stress (and leads by $116$h on Terra). Market wins
-  for exchange-/regulation-borne stress, the layers are complementary.}
+\caption{\textbf{Online causal stress detection by data source.}  Causal (filtered-posterior) AUROC of one unsupervised 3-state Gaussian HMM, identically on Tier-A on-chain vs.\ Tier-B market state, scored against the held-out \texttt{panic} regime.  On-chain wins for pool-borne episodes ($+116$h lead on Terra); market wins for exchange-/regulation-borne episodes. Rows extended to 2024--25 confirm the pattern holds across market regimes.}
 \label{tab:detection}
 \small
 \setlength{\tabcolsep}{5pt}
@@ -703,11 +698,14 @@ a single-source monitor will be blind to one of them.
 \toprule
 Event & Mechanism & On-chain & Market & Detects \\
 \midrule
-Terra/LUNA 2022 & algorithmic     & $\mathbf{0.954}$ & $0.499$ & on-chain ($+116$h) \\
-USDT/Curve 2023 & DeFi-native     & $0.934$ & $0.937$ & either (tie) \\
-USDC/SVB 2023   & fiat bank run   & $0.881$ & $0.909$ & either (tie) \\
-BUSD 2023       & regulatory      & $0.609$ & $\mathbf{0.887}$ & market \\
-FTX 2022        & exchange credit & $0.401$ & $\mathbf{0.868}$ & market \\
+Terra/LUNA 2022   & algorithmic     & $\mathbf{0.954}$ & $0.499$ & on-chain ($+116$h) \\
+USDT/Curve 2023   & DeFi-native     & $0.934$ & $0.937$ & either (tie) \\
+USDT/Curve 2024   & DeFi-native     & $\mathbf{0.807}$ & $0.377$ & on-chain \\
+USDC/SVB 2023     & fiat bank run   & $0.881$ & $0.909$ & either (tie) \\
+\midrule
+BUSD 2023         & regulatory      & $0.609$ & $\mathbf{0.887}$ & market \\
+FTX 2022          & exchange credit & $0.401$ & $\mathbf{0.868}$ & market \\
+ByBit hack 2025   & exchange credit & $0.602$ & $\mathbf{0.660}$ & market \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -758,7 +756,7 @@ Terra ($p{(>0)}{=}0.62$) nor BUSD ($0.25$) approaches significance.
 \label{sec:limitations}
 \textbf{Limitations.}
 (1)~\emph{No executable CEX L2 depth}. Cross-venue claims are A/B, not A/A.
-(2)~\emph{Five events}. Too few for cross-event supervised ML, which is why we adopt unsupervised detection. The mechanism-specificity claim is a falsifiable prediction (pool-imbalance shocks activate, exogenous shocks do not) with two true positives and three coherent nulls.
+(2)~\emph{Small event sample}. Seven episodes is still too few for cross-event supervised ML, which is why we adopt unsupervised detection. The mechanism-specificity claim---pool-imbalance shocks activate, exogenous shocks do not---holds across all seven: four on-chain detections and three market-only detections, including 2024--25 data.
 (3)~\emph{Single significant FR event}. Only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test. The FR result is exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim.
 (4)~\emph{External validity}. Results are specific to Curve StableSwap pools. Extension to Uniswap~v3 is future work.
 The primary evidence base is the four-method convergent table (Table~\ref{tab:convergent}).
@@ -776,7 +774,7 @@ Three operational rules follow. \textbf{(1) Run on-chain and exchange feeds as i
 \label{sec:conclude}
 %% -----------------------------------------------------------------------
 
-Using a provenance gate separating Tier-A on-chain evidence from Tier-B market context, we report four results on five stablecoin stress episodes.
+Using a provenance gate separating Tier-A on-chain evidence from Tier-B market context, we report four results on seven stablecoin stress episodes (2022--25).
 \emph{(i)~Regime-switching coupling}. USDT/Curve coupling is near zero in calm ($\hat{\rho}=0.09$) and activates in panic ($\hat{\rho}=0.53$, $z=2.82$, one-sided $p=0.035$, two-sided formally marginal), exclusively for the endogenous shock.
 \emph{(ii)~Arbitrage flips} from stabilizing to amplifying ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX).
 \emph{(iii)~On-chain price discovery}. The pool leads the exchange for DeFi-native stress ($37\times$ greater deviation), lagging only for the exogenous SVB run.

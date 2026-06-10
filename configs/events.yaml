@@ -105,3 +105,37 @@ events:
     notes: >
       Gradual wind-down rather than acute shock. Redemption flows on-chain are
       Tier-A. BUSD/USDT pairs on Binance are well-archived.
+
+  usdt_curve_2024_aug:
+    name: "USDT/Curve 2024 Aug (BTC carry-trade crash)"
+    mechanism: "market_deleveraging_defi_native"
+    description: >
+      August 5 2024 macro deleveraging event triggered by unwinding of JPY carry trades.
+      BTC -15% in 24h, broad DeFi stress. Curve 3pool activated as liquidity backstop;
+      on-chain HMM AUROC 0.807 vs market 0.377 confirming DeFi-native mechanism.
+    core_window_utc: ["2024-08-05", "2024-08-08"]
+    analysis_window_utc: ["2024-07-28", "2024-08-12"]
+    shock_onset_utc: "2024-08-05T00:00:00Z"
+    primary: false
+    data_quality: "high"
+    notes: >
+      6265 raw Curve TokenExchange logs; 384 hourly pool rows. Binance USDCUSDT
+      klines 23040 rows. Gold parquet: dataset_contagion_features_usdt_curve_2024_aug.parquet.
+      FR z=-1.013 (p=0.9475); HMM on-chain detects, market does not.
+
+  bybit_hack_2025:
+    name: "ByBit hack 2025 (exchange-credit)"
+    mechanism: "exchange_credit_hack"
+    description: >
+      North Korea's Lazarus Group stole ~$1.5B ETH from ByBit cold wallet on 2025-02-21.
+      Exchange-credit shock: market price signals elevated, 3pool silent.
+      On-chain HMM AUROC 0.602 vs market 0.660 confirming exogenous mechanism.
+    core_window_utc: ["2025-02-21", "2025-02-25"]
+    analysis_window_utc: ["2025-02-16", "2025-03-01"]
+    shock_onset_utc: "2025-02-21T06:00:00Z"
+    primary: false
+    data_quality: "high"
+    notes: >
+      6990 raw Curve TokenExchange logs; 336 hourly pool rows. Binance USDCUSDT
+      klines 20160 rows. Gold parquet: dataset_contagion_features_bybit_hack_2025.parquet.
+      FR z=-0.381 (p=0.6125); market detects, on-chain does not (confirms exogenous frame).

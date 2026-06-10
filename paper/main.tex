@@ -422,7 +422,7 @@ shock} striking both pools simultaneously.
     red/green = panic).
     \textbf{(a)~Regime-switching contagion.}  Lag-0 cross-pool flow correlation
     in the calm vs.\ acute regime.  For USDT/Curve it jumps $0.09\!\to\!0.53$
-    ($*$. Fisher $z=2.82$; conservative block-bootstrap one-sided $p=0.035$). Only this endogenous shock activates,
+    ($*$. Fisher $z=2.82$, conservative block-bootstrap one-sided $p=0.035$). Only this endogenous shock activates,
     while the exogenous events stay flat or decouple.
     \textbf{(b)~Arbitrage flip.}  Contemporaneous flow-vs-price coupling.
     Negative (\emph{stabilizing}) in calm, turning positive (\emph{amplifying})
@@ -556,7 +556,7 @@ crisis that has already manifested elsewhere. the cross-event comparison tests t
 \textbf{The non-detections are mechanism findings, not failures.}  Every event now carries a genuine Tier-A A/A pair , yet only the endogenous USDT/Curve shock activates.  Terra/LUNA stays flat (its UST pool drains, leaving no liquid counterparty). FTX and BUSD decouple during panic. USDC/SVB is settlement-sparse.  The pattern is a falsifiable prediction. Pool-imbalance shocks should show AMM-detectable co-movement, exchange-, banking-, or regulation-originated shocks should not.
 
 %%
-Every event carries a genuine Tier-A A/A pair, yet only the endogenous USDT/Curve event is paper-claimable (both directions $p\le0.014$); the four exogenous shocks (Terra/LUNA, USDC/SVB, FTX, BUSD) are mechanism-driven nulls, not data gaps.
+Every event carries a genuine Tier-A A/A pair, yet only the endogenous USDT/Curve event is paper-claimable (both directions $p\le0.014$). The four exogenous shocks (Terra/LUNA, USDC/SVB, FTX, BUSD) are mechanism-driven nulls, not data gaps.
 
 
 \paragraph{Convergent evidence across detection layers}
@@ -715,16 +715,16 @@ ByBit hack 2025   & exchange credit & $0.602$ & $\mathbf{0.660}$ & market \\
 \label{sec:ml-diagnosis}
 
 Three supervised alternatives fail, confirming the unsupervised per-event design.
-\emph{Cross-event prediction} collapses: leave-one-event-out mean AUROC $\approx0.60$
-(one fold at $0.11$); off-diagonal transfer $0.50$ (chance). A normalisation ablation shows the
-barrier is distributional not conceptual---transductive rank-normalisation recovers transfer to $0.61$
+\emph{Cross-event prediction} collapses. Leave-one-event-out mean AUROC $\approx0.60$
+(one fold at $0.11$), with off-diagonal transfer $0.50$ (chance). A normalisation ablation shows the
+barrier is distributional not conceptual, and transductive rank-normalisation recovers transfer to $0.61$
 (Terra $0.77$), but no causal online normalisation does (expanding-$z$ $0.20$), so real-time transfer
 is unattainable.  The KL between train/test feature distributions predicts degradation ($r=0.525$,
 $p=0.017$).  \emph{Forecasting} with a GRU over minute-level features adds no on-chain lift.
 \textbf{Graph neural baseline:} a SnapshotGCN with LSTM temporal head
 underperforms the detection baseline on every event (AUROC lift $-1.6$ to $-60.2$\,pp),
-confirming five heterogeneous episodes are too few to train a temporal graph network;
-the unsupervised per-event HMM on Tier-A data is the right regime choice.
+confirming five heterogeneous episodes are too few to train a temporal graph network.
+The unsupervised per-event HMM on Tier-A data is the right regime choice.
 
 \FloatBarrier
 

@@ -62,7 +62,7 @@ episodes, we show the distinction is empirically sharp and, decisively,
 \emph{mechanism-specific}. For the June~2023 USDT/Curve episode, an
 \emph{endogenous} pool-imbalance shock, cross-pool flow coupling rises from
 near-zero in calm ($\hat{\rho}=0.09$) to $\hat{\rho}=0.53$ during the acute
-window (a \emph{contemporaneous} lag-0 co-movement, not early warning; Fisher
+window (a \emph{contemporaneous} lag-0 co-movement, not early warning, Fisher
 $z=+2.82$, block-bootstrap one-sided $p=0.035$), whereas none of the four
 \emph{exogenous} episodes (Terra/LUNA, USDC/SVB, FTX, BUSD) shows this
 activation despite identical Tier-A data, so the null is mechanism-specific,
@@ -399,7 +399,7 @@ the difference via Fisher $r$-to-$z$ two-sample statistic.
 For USDT/Curve 2023 the coupling is near-zero in calm ($\hat{\rho}=0.09$, $p=0.38$)
 and rises to $\hat{\rho}=0.53$ during panic, directional evidence consistent with
 contagion in the Forbes--Rigobon sense. We take the \emph{conservative} block bootstrap
-as our primary test: a 2000-sample block bootstrap (24-hour block length, $B=2000$)
+as our primary test. A 2000-sample block bootstrap (24-hour block length, $B=2000$)
 gives a one-sided $p=0.035$, with $96.5\%$ of replicates yielding $z>0$. The parametric
 Fisher two-sample test agrees more optimistically as a secondary check
 ($z_{\text{Fisher}}=+2.82$, analytic $p=0.005$). However, the 95\% CI is $[-0.10,\,+4.77]$. The lower bound is
@@ -447,9 +447,9 @@ to stress that originates within the AMM layer.
 
 The rolling coupling $\hat{\rho}(\tau)$ through the USDT/Curve 2023 event is flat near zero in the
 calm period, rises sharply to $0.53$ at onset, and sustains that level through the acute window
-before partially relaxing---confirming the Forbes--Rigobon scalar contrast reflects a sustained
+before partially relaxing, confirming the Forbes--Rigobon scalar contrast reflects a sustained
 regime shift, not a single outlier hour.  This time profile is consistent with exhaustion of
-arbitrage capacity: once capacity is exhausted the two pools co-move as a single illiquid market.
+arbitrage capacity. Once capacity is exhausted the two pools co-move as a single illiquid market.
 
 %% -----------------------------------------------------------------------
 \subsection{Regime-Dependent Reversal of Arbitrage}
@@ -512,7 +512,7 @@ The fifth is the case where theory says it should not be.
 
 
 
-The deviation magnitudes make the surveillance case concrete: the Curve pool fell to $0.875$ ($12.5\%$ deviation) while Binance USDT moved only $0.3\%$---a $\mathbf{37{\times}}$ ratio (BUSD: $34\times$).  On-chain data carry the stress signal that exchange-price surveillance misses.  FTX is excluded from the directional claim ($r=-0.02$, $p=0.68$, anomalous CEX basis).
+The deviation magnitudes make the surveillance case concrete. The Curve pool fell to $0.875$ ($12.5\%$ deviation) while Binance USDT moved only $0.3\%$, a $\mathbf{37{\times}}$ ratio (BUSD $34\times$).  On-chain data carry the stress signal that exchange-price surveillance misses.  FTX is excluded from the directional claim ($r=-0.02$, $p=0.68$, anomalous CEX basis).
 
 %% -----------------------------------------------------------------------
 \begin{table}[t]

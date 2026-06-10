@@ -573,6 +573,27 @@ series contains an anomalous value, so we exclude it from the directional
 claim.)
 
 %% -----------------------------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Experimental configuration.}
+\label{tab:config}
+\small
+\begin{tabular}{ll}
+\toprule
+Setting & Value \\
+\midrule
+Episodes & 5 stablecoin stress events (2022--2023) \\
+Primary evidence & Tier-A Curve \texttt{TokenExchange} and Uniswap v3 \texttt{Swap} logs \\
+Provenance gate & data-quality tier $\to$ feature tier $\to$ significance \\
+Detector & 3-state Gaussian HMM, unsupervised, causal filtered posterior \\
+Tier-A features & $|$price dev$|$, $|$net USDC sold$|$, $|$reserve imbalance$|$ \\
+Threshold & 5\% false-alarm on pre-onset calm, half-fit robustness retrain \\
+Contagion test & Forbes--Rigobon Fisher-$z$, 2000-sample block bootstrap (24h) \\
+Corroboration & lead-lag (Bonferroni), transfer entropy (block-FDR), TVP-VAR \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Cross-Event Evidence}
 \label{sec:cross}
 %% -----------------------------------------------------------------------
@@ -586,35 +607,15 @@ regulatory action) should not, because the AMM response to an external shock
 \emph{lags} the CEX price signal and thus cannot be the primary transmission
 channel.  A pool-imbalance event is one in which arbitrageur behaviour \emph{is}
 the crisis. All other event types involve arbitrageurs \emph{responding to} a
-crisis that has already manifested elsewhere. Table~\ref{tab:cross_event} tests this prediction across all five events.
+crisis that has already manifested elsewhere. the cross-event comparison tests this prediction across all five events.
 
 
 
-\textbf{The non-detections are mechanism findings, not failures.}  Every event now carries a genuine Tier-A A/A pair (Table~\ref{tab:cross_event}), yet only the endogenous USDT/Curve shock activates.  Terra/LUNA stays flat (its UST pool drains, leaving no liquid counterparty). FTX and BUSD decouple during panic. USDC/SVB is settlement-sparse.  The pattern is a falsifiable prediction. Pool-imbalance shocks should show AMM-detectable co-movement, exchange-, banking-, or regulation-originated shocks should not.
+\textbf{The non-detections are mechanism findings, not failures.}  Every event now carries a genuine Tier-A A/A pair , yet only the endogenous USDT/Curve shock activates.  Terra/LUNA stays flat (its UST pool drains, leaving no liquid counterparty). FTX and BUSD decouple during panic. USDC/SVB is settlement-sparse.  The pattern is a falsifiable prediction. Pool-imbalance shocks should show AMM-detectable co-movement, exchange-, banking-, or regulation-originated shocks should not.
 
 %%
-%% Cross-event mechanism comparison table
-%%
-\begin{table}[t]
-\centering
-\caption{\textbf{Cross-event mechanism comparison.}  Every event has a genuine
-  Tier-A A/A pair, yet only the endogenous pool-imbalance event is
-  paper-claimable. The exogenous shocks are mechanism-driven nulls, not data gaps.}
-\label{tab:cross_event}
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}llll@{}}
-\toprule
-Event & Mechanism & A/A result & Claim \\
-\midrule
-USDT/Curve & DeFi pool imbalance & \textbf{both dirs} $p\!\le\!0.014$ & \textbf{A/A robust} \\
-Terra/LUNA & algorithmic         & $\hat{\rho}\!=\!-0.07$, n.s.       & not claimable \\
-USDC/SVB   & fiat bank run       & settlement, underpow.             & descriptive \\
-FTX        & exchange credit     & $\hat{\rho}\!=\!+0.40$, n.s.       & not claimable \\
-BUSD       & regulatory          & $\hat{\rho}\!=\!-0.15$, n.s.       & not claimable \\
-\bottomrule
-\end{tabular}
-\end{table}
+Every event carries a genuine Tier-A A/A pair, yet only the endogenous USDT/Curve event is paper-claimable (both directions $p\le0.014$); the four exogenous shocks (Terra/LUNA, USDC/SVB, FTX, BUSD) are mechanism-driven nulls, not data gaps.
+
 
 \paragraph{Convergent evidence across detection layers}
 Each event is assessed by four independent methods. Forbes--Rigobon bootstrap ($z$-statistic and $p_{>0}$ across 2,000 replicates), cross-correlation lead-lag (Bonferroni-corrected pair count), transfer-entropy block-FDR significance, and within-event HMM AUROC.
@@ -636,7 +637,7 @@ Event & FR $z$ & FR $p_{>0}$ & LL sig & TE sig & AUROC & Convergence \\
 USDC/SVB 2023   & n/a$^\dagger$ & n/a$^\dagger$ & 18 & 28 & 0.935 & \textbf{STRONG} \\
 USDT/Curve 2023 & 2.821 & 0.965 &  2 &  0 & 0.927 & \textbf{STRONG} \\
 Terra/Luna 2022 & 0.183 & 0.622 &  0 &  1 & 0.975 & MODERATE \\
-FTX 2022        &, $^\ddagger$ &, $^\ddagger$ &  0 & 13 & 0.964 & MODERATE \\
+FTX 2022        & n/a$^\ddagger$ & n/a$^\ddagger$ &  0 & 13 & 0.964 & MODERATE \\
 BUSD 2023       & $-1.934$ & 0.245 & 0 & 0 & 0.647 & NONE \\
 \bottomrule
 \end{tabular}

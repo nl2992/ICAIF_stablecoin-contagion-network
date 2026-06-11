@@ -58,7 +58,7 @@
 Empirical contagion studies routinely conflate genuine \emph{contagion}, a
 crisis-driven shift in linkage, with constant \emph{interdependence}. Using
 Tier-A on-chain Curve \texttt{TokenExchange} flow across five stablecoin stress
-episodes, we show the distinction is empirically sharp and, decisively,
+episodes, we show the distinction is empirically sharp and
 \emph{mechanism-specific}. For the June~2023 USDT/Curve episode, an
 \emph{endogenous} pool-imbalance shock, cross-pool flow coupling rises from
 near-zero in calm ($\hat{\rho}=0.09$) to $\hat{\rho}=0.53$ during the acute
@@ -275,7 +275,7 @@ normaliser) is capped at Tier~B for that feature.
 
 \subsection{Event Windows and Node Inventory}
 
-We study five stress episodes (USDT/Curve, June 2023, terra/LUNA, May 2022, uSDC/SVB, March 2023, fTX, November 2022, bUSD, February 2023), each over an hourly window centred on its shock onset.
+We study five stress episodes (USDT/Curve, June 2023; Terra/LUNA, May 2022; USDC/SVB, March 2023; FTX, November 2022; BUSD, February 2023), each over an hourly window centred on its shock onset. These are the 2022--2023 episodes with continuous Tier-A on-chain Curve coverage; events without executable on-chain depth are excluded by the provenance gate.
 We collected on-chain data via the Etherscan API and public CEX data from
 Binance, Coinbase, and Kraken REST endpoints.  All raw data hashes are
 recorded in manifest files. Synthetic fixture data (used for pipeline testing
@@ -458,11 +458,24 @@ real Tier-A A/A pair (Section~\ref{sec:cross}), this contrast cannot be
 attributed to missing data. It is evidence that AMM-flow contagion is specific
 to stress that originates within the AMM layer.
 
-The rolling coupling $\hat{\rho}(\tau)$ through the USDT/Curve 2023 event is flat near zero in the
+The rolling coupling $\hat{\rho}(\tau)$ through the USDT/Curve 2023 event (Figure~\ref{fig:coupling})
+is flat near zero in the
 calm period, rises sharply to $0.53$ at onset, and sustains that level through the acute window
 before partially relaxing, confirming the Forbes--Rigobon scalar contrast reflects a sustained
 regime shift, not a single outlier hour.  This time profile is consistent with exhaustion of
 arbitrage capacity. Once capacity is exhausted the two pools co-move as a single illiquid market.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\columnwidth]{results/paper/figures/figure_coupling_rho_timeline.png}
+  \caption{\textbf{Coupling activates at onset (USDT/Curve 2023).} Lag-0 cross-pool
+    flow coupling between the two Tier-A Curve A/A pools, as a 36-hour rolling Pearson
+    correlation of hourly net flow. Flat near zero through the calm regime
+    (Forbes--Rigobon scalar $\hat{\rho}=0.09$), it rises at onset and sustains the
+    acute-window level ($\hat{\rho}=0.53$, Fisher $z=2.82$) before relaxing---a
+    sustained regime shift, not a single outlier hour.}
+  \label{fig:coupling}
+\end{figure}
 
 %% -----------------------------------------------------------------------
 \subsection{Regime-Dependent Reversal of Arbitrage}

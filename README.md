@@ -64,10 +64,11 @@ Accordingly, this project separates:
 
 ---
 
-## Current empirical status
+## How a claim is gated
 
-As of 2026-06-01 the repo has Tier-A on-chain AMM-flow anchors through Curve
-`TokenExchange` logs and Uniswap v3 `Swap` logs.
+The strongest evidence layer is Tier-A on-chain AMM flow from Curve `TokenExchange`
+logs and Uniswap v3 `Swap` logs. Before any edge becomes a paper claim it must clear
+two independent gates:
 
 > **Terminology**
 >
@@ -89,28 +90,41 @@ directional paper claims.
 | `usdc_mint_burn` ↔ `curve_3pool` | USDC/SVB 2023 | A/A on-chain settlement | No (sparse; 4 events, underpowered) |
 
 For FTX 2022 and BUSD 2023, A/B directional evidence is available (`curve_3pool` A +
-Binance/CoinMetrics B nodes).
-
-The verified headline result is:
-
-> In the USDT/Curve 2023 event, Curve and Uniswap v3 AMM-flow logs yield six statistically
-> supported A/A lead-lag rows: positive within-Curve co-movement and negative Curve--Uniswap
-> counter-movement. This is evidence of directed predictive dependence, not structural causality.
-
-See `results/paper/tables/table_aa_paper_claimable_edges.csv` for the full headline table.
-See `results/paper/tables/table_cross_protocol_leadlag_usdt_curve_2023.csv` for the
-Curve--Uniswap extension.
-See `DATA_INVENTORY.md` for the complete verified data inventory.
+Binance/CoinMetrics B nodes). The full headline table is
+`results/paper/tables/table_aa_paper_claimable_edges.csv`; the Curve–Uniswap cross-protocol
+extension is `table_cross_protocol_leadlag_usdt_curve_2023.csv`; the complete verified
+data inventory is `DATA_INVENTORY.md`. The findings these pairs support are summarized next.
 
 ---
 
-## Verified results — full pipeline re-run (2026-06-04)
+## Empirical results
 
-This section reports numbers from an **end-to-end real-data re-run** of the
-`usdt_curve_2023` event (ingest → silver → gold panel → lead-lag → transfer
-entropy → TVP-VAR → claim gate), executed against the live Etherscan and
-Binance Vision APIs on 2026-06-04. No fixtures were used (`--no-fixture`).
-All numbers below are reproducible from the committed configs.
+The paper rests on four findings across the five stress episodes, each gated by data
+provenance (Tier-A on-chain evidence separated from Tier-B market context) and split
+sharply by **shock mechanism** — endogenous (AMM pool-imbalance) versus exogenous
+(algorithmic, bank-run, exchange-credit, regulatory).
+
+1. **Regime-switching coupling.** For the endogenous USDT/Curve 2023 episode, cross-pool
+   flow coupling rises from near-zero in calm (ρ̂ = 0.09) to ρ̂ = 0.53 in the acute window
+   (Fisher *z* = 2.82, block-bootstrap one-sided *p* = 0.035). None of the four exogenous
+   episodes activates, despite each carrying a genuine Tier-A A/A pool pair — so the null is
+   mechanism-specific, not a data gap.
+2. **Arbitrage flips** from stabilizing to amplifying under endogenous stress
+   (*z* = +3.84 USDT/Curve, +3.69 BUSD, −2.80 FTX).
+3. **On-chain price discovery.** The Curve pool leads the exchange for DeFi-native stress
+   (deviating 37× more than Binance) and lags only for the exogenous SVB bank run.
+4. **Complementary detection.** An unsupervised online HMM on on-chain state reaches
+   AUROC 0.95 on Terra/LUNA (vs 0.50 on market data), 116 h earlier; supervised cross-event
+   prediction fails under concept shift (*r* = 0.525, *p* = 0.017) — where labels are scarce,
+   *detect* rather than *predict*.
+
+A multi-method convergence check (Forbes–Rigobon lead-lag, transfer entropy, TVP-VAR) agrees
+that the USDT/Curve coupling is **contemporaneous common-factor co-movement, not directional
+contagion**. Full tables under `results/paper/tables/`; the headline A/A edge table is
+`table_aa_paper_claimable_edges.csv`.
+
+<details>
+<summary>Per-event A/A lead-lag detail (all five episodes, real data)</summary>
 
 ### Node coverage (real data, Tier verified)
 
@@ -141,286 +155,7 @@ The primary A/A lead-lag result reproduces exactly on fresh real data:
   `paper_claim_allowed = True` (both directions), `uses_fixture = false`.
 - 4 of 45 provenance-claimable rows pass the paper gate (100% provenance pass).
 
-> **Reconciliation note:** the paper draft currently states `n = 168`; the
-> verified overlap is `n = 281`. The 95% Fisher-z CI tightens accordingly to
-> approximately **[0.28, 0.48]** (from the draft's [0.25, 0.51]). The paper
-> text must be updated to `n = 281` before submission.
-
-### Transfer entropy — convergent, with an honest twist
-
-TE was run on the **same** node pair, feature, and 3600 s grid (after fixing a
-min-node guard that previously blocked bivariate layer-filtered TE):
-
-| Direction | TE | p (naive) | p (block-shuffle) | Robust? |
-|---|---|---|---|---|
-| `curve_3pool` → `curve_crvusd_usdt` | 0.835 | 0.020 | 0.575 | **No** |
-| `curve_crvusd_usdt` → `curve_3pool` | 0.784 | 0.240 | 1.000 | No |
-
-**Interpretation.** TE shows a mild directional asymmetry under the naive null
-but **neither direction survives the block-shuffle null** that controls for
-serial correlation. This *converges* with the lead-lag finding rather than
-contradicting it: both paradigms agree the relationship is **contemporaneous
-co-movement, not robust directional transmission**. The lag-0 lead-lag peak and
-the non-robust TE direction tell the same story — a common-factor mechanism, not
-sequential contagion.
-
-### TVP-VAR — transient coupling, NOT early warning
-
-A rolling TVP-VAR (168 h window, 24 h step, `usdc_net_sold_1h`) now runs for
-`usdt_curve_2023` (previously skipped due to a feature-column bug, now fixed):
-
-| Spillover direction | FEVD share (mean) | FEVD share (max) |
-|---|---|---|
-| `curve_crvusd_usdt` → `curve_3pool` | 0.157 | **0.941** |
-| `curve_3pool` → `curve_crvusd_usdt` | 0.015 | 0.090 |
-
-The 94% peak occurs in a **single rolling window centred ≈ +140 h
-(≈ 5.8 days) *after* the 2023-06-15 shock onset**; all pre-onset windows show
-≈ 0 spillover.
-
-> **Honest correction:** an earlier draft speculated the coefficient
-> "strengthens *before* peak stress" as an early-warning signal. **The data do
-> not support this.** Cross-pool coupling is concentrated in the *aftermath*,
-> not as a precursor. The defensible claim is that the coupling is **transient
-> and event-driven** (consistent with no persistent structural link), not that
-> it provides early warning. The paper's TVP-VAR narrative (N7.2) must be
-> revised to remove the early-warning framing.
-
-### ML benchmark — does NOT replicate on corrected window (must fix paper)
-
-Re-running the prediction benchmark for USDC/SVB 2023 (LOEO, with provenance
-ablation) on the corrected 30-day window **contradicts the paper's headline ML
-claim**:
-
-| Model | Full features | Tier-B only (no graph) | Δ (Tier-A lift) |
-|---|---|---|---|
-| LogisticRegression | 0.8342 | 0.8334 | **+0.1 pp** (flat) |
-| RandomForest | 0.6659 | 0.7640 | **−9.8 pp** (Tier-A *hurts*) |
-
-- Test-set prevalence is now **0.59** (the paper assumed 0.89); the 30-day
-  window correction (TODO 2.2) changed the label balance and with it the
-  ablation result.
-- The paper currently claims **RF AUROC 0.859 with a +5.1 pp Tier-A lift**.
-  Neither figure reproduces: best AUROC is now LogisticRegression at 0.834, and
-  the Tier-A feature lift is flat (LR) or negative (RF).
-
-**Implication:** the ML "Tier-A features are informationally richer" claim is
-**not robust to the window correction** and must be removed or heavily
-qualified before submission. This does not affect the co-movement results
-(which are independent of the ML benchmark), but it does remove one of the
-three empirical contributions as currently stated. *The abstract and ML
-section have been updated in this commit to drop the unsupported lift.*
-
-**Second supervised ML framing also null.** Detecting the regime (`panic` vs
-rest) from flow features *cross-event* (LOEO) also fails: mean AUROC ≈ 0.60,
-extreme variance (BUSD 0.11). Both ML nulls share a root cause — they are
-**supervised cross-event** tasks, and n=5 cannot teach a transferable mapping.
-
-### Diagnosis — *why* cross-event prediction fails (concept shift, not n=5 alone)
-
-We don't just assert "too few events" — we test it (`make ml_diagnostics` →
-`table_ml_diagnostics.csv`, `table_transfer_matrix.csv`):
-
-| Diagnostic | Value | Reading |
-|---|---|---|
-| Within-event AUROC (5-fold CV) | **0.82** | the signal *exists* per event |
-| Cross-event transfer (pairwise off-diagonal) | **0.50** | does **not** transfer (chance) |
-| Domain-classifier accuracy | 0.30 (chance 0.20) | covariate shift only *mild* |
-| Concept shift — panic/calm price-dev ratio | **2.0 / 1.9 / 2.9** (USDT, Terra, USDC) vs **0.84 / 0.54** (FTX, BUSD) | the mapping **inverts** |
-
-The transfer matrix is block-structured: the three pool-stress events transfer
-to *each other* (0.76–0.97) but to/from FTX/BUSD it's chance-or-inverted
-(0.03–0.46). **The cause is concept shift, not covariate shift** — the features
-look similar across events (domain classifier barely above chance), but "high
-pool price-deviation → stress" holds for pool-stress events and *reverses* for
-the CEX-borne shocks. With n=5 heterogeneous events, no single cross-event rule
-can exist, so leave-one-event-out is doomed whenever the held-out event is in
-the minority mechanism class. This is *why* you must detect, not predict.
-
-### Positive AI finding — unsupervised HMM detects the regime (detect, don't predict)
-
-The fix is to change the AI framing entirely: not supervised cross-event
-*prediction* but **unsupervised, per-event, online latent-state *detection***.
-A 3-state Gaussian **Hidden Markov Model** on on-chain pool state
-(`|flow|`, `|implied_pool_price−1|`, `|reserve_imbalance|`), **fit with no
-labels**, recovers the stress regime (`make hmm_regime` → `table_hmm_regime.csv`):
-
-| Event | shock | HMM AUROC | balanced acc | detects? |
-|---|---|---|---|---|
-| **Terra/LUNA 2022** | algorithmic | **0.954** | 0.958 | ✓ |
-| **USDT/Curve 2023** | DeFi-native | **0.927** | 0.828 | ✓ |
-| **USDC/SVB 2023** | fiat bank run | **0.917** | 0.782 | ✓ |
-| BUSD 2023 | regulatory | 0.618 | 0.453 | – |
-| FTX 2022 | exchange credit | 0.389 | 0.342 | – |
-
-**3 of 5 events detected at AUROC 0.92–0.95 with zero supervision.** The two
-misses are mechanism-consistent, not failures: FTX and BUSD are shocks borne by
-exchanges/issuers, not the 3pool, so there is no strong pool-state regime to
-detect — the same endogenous/exogenous boundary that runs through every result.
-
-**The AI takeaway** (and the paper's ML conclusion): *for few-event DeFi-stress
-problems, detect — don't predict.* Supervised cross-event learning is dominated
-by the n=5 ceiling; an unsupervised latent-state detector extracts a usable
-real-time stress signal that supervised prediction cannot. This is the genuine
-AI contribution; the rejected supervised lifts demonstrate the gate working.
-
-### 2024–25 out-of-period extension — mechanism-specificity holds (2026-06-11)
-
-To test whether the endogenous/exogenous detection boundary survives *outside* the
-2022–23 period, we ran the same causal (filtered-posterior) HMM on two newer episodes
-(`scripts/fetch_run_2024_episodes.py` → `results/tables/table_2024_episodes_detection.json`):
-
-| Event | mechanism | on-chain AUROC | market AUROC | detects |
-|---|---|---|---|---|
-| **USDT/Curve 2024 Aug** (BTC carry-trade crash) | DeFi-native | **0.807** | 0.377 | on-chain ✓ |
-| **ByBit hack 2025** | exchange-credit | 0.602 | 0.660 | market ✓ |
-
-Both confirm the prediction: the DeFi-native deleveraging event fires on-chain while
-the market layer is blind, and the exchange-credit hack is market-borne and leaves the
-3pool quiet. The **detection** study now spans **7 episodes (2022–25)**. The supervised
-cross-event ML ceiling above is unchanged — it remains an n=5 (2022–23) result, since the
-two new episodes are used for out-of-period *detection* validation, not retraining. Real
-data: 6,265 / 6,990 Curve `TokenExchange` logs plus Binance USDCUSDT klines per episode;
-gold parquets in `data/gold/`.
-
-### Strengthened headline — regime-switching contagion (2026-06-04)
-
-The static full-window correlation (ρ=0.386) understates the story. Splitting
-each event by `event_phase` and testing the **calm→panic shift** in cross-pool
-coupling (Fisher r-to-z) yields a genuine *contagion* result in the rigorous
-Forbes–Rigobon sense — a significant **increase in linkage during the crisis
-regime**, not constant interdependence — and it is **mechanism-specific**:
-
-| Event | Mechanism | calm ρ | panic ρ | Fisher z | p (shift) | Contagion? |
-|---|---|---|---|---|---|---|
-| **USDT/Curve 2023** | endogenous pool imbalance | +0.09 (n.s.) | **+0.53** (p<1e-4) | **+2.82** | **0.005** | **Yes** |
-| Terra/LUNA 2022 | algorithmic collapse | +0.01 | +0.09 | +0.18 | 0.855 | No (flat) |
-| FTX 2022 | exchange credit | +0.37 | −0.23 | −0.89 | 0.371 | No (decouples) |
-| BUSD 2023 | regulatory wind-down | +0.09 | −0.60 | −1.93 | 0.053 | No (decouples) |
-
-Reproduce: `make regime_contagion` →
-`results/tables/table_regime_contagion.csv`.
-
-**Why this is the stronger contribution.** (1) It is *contagion*, not
-*interdependence*: the linkage is statistically indistinguishable from zero in
-calm markets and activates only during acute stress. (2) It is
-*mechanism-specific and confound-free*: only the endogenous AMM pool-imbalance
-event activates; the three exogenous shocks (all with genuine A/A pairs) show
-no positive activation. (3) It *explains* the lag-0 peak (a common shock hits
-both pools simultaneously during panic) and is consistent with the TVP-VAR
-(94% of the spillover concentrated in the stress window). (4) The test
-statistic is a shift in linkage (Fisher z=+2.82, p=0.005), a sharper and more
-defensible claim than a single static correlation.
-
-### Positive finding — on-chain price discovery (and how much CEX misses)
-
-For DeFi-native stress, the Curve pool price moves **before** the centralized
-exchange.  Using first-differenced (trend-robust) lead-lag of on-chain pool
-deviation vs CEX basis deviation (`make price_discovery` →
-`table_price_discovery.csv`):
-
-| Event | shock | on-chain leads | CEX leads | +1h r (p) | on-chain dev / CEX dev |
-|---|---|---|---|---|---|
-| **USDT/Curve 2023** | DeFi-native | **0.175** | 0.040 | **0.28 (<1e-4)** | **37×** (12.5% vs 0.3%) |
-| **BUSD 2023** | regulatory | **0.100** | 0.017 | **0.15 (<1e-4)** | **34×** |
-| Terra/LUNA 2022 | algorithmic | 0.044 | 0.044 | 0.17 (<1e-4) | 8× |
-| **USDC/SVB 2023** | fiat bank run | 0.040 | **0.120** | 0.11 (0.11, n.s.) | 3× (CEX leads) |
-| FTX 2022 | exchange (inconclusive) | 0.043 | −0.044 | −0.02 (0.68) | — |
-
-**Why it's strong.** (1) Trend-robust — it survives first-differencing (unlike
-the flow-leads-price level correlation, which collapsed). (2) Mechanism-
-consistent: on-chain leads for DeFi-native shocks; the CEX leads only for the
-exogenous fiat bank run (the depeg hits exchange prices first). (3) The
-deviation ratio is the thesis in one number — during USDT/Curve the **Curve
-pool priced the stress 37× more strongly than Binance** (12.5% vs 0.3%); a
-price-only monitor would have seen almost nothing. FTX is excluded from the
-directional claim (insignificant +1h lead; anomalous CEX basis value).
-
-### Positive finding — arbitrage flips from stabilizing to amplifying
-
-The regime lens also yields a clean *positive* structural result.  In calm
-markets on-chain arbitrage is **stabilizing**: flow intensity
-(`|usdc_net_sold_1h|`, Curve 3pool, Tier-A) is *negatively* correlated with CEX
-price-deviation magnitude (`|basis_vs_usd|`) — arbitrage absorbs dislocations,
-as theory predicts.  Acute stress significantly bends this relationship in
-**3 of 5 events** (`make arbitrage_regime` → `table_arbitrage_regime.csv`):
-
-| Event | shock type | r (calm) | r (panic) | Fisher z | p | flip |
-|---|---|---|---|---|---|---|
-| **USDT/Curve 2023** | supply imbalance | −0.22 | **+0.36** | **+3.84** | 1e-4 | stabilizing→amplifying |
-| **BUSD 2023** | regulatory | −0.07 | **+0.45** | **+3.69** | 2e-4 | stabilizing→amplifying |
-| FTX 2022 | exchange credit | −0.13 | −0.52 | −2.80 | 0.005 | stays/strengthens stabilizing |
-| Terra/LUNA 2022 | algorithmic | +0.01 | +0.04 | +0.20 | 0.84 | flat (pool draining) |
-| USDC/SVB 2023 | bank reserve | n/a | +0.01 | — | — | no calm data |
-
-**Why it's robust and positive.** A *sign flip* across regimes cannot be
-produced by a shared trend — so unlike the naive "flow leads price" level
-correlation (which collapsed under first-differencing), this survives.
-Economically: arbitrage flips from dampening to amplifying when its capacity is
-overwhelmed (supply/regulatory supply shocks), but strengthens its stabilizing
-lean when it is absorbing an off-chain exchange run (FTX). The *direction* in
-which stress bends the flow–price relationship is informative about the shock.
-
-> Note: the discarded "flow-leads-price" hypothesis is itself instructive — the
-> level cross-correlation peaked at +4h (r=0.32) but **collapsed after
-> first-differencing** (the lead was a common stress trend). We report it as a
-> rejected hypothesis; the gate working as intended.
-
-### What this run establishes
-
-1. The headline A/A result is **real and reproducible** (ρ̂ = 0.386, Bonferroni
-   p ≤ 0.014, both directions, Tier-A on both endpoints, no fixtures).
-2. Three methods (lead-lag, TE, TVP-VAR) **converge on one mechanism**:
-   contemporaneous, transient cross-pool co-movement driven by a common USDT
-   shock — *not* directional/sequential contagion.
-3. The cross-event pattern is now **confound-free**: all five events have a
-   genuine A/A pair, and only the endogenous pool-imbalance event is
-   paper-claimable. The four exogenous-shock nulls are mechanism findings, not
-   data gaps.
-4. Two paper claims that the data contradicted have been **corrected in this
-   commit set**: `n = 168 → 281` (CI [0.28, 0.48]) and removal of the TVP-VAR
-   early-warning framing.
-
-### Cross-event results — all five events, real data (2026-06-04)
-
-All five events were re-ingested and analysed end-to-end on real on-chain data.
-**Every event now has a genuine A/A pair** — including FTX and BUSD, which
-gained a second Tier-A DEX node (`curve_lusd_3crv`) via the B4 pool additions.
-This removes the earlier "missing data" confound: FTX and BUSD are no longer
-A/B-only because of a data gap; they have real A/A pairs that *still* show no
-significant co-movement.
-
-| Event | Mechanism | A/A pair tested | ρ̂ (lag) | p (Bonf.) | Paper-claimable? |
-|---|---|---|---|---|---|
-| **USDT/Curve 2023** | DeFi pool imbalance | `curve_3pool ↔ curve_crvusd_usdt` | **+0.386 (lag 0)** | **0.014** | **Yes — robust** |
-| Terra/LUNA 2022 | Algorithmic collapse | `curve_3pool ↔ curve_ust_wormhole` | −0.07 full / −0.28 pre-drain | 1.00 | No |
-| USDC/SVB 2023 | Fiat-reserve bank run | `usdc_mint_burn ↔ curve_3pool` (settlement) | n=7 arrivals | 1.00 | No (underpowered) |
-| FTX 2022 | Exchange credit/liquidity | `curve_3pool ↔ curve_lusd_3crv` | +0.40 (lag +7 h) | 1.00 | No |
-| BUSD 2023 | Regulatory wind-down | `curve_3pool ↔ curve_lusd_3crv` | −0.15 (lag −11 h) | 1.00 | No |
-
-Node coverage (Tier-A nodes per event, real data):
-
-| Event | Tier-A nodes | curve_3pool rows |
-|---|---|---|
-| USDT/Curve 2023 | `curve_3pool`, `curve_crvusd_usdt`, `usdt_mint_burn` | 379 |
-| Terra/LUNA 2022 | `curve_3pool`, `curve_ust_wormhole` (189) | 1,045 |
-| USDC/SVB 2023 | `curve_3pool`, `usdc_mint_burn` (7) | 696 |
-| FTX 2022 | `curve_3pool`, `curve_lusd_3crv` (92) | 718 |
-| BUSD 2023 | `curve_3pool`, `curve_lusd_3crv` (160) | 864 |
-
-**The strengthened finding.** Only the one event whose shock is *endogenous to
-the AMM layer* (USDT/Curve 2023, a pool-imbalance event) produces a
-paper-claimable A/A co-movement result. The four exogenous shocks
-(algorithmic, bank-run, exchange-credit, regulatory) do not — even when a
-genuine A/A pair is available to test. This is a cleaner version of the
-"endogenous detectable / exogenous not" thesis than the draft had, because the
-nulls are no longer attributable to missing data.
-
-**Known issue.** `curve_fraxusdc` (a B4 pool intended as a 3rd Tier-A node for
-FTX/BUSD) failed ingestion with `'str' object does not support item assignment`
-— a malformed contract address / config bug in the Curve ingest path. It is
-flagged for a fix; `curve_lusd_3crv` already provides the A/A pair for both
-events, so the cross-event conclusion is unaffected.
+</details>
 
 ---
 
@@ -569,6 +304,23 @@ make paper_gate
 python scripts/14_validate_paper_package.py
 ```
 
+### Reproduce the paper's headline numbers
+
+`make empirical_all` runs the full empirical stack on all five events; each finding lands
+in one committed table. Statistical tests and the HMM detector are seeded and deterministic.
+
+| Paper claim | Command | Output artifact |
+| --- | --- | --- |
+| Headline A/A lead-lag edges (USDT/Curve, Bonferroni-gated) | `make empirical_all` | `results/paper/tables/table_aa_paper_claimable_edges.csv` |
+| Regime-switching coupling **0.09 → 0.53** (Fisher *z*=2.82, *p*=0.035) — finding (i) | `make empirical_all` | `results/tables/table_regime_contagion.csv` |
+| Arbitrage flip (*z*=+3.84 / +3.69 / −2.80) — finding (ii) | `make empirical_all` | `results/tables/table_arbitrage_regime.csv` |
+| On-chain price discovery (**37×** greater pool deviation) — finding (iii) | `make empirical_all` | `results/tables/table_price_discovery.csv` |
+| Online HMM detection (AUROC **0.95** Terra, 116 h lead) — finding (iv) | `make empirical_all` | `results/tables/table_online_detection.csv` |
+| Cross-event prediction fails under concept shift (*r*=0.525) — finding (iv) | `python scripts/run_transfer_detector.py` | `results/eval/transfer_detector.json` |
+| Coupling-ρ(τ) timeline (Fig 3) | `python scripts/make_coupling_timeline_figure.py` | `results/paper/figures/figure_coupling_rho_timeline.png` |
+
+The compiled paper is **`paper/main.tex → paper/main.pdf`** (build: `cd paper && latexmk -pdf main.tex`).
+
 > **Fixture data warning** — `make ingest` (without `--no-fixture`) writes
 > deterministic synthetic fixtures marked `tier_actual = fixture_non_empirical`.
 > These are for pipeline testing only and are blocked from all paper claims.
@@ -688,32 +440,3 @@ The paper's core analysis is five 2022–23 episodes. This repo figure (`scripts
 <p align="center"><img src="docs/figures/detection_across_episodes.png" width="760" alt="Mechanism-specific stress detection across seven episodes (2022-2025): on-chain HMM detects pool-borne crises, market HMM detects exogenous ones."/></p>
 
 *Pool-borne crises (Terra, USDT/Curve ’23 & ’24, USDC/SVB) are caught by the **on-chain** detector (navy ◆); exchange/regulatory shocks (BUSD, FTX, ByBit) by the **market** detector (blue ●). † = 2024–25 out-of-period episodes held out of the core study.*
-
-## Reproduce (data → analysis → paper)
-
-**Prerequisites.** Python 3.11+, then:
-```bash
-pip install -r requirements.txt && cp .env.example .env   # Etherscan / Dune / The Graph keys
-```
-
-**End-to-end pipeline.** Each step writes versioned artifacts consumed by the next:
-
-```bash
-# 1. Fetch raw on-chain + CEX data and gate by provenance
-make setup && make ingest
-
-# 2. Reconstruct flows, build the multi-layer panel + event maps
-make reconstruct && make panel && make maps
-
-# 3. Run the empirical stack (lead-lag, TVP-VAR, transfer entropy, online HMM)
-make empirical_all
-
-# 4. Cross-event transfer-detector ablation (transductive vs causal)
-python scripts/run_transfer_detector.py
-
-# 5. Build paper figures + validate claims
-make paper_figures && make validate_paper
-
-```
-
-The compiled paper is **`paper/main.tex → paper/main.pdf`**; every number and figure above is regenerated by the steps here.

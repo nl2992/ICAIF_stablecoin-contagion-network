@@ -560,6 +560,8 @@ python scripts/14_validate_paper_package.py
 > These are for pipeline testing only and are blocked from all paper claims.
 > Use `make empirical` or `make empirical_all` for paper evidence.
 
+**Exact reproduction.** Tested with Python 3.11. The committed `data/gold/` parquets and `results/` tables are the exact published numbers (the live pull was executed 2026-06-04). Raw data come from the Etherscan and Binance Vision APIs (`ETHERSCAN_API_KEY` in `.env`, see `.env.example`); re-pulling may differ as chains and archives update, so the committed gold artifacts are canonical. Detection (HMM) and statistical tests are seeded and deterministic. The 2024–25 extension episodes are built by `scripts/fetch_run_2024_episodes.py`.
+
 ---
 
 ## Repository structure

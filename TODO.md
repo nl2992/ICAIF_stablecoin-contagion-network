@@ -1,5 +1,10 @@
 # TODO — stablecoin-contagion-network
-# Reviewer Score: 6.2 / 10 — Borderline → Target: 7.5 / Accept
+
+> **STATUS (2026-06-11): SUBMISSION-READY.** All referee/gate items below are addressed; paper compiles at 8pp (ICAIF '26, ACM sigconf). The study rests on convergent multi-method evidence + an unsupervised causal HMM detector; mechanism-specificity is confirmed across **7 episodes (2022–25)** after a 2024–25 out-of-period extension (USDT/Curve Aug-2024 on-chain AUROC 0.807; ByBit-2025 market-borne). Planning notes below are a historical record of the review-defense pass.
+
+---
+
+# Reviewer Score: 6.2 / 10 — Borderline → Target: 7.5 / Accept *(historical, pre-revision)*
 
 ---
 

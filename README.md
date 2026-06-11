@@ -252,6 +252,25 @@ by the n=5 ceiling; an unsupervised latent-state detector extracts a usable
 real-time stress signal that supervised prediction cannot. This is the genuine
 AI contribution; the rejected supervised lifts demonstrate the gate working.
 
+### 2024–25 out-of-period extension — mechanism-specificity holds (2026-06-11)
+
+To test whether the endogenous/exogenous detection boundary survives *outside* the
+2022–23 period, we ran the same causal (filtered-posterior) HMM on two newer episodes
+(`scripts/fetch_run_2024_episodes.py` → `results/tables/table_2024_episodes_detection.json`):
+
+| Event | mechanism | on-chain AUROC | market AUROC | detects |
+|---|---|---|---|---|
+| **USDT/Curve 2024 Aug** (BTC carry-trade crash) | DeFi-native | **0.807** | 0.377 | on-chain ✓ |
+| **ByBit hack 2025** | exchange-credit | 0.602 | 0.660 | market ✓ |
+
+Both confirm the prediction: the DeFi-native deleveraging event fires on-chain while
+the market layer is blind, and the exchange-credit hack is market-borne and leaves the
+3pool quiet. The **detection** study now spans **7 episodes (2022–25)**. The supervised
+cross-event ML ceiling above is unchanged — it remains an n=5 (2022–23) result, since the
+two new episodes are used for out-of-period *detection* validation, not retraining. Real
+data: 6,265 / 6,990 Curve `TokenExchange` logs plus Binance USDCUSDT klines per episode;
+gold parquets in `data/gold/`.
+
 ### Strengthened headline — regime-switching contagion (2026-06-04)
 
 The static full-window correlation (ρ=0.386) understates the story. Splitting

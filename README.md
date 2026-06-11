@@ -1,5 +1,7 @@
 # Provenance-Aware Stablecoin Stress Propagation Networks
 
+[![CI](https://github.com/nl2992/ICAIF_stablecoin-contagion-network/actions/workflows/ci.yml/badge.svg)](https://github.com/nl2992/ICAIF_stablecoin-contagion-network/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](environment.yml)
+
 <p align="center">
   <img src="results/figures/figure_auc_by_event.png" width="760" alt="Online detection AUROC by event and evidence layer: on-chain Tier-A flow recover"/>
 </p>
@@ -527,7 +529,9 @@ resampling hourly on-chain flows onto minute grids.
 ## Reproduction
 
 ```bash
-# 1. Install
+# 1. Install  (Python 3.11)
+#    conda: conda env create -f environment.yml && conda activate stressnet
+#    or pip:
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt && pip install -e .
 cp .env.example .env

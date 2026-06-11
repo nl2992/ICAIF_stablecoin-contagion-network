@@ -1,0 +1,13 @@
+# Reproducible environment for stablecoin-contagion-network.
+#   conda env create -f environment.yml && conda activate stressnet
+# (mirrors the CI install; Python 3.11 is the tested version)
+# Live data pulls also need ETHERSCAN_API_KEY in .env (see .env.example).
+name: stressnet
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - -r requirements.txt
+      - -e .

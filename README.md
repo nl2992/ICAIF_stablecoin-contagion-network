@@ -671,6 +671,14 @@ See `docs/limitations.md` for the full limitations discussion.
 
 *Provenance-gated, multi-method convergence (Forbes–Rigobon + lead-lag + transfer entropy + online HMM).*
 
+### Extended visual — the story beyond the 8-page paper
+
+The paper's core analysis is five 2022–23 episodes. This repo figure (`scripts/make_repo_detection_figure.py`) extends the picture to **seven episodes spanning 2022–2025**, adding the two 2024–25 out-of-period events (USDT/Curve Aug-2024 carry-trade crash; ByBit Feb-2025 hack). It makes the headline visible at a glance: the *same* unsupervised HMM, run on on-chain vs. market state, detects each crisis through **whichever layer the stress actually flows through** — and the endogenous/exogenous boundary holds across three years and a changing market structure.
+
+<p align="center"><img src="docs/figures/detection_across_episodes.png" width="760" alt="Mechanism-specific stress detection across seven episodes (2022-2025): on-chain HMM detects pool-borne crises, market HMM detects exogenous ones."/></p>
+
+*Pool-borne crises (Terra, USDT/Curve ’23 & ’24, USDC/SVB) are caught by the **on-chain** detector (navy ◆); exchange/regulatory shocks (BUSD, FTX, ByBit) by the **market** detector (blue ●). † = 2024–25 out-of-period episodes held out of the core study.*
+
 ## Reproduce (data → analysis → paper)
 
 **Prerequisites.** Python 3.11+, then:

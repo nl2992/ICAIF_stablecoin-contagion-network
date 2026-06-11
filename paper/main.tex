@@ -50,7 +50,7 @@
 %\acmDOI{...}
 
 \title{When On-Chain Flow Signals Work and When They Don't}
-\subtitle{AMM-Layer Stablecoin Stress Propagation Across Five Episodes, a Provenance-Gated Analysis of Curve Finance TokenExchange Flow}
+\subtitle{AMM-Layer Stablecoin Stress Propagation Across Five Episodes, a Provenance-Gated Analysis of On-Chain Curve Pool Swap Flow}
 
 %% Author block omitted for double-blind review
 
@@ -99,6 +99,19 @@ Thirteen months earlier, during the Terra/LUNA algorithmic collapse, on-chain
 pool-state data would have raised the alarm $116$ hours before exchange-based
 signals detected the crisis.  These two numbers, $37\times$ more amplitude on USDT/Curve and a $116$-hour detection
 lead on Terra/LUNA, define the surveillance gap this paper measures.
+
+\textbf{What is at stake, in plain terms.}  A \emph{stablecoin} is a
+cryptocurrency engineered to hold a fixed value---almost always one US
+dollar---either by holding cash-like reserves (as USDC and USDT claim to) or by
+an algorithm that expands and contracts supply (the design that failed for
+UST/Terra).  They are the dollar settlement layer of decentralised finance,
+turning over trillions of dollars a year, so a coin that ``breaks the buck'' can
+cascade through lending protocols, exchanges, and trading pools.  We observe that
+stress through two evidence layers of very different reliability, and we keep them
+strictly separate throughout: \emph{Tier-A} is execution-grade, directly observed
+on-chain swap data (every trade, with an exact timestamp and amount); \emph{Tier-B}
+is market-price context from exchanges, useful but lower-fidelity.  Every claim in
+this paper is capped at the reliability tier of its weakest input.
 
 Four distinct stablecoin systems experienced significant stress across these
 episodes. The algorithmic UST/Terra collapsed in May 2022. FTX's implosion
@@ -163,9 +176,9 @@ concept shift.
 
 \textbf{Implications for DeFi risk practitioners.}  Risk managers on CEX-only feeds
 would be structurally blind to pool-imbalance shocks. Terra/LUNA went undetected
-116 hours longer than on-chain monitoring would have allowed.  Section~\ref{sec:practitioner}
-gives a replicable decision framework. Endogenous shocks require on-chain detection,
-exogenous shocks require market signals.  Both layers are necessary.
+116 hours longer than on-chain monitoring would have allowed.  Endogenous shocks require
+on-chain detection, exogenous shocks require market signals, and both layers are
+necessary; we distil this into operational rules in the conclusion.
 
 
 %% -----------------------------------------------------------------------
@@ -764,12 +777,6 @@ includes zero, so we report it as directional rather than confirmed two-sided co
 
 
 %% -----------------------------------------------------------------------
-\section{Practitioner Decision Framework}
-\label{sec:practitioner}
-%% -----------------------------------------------------------------------
-
-Three operational rules follow. \textbf{(1) Run on-chain and exchange feeds as independent layers}, since on-chain fires 116h before market signals for Terra while exchange signals are decisive for FTX and BUSD, so a single-source monitor is structurally blind to one class of event. \textbf{(2) Match the detector to the mechanism}, an on-chain HMM for AMM-native events and market-price signals for exchange-credit or regulatory shocks. \textbf{(3) Watch for the arbitrage-sign flip}, where cross-pool coupling surges from $\hat{\rho}=0.09$ to $0.53$ and flow turns from stabilising to amplifying ($z=+3.84$), signalling exhausted arbitrage capacity.
-
 %% -----------------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclude}
@@ -781,7 +788,17 @@ Using a provenance gate separating Tier-A on-chain evidence from Tier-B market c
 \emph{(iii)~On-chain price discovery}. The pool leads the exchange for DeFi-native stress ($37\times$ greater deviation), lagging only for the exogenous SVB run.
 \emph{(iv)~Complementary detection layers}. On-chain recovers endogenous stress that market signals miss (Terra AUROC $0.95$ vs $0.50$, 116h earlier). Market signals are required for exchange-borne shocks. Supervised cross-event prediction fails under concept shift ($r=0.525$, $p=0.017$).
 
-The provenance gate unifies these results.  Two principles emerge. Gate claims by data provenance, and where labels are scarce, detect rather than predict.  Future work targets CEX order-book depth, a Uniswap~v3 extension, and higher-powered settlement-layer tests.
+The provenance gate unifies these results, and three operational rules follow for
+practitioners. Run on-chain and exchange feeds as \emph{independent} layers, since a
+single-source monitor is structurally blind to one class of event (on-chain leads by
+116h on Terra; exchange signals are decisive for FTX and BUSD). Match the detector to
+the mechanism: an on-chain HMM for AMM-native shocks, market-price signals for
+exchange-credit or regulatory ones. And watch for the arbitrage-sign flip, where
+cross-pool coupling surges ($\hat{\rho}=0.09\!\to\!0.53$) and flow turns from
+stabilising to amplifying ($z=+3.84$), signalling exhausted arbitrage capacity. Two
+broader principles emerge: gate claims by data provenance, and where labels are
+scarce, detect rather than predict. Future work targets CEX order-book depth, a
+Uniswap~v3 extension, and higher-powered settlement-layer tests.
 
 \begin{acks}
 The full analysis pipeline, data-ingestion scripts, figure-generation code,

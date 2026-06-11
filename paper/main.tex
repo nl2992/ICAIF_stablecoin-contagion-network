@@ -726,6 +726,9 @@ underperforms the detection baseline on every event (AUROC lift $-1.6$ to $-60.2
 confirming five heterogeneous episodes are too few to train a temporal graph network.
 The unsupervised per-event HMM on Tier-A data is the right regime choice.
 
+\paragraph{Practical economic value.}
+At the $116$h lead horizon the on-chain HMM reduces loss on a $\$1$M long-LUNA position from $\$912\text{K}$ (market-signal timing) to $\$150\text{K}$, saving $\$762\text{K}$ ($6\times$ the market signal).  Long-UST positions see comparable savings ($\$503\text{K}$ per $\$1$M at $116$h).  Curve~LP positions record \$0 savings because the pool price was mechanically supported throughout---an honest scope condition the model does not overstate.
+
 \FloatBarrier
 
 
@@ -740,16 +743,14 @@ grid configurations. \texttt{Baseline\_60s} (1-minute), \texttt{block\_300}
 (5-minute blocks), and \texttt{block\_1800} (30-minute blocks).  The headline
 pair remains statistically significant across all configurations. The Terra
 pair remains non-significant across all configurations.
-
-A TVP-VAR (168-hour window) confirms spillover is acute and transient. 94\% FEVD concentrates in a single post-onset window. All pre-onset windows show near-zero spillover.
+A TVP-VAR ($168$h window) finds $94\%$ of FEVD post-onset and near-zero pre-onset spillover.
 
 \textbf{Bootstrap validation of Forbes--Rigobon.}
 A 2000-sample block-bootstrap (24h blocks) gives USDT/Curve the only strong directional support
 ($96.5\%$ of replicates $z>0$, one-sided $p=0.035$), though its two-sided 95\%~CI $[-0.10,+4.77]$
-includes zero, so we report it as directional rather than confirmed two-sided contagion. Neither
-Terra ($p{(>0)}{=}0.62$) nor BUSD ($0.25$) approaches significance.
+includes zero, so we report it as directional rather than confirmed two-sided contagion.
 
-\textbf{Tier and model robustness.}  Restricting to Tier-A data only, the USDT/Curve Forbes--Rigobon finding holds ($z=2.82$, $p=0.005$). All four exogenous events remain non-claimable.  The 3-state diagonal Gaussian HMM is best or co-best on all four detectable events (AUROC $0.92$--$0.96$) and beats a CUSUM baseline on 4 of 5 events. Across all 9 configurations tested, the default is within $\pm0.02$ AUROC of the best per-event choice.
+\textbf{Tier and model robustness.}  Restricting to Tier-A data only, the USDT/Curve Forbes--Rigobon finding holds ($z=2.82$, $p=0.005$). All four exogenous events remain non-claimable.  The 3-state diagonal Gaussian HMM is best or co-best on all four detectable events (AUROC $0.92$--$0.96$) and beats a CUSUM baseline on 4 of 5 events.
 
 
 
@@ -759,7 +760,7 @@ Terra ($p{(>0)}{=}0.62$) nor BUSD ($0.25$) approaches significance.
 (2)~\emph{Small event sample}. Seven episodes is still too few for cross-event supervised ML, which is why we adopt unsupervised detection. The mechanism-specificity claim (pool-imbalance shocks activate, exogenous shocks do not) holds across all seven, with four on-chain detections and three market-only detections, including 2024--25 data.
 (3)~\emph{Single significant FR event}. Only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test. The FR result is exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim.
 (4)~\emph{External validity}. Results are specific to Curve StableSwap pools. Extension to Uniswap~v3 is future work.
-The primary evidence base is the four-method convergent table (Table~\ref{tab:convergent}).
+(5)~\emph{Lead-lag placebo power}. Only USDC/SVB beats its shuffled baseline (true rate $0.231$ vs placebo $0.179$, $\Delta{=}+0.052$); the other four events match exactly, indicating individual lead-lag tests lack power at event-level sample sizes. The primary basis is the convergent evidence table (Table~\ref{tab:convergent}).
 
 
 %% -----------------------------------------------------------------------

@@ -2,12 +2,7 @@
 
 %% Additional packages (acmart includes graphicx, hyperref, amsmath, amssymb; do not reload)
 \usepackage{booktabs}
-\usepackage{xcolor}
 \usepackage{microtype}
-\usepackage{enumitem}
-\usepackage{subcaption}
-\usepackage{tabularx}
-\usepackage{array}
 \usepackage{placeins}  % \FloatBarrier to flush pending floats at section ends
 %% Loosen float placement so dense result sections can absorb more floats/page
 \renewcommand{\topfraction}{0.92}
@@ -26,18 +21,6 @@
 %% Relax line-breaking to prevent overfull hboxes from inline code / long tokens
 \setlength{\emergencystretch}{3em}
 
-%% Colour definitions for table highlights (do not override acmart layout)
-\definecolor{navy}{HTML}{003865}
-\definecolor{cublue}{HTML}{B9D9EB}
-\definecolor{amber}{HTML}{E67E22}
-\definecolor{tiergreen}{HTML}{27AE60}
-\definecolor{tiergrey}{HTML}{7F8C8D}
-\definecolor{blocked}{HTML}{C0392B}
-\definecolor{slate}{HTML}{2C3E50}
-
-%% Helper: breakable inline code (allows TeX to break at underscores)
-\newcommand{\code}[1]{\texttt{#1}}
-
 
 \begin{document}
 
@@ -50,7 +33,7 @@
 %\acmDOI{...}
 
 \title{When On-Chain Flow Signals Work and When They Don't}
-\subtitle{AMM-Layer Stablecoin Stress Propagation Across Five Episodes, a Provenance-Gated Analysis of On-Chain Curve Pool Swap Flow}
+\subtitle{A Provenance-Gated Analysis of On-Chain Curve Flow}
 
 %% Author block omitted for double-blind review
 
@@ -66,13 +49,16 @@ window (a \emph{contemporaneous} lag-0 co-movement, not early warning, Fisher
 $z=+2.82$, block-bootstrap one-sided $p=0.035$), whereas none of the four
 \emph{exogenous} episodes (Terra/LUNA, USDC/SVB, FTX, BUSD) shows this
 activation despite identical Tier-A data, so the null is mechanism-specific,
-not a data gap. The same split governs structure and detection. On-chain
-arbitrage is stabilizing in calm markets but flips to amplifying under
-endogenous stress, price discovery is on-chain for DeFi-native shocks (the
-Curve pool deviates $37\times$ more than Binance) but CEX-led for bank-run
-shocks, and an online Hidden Markov Model run causally on on-chain state
-reaches AUROC $0.95$ on Terra/LUNA (versus $0.50$ on market data), raising the
-alarm 116 hours earlier. The operational implication is concrete. DeFi stress
+not a data gap. Our machine-learning result follows the same split: an
+unsupervised online Hidden Markov Model, run causally on Tier-A on-chain state,
+detects the endogenous Terra/LUNA collapse at AUROC $0.95$ versus $0.50$ on
+Tier-B market data, raising the alarm 116 hours earlier, while exchange-borne
+shocks are detectable only on the market layer---the two evidence layers are
+complementary. The same split governs structure: on-chain arbitrage is
+stabilizing in calm markets but flips to amplifying under endogenous stress, and
+price discovery is on-chain for DeFi-native shocks (the Curve pool deviates
+$37\times$ more than Binance) but CEX-led for bank-run shocks. The operational
+implication is concrete. DeFi stress
 surveillance needs \emph{separate monitoring architectures} for endogenous
 versus exchange-originating shocks, and a provenance-aware three-gate pipeline
 underpins every claim.
@@ -172,7 +158,9 @@ causally on Tier-A on-chain state recovers endogenous DeFi-native stress that th
 Tier-B market layer registers at chance (Terra/LUNA causal AUROC $0.95$ vs
 $0.50$, $116$h earlier), while market data is required for exchange-borne shocks.
 The layers are complementary, and supervised cross-event prediction fails under
-concept shift.
+concept shift (leave-one-event-out mean AUROC ${\approx}0.60$ with off-diagonal
+transfer at chance, $0.50$; KL distribution shift predicts the degradation,
+$r=0.525$, $p=0.017$).
 
 \textbf{Implications for DeFi risk practitioners.}  Risk managers on CEX-only feeds
 would be structurally blind to pool-imbalance shocks. Terra/LUNA went undetected
@@ -769,14 +757,16 @@ grid configurations. \texttt{Baseline\_60s} (1-minute), \texttt{block\_300}
 (5-minute blocks), and \texttt{block\_1800} (30-minute blocks).  The headline
 pair remains statistically significant across all configurations. The Terra
 pair remains non-significant across all configurations.
-A TVP-VAR ($168$h window) finds $94\%$ of FEVD post-onset and near-zero pre-onset spillover.
+A rolling TVP-VAR (VAR lag order $5$, $10$-step forecast-error-variance-decomposition
+horizon, $168$h rolling window, $24$h step, feature \texttt{usdc\_net\_sold\_1h}) finds
+$94\%$ of FEVD post-onset and near-zero pre-onset spillover.
 
 \textbf{Bootstrap validation of Forbes--Rigobon.}
 A 2000-sample block-bootstrap (24h blocks) gives USDT/Curve the only strong directional support
 ($96.5\%$ of replicates $z>0$, one-sided $p=0.035$), though its two-sided 95\%~CI $[-0.10,+4.77]$
 includes zero, so we report it as directional rather than confirmed two-sided contagion.
 
-\textbf{Tier and model robustness.}  Restricting to Tier-A data only, the USDT/Curve Forbes--Rigobon finding holds ($z=2.82$, $p=0.005$). All four exogenous events remain non-claimable.  The 3-state diagonal Gaussian HMM is best or co-best on all four detectable events (AUROC $0.92$--$0.96$) and beats a CUSUM baseline on 4 of 5 events.
+\textbf{Tier and model robustness.}  Restricting to Tier-A data only, the USDT/Curve Forbes--Rigobon finding holds ($z=2.82$; analytic two-sample $p=0.005$, which we report only as a secondary check against the primary block-bootstrap one-sided $p=0.035$). All four exogenous events remain non-claimable.  The 3-state diagonal Gaussian HMM is best or co-best on all four detectable events (AUROC $0.92$--$0.96$) and beats a CUSUM baseline on 4 of 5 events.
 
 
 
@@ -815,8 +805,8 @@ Uniswap~v3 extension, and higher-powered settlement-layer tests.
 
 \begin{acks}
 The full analysis pipeline, data-ingestion scripts, figure-generation code,
-and committed result artefacts are available at
-[anonymized repository; link provided at camera-ready].
+and committed result artefacts are available at an anonymized repository
+(link provided at camera-ready).
 \end{acks}
 
 {\footnotesize\setlength{\bibsep}{0pt plus 0.1ex}

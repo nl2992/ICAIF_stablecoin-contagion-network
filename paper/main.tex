@@ -131,9 +131,11 @@ every 12 seconds.  This is a direct observation of the trading flow that
 \emph{produces} the price move, not a derived signal.  Our analysis shows that
 the cross-pool flow coupling during the June~2023 USDT/Curve episode is
 strong but \emph{contemporaneous} with the price stress rather than leading it
-(Sections~\ref{sec:main} and~\ref{sec:robust}). The contribution is therefore a
-mechanism-level decomposition of how stress moves through the AMM layer, not an
-early-warning claim.  No existing stablecoin contagion study uses TokenExchange
+(Sections~\ref{sec:main} and~\ref{sec:robust}); the 116-hour early detection above
+is delivered by a different instrument, the online HMM run on on-chain pool
+\emph{state} (Section~\ref{sec:prediction}), not by the flow coupling. The
+contribution is therefore a mechanism-level decomposition of how stress moves
+through the AMM layer, not an early-warning claim for the coupling itself.  No existing stablecoin contagion study uses TokenExchange
 flow as its primary evidence layer.
 
 \textbf{Contributions.}  \emph{Methodologically}, we introduce a
@@ -257,7 +259,9 @@ the weakest link.
 where $\text{tier}_f$ is the tier of the specific feature used to measure
 stress at each endpoint.  A Tier-A pool with a derived proxy feature (e.g.
 \texttt{Reserve\_imbalance}, computed from an approximate pool-size
-normaliser) is capped at Tier~B for that feature.
+normaliser) is capped at Tier~B for that feature.  The primary feature
+\texttt{usdc\_net\_sold\_1h} is a direct hourly sum of \texttt{TokenExchange}
+swap amounts with no proxy step, so it retains Tier~A.
 
 
 
@@ -406,7 +410,7 @@ Fisher two-sample test agrees more optimistically as a secondary check
 ($z_{\text{Fisher}}=+2.82$, analytic $p=0.005$). However, the 95\% CI is $[-0.10,\,+4.77]$. The lower bound is
 marginally negative owing to the short acute window ($n_{\text{panic}}{=}53$),
 and the formal two-sided test is not significant at the 0.05 level.  We therefore
-state this as \emph{strong directional evidence of coupling amplification (one-sided
+state this as \emph{directional evidence of coupling amplification (one-sided
 $p=0.035$, 96.5\% of bootstrap replicates positive)}, while noting that the
 two-sided test remains marginal and does not meet the stricter standard for
 confirmed contagion in the original Forbes--Rigobon framework.  This is the
@@ -582,7 +586,9 @@ Table~\ref{tab:convergent} summarises this four-method evidence for all five eve
 \caption{\textbf{Convergent evidence. 5 events $\times$ 4 methods.}
   FR $p_{>0}$. Bootstrap fraction of replicates with positive Fisher $z$.
   LL sig. Bonferroni-corrected lead-lag pairs.  TE sig. Block-FDR transfer entropy pairs.
-  AUROC. Best within-event HMM detection.  Convergence. Count of signals exceeding threshold.}
+  AUROC. Best within-event HMM detection.  Convergence. Count of signals exceeding threshold.
+  Terra's high AUROC alongside a null FR is reconciled in the text (the two tests measure
+  different phenomena).}
 \label{tab:convergent}
 \small
 \setlength{\tabcolsep}{3pt}
@@ -669,7 +675,7 @@ across shock mechanisms.
 
 We fit a three-state Gaussian HMM on standardised features, using \emph{no} labels.
 Tier-A features. On-chain pool state ($|\text{price\,dev}|$, $|\text{net USDC sold}|$,
-$|\text{reserve imbalance}|$). Tier-B features. CEX state ($|\text{basis}|$, spread, OBI).
+$|\text{reserve imbalance}|$). Tier-B features. CEX state ($|\text{basis}|$, spread, order-book imbalance).
 Detection is scored causally via the filtered (forward-only) posterior.
 \begin{equation}
   P(\text{stress} \mid x_{1:t}) = \frac{\exp({\text{logfilt}}[t, s])}{\sum_{s'} \exp({\text{logfilt}}[t, s'])},
@@ -741,7 +747,7 @@ confirming five heterogeneous episodes are too few to train a temporal graph net
 The unsupervised per-event HMM on Tier-A data is the right regime choice.
 
 \paragraph{Practical economic value.}
-At the $116$h lead horizon the on-chain HMM reduces loss on a $\$1$M long-LUNA position from $\$912\text{K}$ (market-signal timing) to $\$150\text{K}$, saving $\$762\text{K}$ ($6\times$ the market signal).  Long-UST positions see comparable savings ($\$503\text{K}$ per $\$1$M at $116$h).  Curve~LP positions record \$0 savings because the pool price was mechanically supported throughout---an honest scope condition the model does not overstate.
+At the $116$h lead horizon the on-chain HMM reduces loss on a $\$1$M long-LUNA position from $\$912\text{K}$ (market-signal timing) to $\$150\text{K}$, saving $\$762\text{K}$ ($6\times$ the market signal); this assumes exit at the alarm hour and ignores execution slippage and funding.  Long-UST positions see comparable savings ($\$503\text{K}$ per $\$1$M at $116$h).  Curve~LP positions record \$0 savings because the pool price was mechanically supported throughout---an honest scope condition the model does not overstate.
 
 \FloatBarrier
 
@@ -762,7 +768,7 @@ horizon, $168$h rolling window, $24$h step, feature \texttt{usdc\_net\_sold\_1h}
 $94\%$ of FEVD post-onset and near-zero pre-onset spillover.
 
 \textbf{Bootstrap validation of Forbes--Rigobon.}
-A 2000-sample block-bootstrap (24h blocks) gives USDT/Curve the only strong directional support
+A 2000-sample block-bootstrap (24h blocks) gives USDT/Curve the only directional support
 ($96.5\%$ of replicates $z>0$, one-sided $p=0.035$), though its two-sided 95\%~CI $[-0.10,+4.77]$
 includes zero, so we report it as directional rather than confirmed two-sided contagion.
 
@@ -774,7 +780,7 @@ includes zero, so we report it as directional rather than confirmed two-sided co
 \textbf{Limitations.}
 (1)~\emph{No executable CEX L2 depth}. Cross-venue claims are A/B, not A/A.
 (2)~\emph{Small event sample}. The five-episode core is too few for cross-event supervised ML, which is why we adopt unsupervised detection. The mechanism-specificity claim (pool-imbalance shocks activate, exogenous shocks do not) holds across all seven episodes once the two 2024--25 out-of-period events are added, with four on-chain detections and three market-only detections.
-(3)~\emph{Single significant FR event}. Only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test. The FR result is exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim.
+(3)~\emph{Single significant FR event}. Only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test. The FR result is exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim; this bounds only the bilateral-contagion claim, while the mechanism-specificity finding rests on the convergent multi-method evidence (Table~\ref{tab:convergent}).
 (4)~\emph{External validity}. Results are specific to Curve StableSwap pools. Extension to Uniswap~v3 is future work.
 (5)~\emph{Lead-lag placebo power}. Only USDC/SVB beats its shuffled baseline (true rate $0.231$ vs placebo $0.179$, $\Delta{=}+0.052$); the other four events match exactly, indicating individual lead-lag tests lack power at event-level sample sizes. The primary basis is the convergent evidence table (Table~\ref{tab:convergent}).
 

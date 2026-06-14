@@ -1,0 +1,17 @@
+{
+  "event": "usdt_curve_2023",
+  "pair": [
+    "curve_3pool",
+    "curve_crvusd_usdt"
+  ],
+  "feature": "usdc_net_sold_1h",
+  "rho_pre": 0.0905,
+  "n_pre": 95,
+  "rho_panic": 0.5273,
+  "n_panic": 53,
+  "fisher_z_obs": 2.8209,
+  "n_permutations": 2000,
+  "n_z_ge_obs": 72,
+  "p_permutation_one_sided": 0.036,
+  "interpretation": "One-sided label-shuffle null on the pre/panic split: fraction of random 95/53 re-labellings whose Fisher z >= the observed. Small p => the linkage rise is tied to the actual onset timing, not the small acute window."
+}

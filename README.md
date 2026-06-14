@@ -479,6 +479,7 @@ pipeline underpins every claim.
 |---|---|---|---|
 | Cross-pool coupling rises in the acute window | ρ̂ 0.09 (calm, n=95) → 0.53 (acute, n=53), Fisher z=2.82 | `results/tables/table_regime_contagion.csv`, `results/tables/table_tier_robustness_fr.csv` | `r_calm`=0.0905, `r_acute`=0.5273, `fisher_z`=2.8209 (usdt_curve_2023) |
 | Block-bootstrap significance (primary) | one-sided p=0.035 (96.5% of replicates positive) | `results/tables/table_convergent_evidence.csv` | `fr_p_gt0`=0.965 (usdt_curve_2023) |
+| Permutation null on the calm/panic split (corroborating) | one-sided p=0.036 — agrees with the bootstrap via a *different* null (split-timing vs. sampling variance) | `results/tables/regime_permutation_null.json` (← `scripts/run_regime_permutation_null.py`) | `p_permutation_one_sided`=0.036; reproduces `fisher_z_obs`=2.8209 as a gate |
 | HMM detects Terra on-chain vs market, earlier | AUROC 0.954 vs 0.499, +116 h | `results/tables/table_online_detection.csv` | `auroc_onchain_causal`, `auroc_market_causal`, `earlier_by_h`=116 (terra_luna_2022) |
 | Per-event HMM detection (default 3-state) | Terra 0.954, USDT/Curve 0.934, FTX 0.401, BUSD 0.609 | `results/tables/table_hmm_regime.csv` | `auroc` per `event_id` |
 | Best within-event HMM (ablation; tab:convergent) | Terra 0.975, SVB 0.935, USDT/Curve 0.927 | `results/tables/table_hmm_ablation.csv` (best config) | `auroc` max per event — distinct from the default-config 0.954 above |

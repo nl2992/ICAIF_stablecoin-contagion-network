@@ -406,16 +406,19 @@ For USDT/Curve 2023 the coupling is near-zero in calm ($\hat{\rho}=0.09$, $p=0.3
 and rises to $\hat{\rho}=0.53$ during panic, directional evidence consistent with
 contagion in the Forbes--Rigobon sense. We take the \emph{conservative} block bootstrap
 as our primary test. A 2000-sample block bootstrap (24-hour block length, $B=2000$)
-gives a one-sided $p=0.035$, with $96.5\%$ of replicates yielding $z>0$. The parametric
+gives a one-sided $p=0.035$, with $96.5\%$ of replicates yielding $z>0$. A
+label-shuffle permutation null---holding the $95/53$ split sizes fixed but randomly
+reassigning which hours are labelled \emph{panic} ($B{=}2000$)---independently
+corroborates this: only $3.6\%$ of reshuffles reach the observed $z$. The agreement
+is reassuring precisely because the two nulls stress different assumptions (sampling
+variance vs.\ whether the regime-split timing itself carries the signal). The parametric
 Fisher two-sample test agrees more optimistically as a secondary check
-($z_{\text{Fisher}}=+2.82$, analytic $p=0.005$). However, the 95\% CI is $[-0.10,\,+4.77]$. The lower bound is
-marginally negative owing to the short acute window ($n_{\text{panic}}{=}53$),
-and the formal two-sided test is not significant at the 0.05 level.  We therefore
-state this as \emph{directional evidence of coupling amplification (one-sided
-$p=0.035$, 96.5\% of bootstrap replicates positive)}, while noting that the
-two-sided test remains marginal and does not meet the stricter standard for
-confirmed contagion in the original Forbes--Rigobon framework.  This is the
-appropriate honest framing for a short acute window with $n{=}53$ observations.
+($z_{\text{Fisher}}=+2.82$, analytic $p=0.005$); its 95\% CI is $[-0.10,\,+4.77]$, the lower
+bound marginally negative owing to the short acute window ($n_{\text{panic}}{=}53$), so the
+two-sided test is not significant at the 0.05 level.  We therefore state this as
+\emph{directional evidence of coupling amplification (one-sided $p=0.035$, corroborated by a
+permutation null)}, not confirmed contagion in the strict Forbes--Rigobon sense---the
+honest framing for a $53$-hour acute window.
 The lag-0 peak is not a failure to detect direction, but evidence of a \emph{common
 shock} striking both pools simultaneously.
 

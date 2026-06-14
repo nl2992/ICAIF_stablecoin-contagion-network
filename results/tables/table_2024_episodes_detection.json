@@ -1,4 +1,42 @@
 {
+  "usdt_curve_2024_aug": {
+    "event_id": "usdt_curve_2024_aug",
+    "name": "USDT/Curve 2024 Aug (carry-trade deleveraging)",
+    "mechanism": "market_deleveraging_defi_native",
+    "analysis_window": [
+      "2024-08-04",
+      "2024-08-08"
+    ],
+    "shock_onset_utc": "2024-08-05T04:00:00Z",
+    "expected_onchain_fires": true,
+    "n_pool_rows": 384,
+    "n_market_rows": 384,
+    "forbes_rigobon": null,
+    "hmm": {
+      "onchain": {
+        "auroc": 0.807,
+        "stress_state": 0,
+        "lead_hours": null,
+        "n_calm": 288,
+        "n_panic": 96,
+        "status": "ok"
+      },
+      "market": {
+        "auroc": 0.377,
+        "stress_state": 1,
+        "lead_hours": null,
+        "n_calm": 288,
+        "n_panic": 96,
+        "status": "ok"
+      }
+    },
+    "paper_summary": {
+      "hmm_auroc_onchain": 0.807,
+      "hmm_auroc_market": 0.377,
+      "lead_hours": null,
+      "detects": "on-chain"
+    }
+  },
   "bybit_hack_2025": {
     "event_id": "bybit_hack_2025",
     "name": "ByBit hack 2025 (exchange-credit)",

@@ -1,0 +1,44 @@
+{
+  "method": "Two-sided label-shuffle null on the calm/panic split of the on-chain-flow vs CEX-price-deviation correlation; p = fraction of relabellings with |Fisher z| >= observed. Non-parametric counterpart to the analytic p_shift.",
+  "events": {
+    "usdt_curve_2023": {
+      "event": "usdt_curve_2023",
+      "cex_node": "usdt_binance",
+      "r_calm": -0.218,
+      "n_calm": 117,
+      "r_panic": 0.3634,
+      "n_panic": 66,
+      "fisher_z_obs": 3.8364,
+      "flip_sign": true,
+      "n_permutations": 10000,
+      "n_absz_ge_obs": 20,
+      "p_permutation_two_sided": 0.002
+    },
+    "busd_2023": {
+      "event": "busd_2023",
+      "cex_node": "busd_binance",
+      "r_calm": -0.0669,
+      "n_calm": 168,
+      "r_panic": 0.4462,
+      "n_panic": 66,
+      "fisher_z_obs": 3.6931,
+      "flip_sign": true,
+      "n_permutations": 10000,
+      "n_absz_ge_obs": 294,
+      "p_permutation_two_sided": 0.0294
+    },
+    "ftx_2022": {
+      "event": "ftx_2022",
+      "cex_node": "usdt_binance",
+      "r_calm": -0.1274,
+      "n_calm": 120,
+      "r_panic": -0.5159,
+      "n_panic": 64,
+      "fisher_z_obs": -2.8027,
+      "flip_sign": false,
+      "n_permutations": 10000,
+      "n_absz_ge_obs": 1941,
+      "p_permutation_two_sided": 0.1941
+    }
+  }
+}

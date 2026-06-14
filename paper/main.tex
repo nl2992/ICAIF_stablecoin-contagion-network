@@ -151,7 +151,7 @@ systems. \emph{Empirically}, on five stress episodes we report four results.
 $\hat{\rho}=0.09$ (calm) to $0.53$ (panic), Fisher $z=2.82$, resting not on one
 statistic but on three \emph{converging} methods on the same episode
 (Forbes--Rigobon, $96.5\%$ of bootstraps positive. An online HMM detecting the
-regime at AUROC~$0.93$. A TVP-VAR placing $94\%$ of spillover post-onset), present
+regime at AUROC~$0.93$. A TVP-VAR placing $\ge91\%$ of spillover post-onset), present
 only for the endogenous shock despite all five events carrying Tier-A A/A pairs. (2)~arbitrage flipping from stabilizing to amplifying under
 stress ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX). (3)~on-chain price
 discovery, the Curve pool leading the exchange and deviating $37\times$ more for
@@ -773,8 +773,9 @@ grid configurations. \texttt{Baseline\_60s} (1-minute), \texttt{block\_300}
 pair remains statistically significant across all configurations. The Terra
 pair remains non-significant across all configurations.
 A rolling TVP-VAR (VAR lag order $5$, $10$-step forecast-error-variance-decomposition
-horizon, $168$h rolling window, $24$h step, feature \texttt{usdc\_net\_sold\_1h}) finds
-$94\%$ of FEVD post-onset and near-zero pre-onset spillover.
+horizon, $168$h rolling window, $24$h step, feature \texttt{usdc\_net\_sold\_1h}) places
+$91$--$100\%$ of cross-edge FEVD post-onset across the five events (pooled $95\%$), with
+near-zero pre-onset spillover.
 
 \textbf{Bootstrap validation of Forbes--Rigobon.}
 A 2000-sample block-bootstrap (24h blocks) gives USDT/Curve the only directional support

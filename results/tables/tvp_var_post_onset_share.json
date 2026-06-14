@@ -1,0 +1,33 @@
+{
+  "metric": "Off-diagonal (cross-node) FEVD share occurring in post-onset rolling windows (window_center >= 0), from the committed TVP-VAR rolling spillovers.",
+  "per_event": {
+    "busd_2023": {
+      "post_onset_fevd_share": 1.0,
+      "pre_onset_fevd_share": 0.0,
+      "n_windows": 5
+    },
+    "ftx_2022": {
+      "post_onset_fevd_share": 0.913,
+      "pre_onset_fevd_share": 0.087,
+      "n_windows": 23
+    },
+    "terra_luna_2022": {
+      "post_onset_fevd_share": 1.0,
+      "pre_onset_fevd_share": 0.0,
+      "n_windows": 5
+    },
+    "usdc_svb_2023": {
+      "post_onset_fevd_share": 1.0,
+      "pre_onset_fevd_share": 0.0,
+      "n_windows": 5
+    },
+    "usdt_curve_2023": {
+      "post_onset_fevd_share": 1.0,
+      "pre_onset_fevd_share": 0.0,
+      "n_windows": 6
+    }
+  },
+  "pooled_post_onset_share": 0.9552,
+  "per_event_min": 0.913,
+  "per_event_max": 1.0
+}

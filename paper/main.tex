@@ -62,8 +62,7 @@ price discovery is on-chain for DeFi-native shocks (the Curve pool deviates
 $37\times$ more than Binance) but CEX-led for bank-run shocks. The operational implication is concrete: DeFi stress
 surveillance needs \emph{separate monitoring architectures} for endogenous
 versus exchange-originating shocks, and a provenance-aware three-gate pipeline
-underpins every claim. The finding is mechanism-specific: it is not a general-purpose
-prediction model but a demonstration that the detection boundary follows mechanism, not data availability.
+underpins every claim. The detection boundary follows mechanism, not data availability.
 \end{abstract}
 
 \keywords{stablecoin, AMM, Curve Finance, DeFi stress, provenance, claim gate,
@@ -775,7 +774,7 @@ confirming five heterogeneous episodes are too few to train a temporal graph net
 The unsupervised per-event HMM on Tier-A data is the right regime choice.
 
 \paragraph{Practical economic value.}
-At the $116$h lead horizon the on-chain HMM reduces loss on a $\$1$M long-LUNA position from $\$912\text{K}$ (market-signal timing) to $\$150\text{K}$, saving $\$762\text{K}$ ($6\times$ the market signal); this assumes exit at the alarm hour and ignores execution slippage and funding.  Long-UST positions see comparable savings ($\$503\text{K}$ per $\$1$M at $116$h).  Curve~LP positions record \$0 savings because the pool price was mechanically supported throughout---an honest scope condition the model does not overstate.
+At $116$h the on-chain HMM saves $\$762\text{K}$ per \$1M long-LUNA ($\$912\text{K}$ to $\$150\text{K}$; exit at alarm hour; no slippage assumed). Long-UST: $\$503\text{K}$ per \$1M. Curve~LP: \$0 (pool price mechanically supported).
 
 \FloatBarrier
 
@@ -786,15 +785,8 @@ At the $116$h lead horizon the on-chain HMM reduces loss on a $\$1$M long-LUNA p
 %% -----------------------------------------------------------------------
 
 \textbf{Robustness.}
-We rerun the lead-lag analysis for the USDT/Curve headline pair across three
-grid configurations. \texttt{Baseline\_60s} (1-minute), \texttt{block\_300}
-(5-minute blocks), and \texttt{block\_1800} (30-minute blocks).  The headline
-pair remains statistically significant across all configurations. The Terra
-pair remains non-significant across all configurations.
-A rolling TVP-VAR (VAR lag order $5$, $10$-step forecast-error-variance-decomposition
-horizon, $168$h rolling window, $24$h step, feature \texttt{usdc\_net\_sold\_1h}) places
-$91$--$100\%$ of cross-edge FEVD post-onset across the five events (pooled $95\%$), with
-near-zero pre-onset spillover.
+Lead-lag is rerun across three grid resolutions (\texttt{Baseline\_60s}, \texttt{block\_300}, \texttt{block\_1800}): headline pair remains significant; Terra pair non-significant throughout.
+A rolling TVP-VAR (lag $5$, $10$-step FEVD, $168$h window, $24$h step) places $91$--$100\%$ of cross-edge spillover post-onset (pooled $95\%$), near-zero pre-onset.
 
 \textbf{Bootstrap validation of Forbes--Rigobon.}
 A 2000-sample block-bootstrap (24h blocks) gives USDT/Curve the only directional support

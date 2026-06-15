@@ -398,8 +398,8 @@ literature distinguishes \emph{interdependence} (stable linkage in all states) f
 \emph{contagion} (linkage that rises during crisis)~\cite{Forbes2002}.  We test
 the difference via Fisher $r$-to-$z$ two-sample statistic.
 \begin{equation}
-  z_{\text{Fisher}} = \frac{1}{2}\left( \ln\frac{1+\hat{\rho}_{\text{panic}}}{1-\hat{\rho}_{\text{panic}}}  - \ln\frac{1+\hat{\rho}_{\text{calm}}}{1-\hat{\rho}_{\text{calm}}} \right)
-  \left( \frac{1}{n_{\text{panic}}-3} + \frac{1}{n_{\text{calm}}-3} \right)^{-1/2}
+  z_{\text{Fisher}} = \tfrac{1}{2}\!\left( \ln\tfrac{1+\hat{\rho}_{\text{panic}}}{1-\hat{\rho}_{\text{panic}}}  - \ln\tfrac{1+\hat{\rho}_{\text{calm}}}{1-\hat{\rho}_{\text{calm}}} \right)
+  \!\left( \tfrac{1}{n_{\text{panic}}-3} + \tfrac{1}{n_{\text{calm}}-3} \right)^{-1/2}
 \end{equation}
 
 For USDT/Curve 2023 the coupling is near-zero in calm ($\hat{\rho}=0.09$, $p=0.38$)
@@ -547,18 +547,19 @@ The deviation magnitudes make the surveillance case concrete. The Curve pool fel
 \caption{Experimental configuration.}
 \label{tab:config}
 \small
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{ll}
 \toprule
 Setting & Value \\
 \midrule
 Episodes & 5 stablecoin stress events (2022--2023) \\
-Primary evidence & Tier-A Curve \texttt{TokenExchange} and Uniswap v3 \texttt{Swap} logs \\
-Provenance gate & data-quality tier $\to$ feature tier $\to$ significance \\
-Detector & 3-state Gaussian HMM, unsupervised, causal filtered posterior \\
-Tier-A features & $|$price dev$|$, $|$net USDC sold$|$, $|$reserve imbalance$|$ \\
-Threshold & 5\% false-alarm on pre-onset calm, half-fit robustness retrain \\
-Contagion test & Forbes--Rigobon Fisher-$z$, 2000-sample block bootstrap (24h) \\
-Corroboration & lead-lag (Bonferroni), transfer entropy (block-FDR), TVP-VAR \\
+Primary evidence & Curve/Uniswap~v3 on-chain event logs (Tier-A) \\
+Provenance gate & data-quality $\to$ feature tier $\to$ significance \\
+Detector & 3-state Gaussian HMM, causal filtered posterior \\
+Tier-A features & $|$price dev$|$, $|$net USDC sold$|$, $|$reserve imb.$|$ \\
+Threshold & 5\% false-alarm on calm, half-fit robustness retrain \\
+Contagion test & Forbes--Rigobon Fisher-$z$, block bootstrap ($n$=2000) \\
+Corroboration & lead-lag (Bonf.), TE (block-FDR), TVP-VAR \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -600,7 +601,7 @@ Table~\ref{tab:convergent} summarises this four-method evidence for all five eve
   different phenomena).}
 \label{tab:convergent}
 \small
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{@{}lrrrrll@{}}
 \toprule
 Event & FR $z$ & FR $p_{>0}$ & LL sig & TE sig & AUROC & Convergence \\
@@ -722,12 +723,12 @@ a single-source monitor will be blind to one of them.
 \caption{\textbf{Online causal stress detection by data source.}  Causal (filtered-posterior) AUROC of one unsupervised 3-state Gaussian HMM, identically on Tier-A on-chain vs.\ Tier-B market state, scored against the held-out \texttt{panic} regime.  On-chain wins for pool-borne episodes ($+116$h lead on Terra); market wins for exchange-/regulation-borne episodes. Rows extended to 2024--25 confirm the pattern holds across market regimes.}
 \label{tab:detection}
 \small
-\setlength{\tabcolsep}{5pt}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{llccl}
 \toprule
 Event & Mechanism & On-chain & Market & Detects \\
 \midrule
-Terra/LUNA 2022   & algorithmic     & $\mathbf{0.954}$ & $0.499$ & on-chain ($+116$h) \\
+Terra/LUNA 2022   & algorithmic     & $\mathbf{0.954}$ & $0.499$ & on-chain~$+$116h \\
 USDT/Curve 2023   & DeFi-native     & $0.934$ & $0.937$ & either (tie) \\
 USDT/Curve 2024   & DeFi-native     & $\mathbf{0.807}$ & $0.377$ & on-chain \\
 USDC/SVB 2023     & fiat bank run   & $0.881$ & $0.909$ & either (tie) \\

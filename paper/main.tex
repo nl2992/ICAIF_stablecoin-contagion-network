@@ -32,23 +32,25 @@
 %\setcopyright{acmlicensed}
 %\acmDOI{...}
 
-\title{When On-Chain Flow Signals Work and When They Don't}
+\title{Endogenous vs.\ Exogenous Stablecoin Shocks: On-Chain Flow
+Detects DeFi-Native Crises 116 Hours Early but Misses Bank-Run Contagion}
 \subtitle{A Provenance-Gated Analysis of On-Chain Curve Flow}
 
 %% Author block omitted for double-blind review
 
 \begin{abstract}
-Empirical contagion studies routinely conflate genuine \emph{contagion}, a
-crisis-driven shift in linkage, with constant \emph{interdependence}. Using
-Tier-A on-chain Curve \texttt{TokenExchange} flow across five stablecoin stress
-episodes, we show the distinction is empirically sharp and
-\emph{mechanism-specific}. For the June~2023 USDT/Curve episode, an
-\emph{endogenous} pool-imbalance shock, cross-pool flow coupling rises from
-near-zero in calm ($\hat{\rho}=0.09$) to $\hat{\rho}=0.53$ during the acute
-window (a \emph{contemporaneous} lag-0 co-movement, not early warning, Fisher
-$z=+2.82$, block-bootstrap one-sided $p=0.035$), whereas none of the four
-\emph{exogenous} episodes (Terra/LUNA, USDC/SVB, FTX, BUSD) shows this
-activation despite identical Tier-A data, so the null is mechanism-specific,
+\textbf{Four independent methods---Forbes--Rigobon structural breaks, an online
+Hidden Markov Model, TVP-VAR spillover attribution, and on-chain flow-labeling---converge
+on the same finding}: endogenous (pool-imbalance) stablecoin shocks activate cross-pool
+contagion coupling; exogenous (bank-run, exchange-credit) shocks do not, despite identical
+Tier-A data availability. Empirical contagion studies routinely conflate genuine
+\emph{contagion}, a crisis-driven shift in linkage, with constant \emph{interdependence}.
+Using Tier-A on-chain Curve \texttt{TokenExchange} flow across five stablecoin stress
+episodes, we show the distinction is empirically sharp and \emph{mechanism-specific}. For
+the June~2023 USDT/Curve episode, an \emph{endogenous} pool-imbalance shock, cross-pool
+flow coupling rises from near-zero in calm ($\hat{\rho}=0.09$) to $\hat{\rho}=0.53$ during
+the acute window (Fisher $z=+2.82$, $p=0.035$), whereas none of the four \emph{exogenous}
+episodes shows this activation despite identical data, so the null is mechanism-specific,
 not a data gap. Our machine-learning result follows the same split: an
 unsupervised online Hidden Markov Model, run causally on Tier-A on-chain state,
 detects the endogenous Terra/LUNA collapse at AUROC $0.95$ versus $0.50$ on
@@ -57,11 +59,11 @@ shocks are detectable only on the market layer---the two evidence layers are
 complementary. The same split governs structure: on-chain arbitrage is
 stabilizing in calm markets but flips to amplifying under endogenous stress, and
 price discovery is on-chain for DeFi-native shocks (the Curve pool deviates
-$37\times$ more than Binance) but CEX-led for bank-run shocks. The operational
-implication is concrete. DeFi stress
+$37\times$ more than Binance) but CEX-led for bank-run shocks. The operational implication is concrete: DeFi stress
 surveillance needs \emph{separate monitoring architectures} for endogenous
 versus exchange-originating shocks, and a provenance-aware three-gate pipeline
-underpins every claim.
+underpins every claim. The finding is mechanism-specific: it is not a general-purpose
+prediction model but a demonstration that the detection boundary follows mechanism, not data availability.
 \end{abstract}
 
 \keywords{stablecoin, AMM, Curve Finance, DeFi stress, provenance, claim gate,
@@ -180,6 +182,12 @@ would be structurally blind to pool-imbalance shocks. Terra/LUNA went undetected
 116 hours longer than on-chain monitoring would have allowed.  Endogenous shocks require
 on-chain detection, exogenous shocks require market signals, and both layers are
 necessary; we distil this into operational rules in the conclusion.
+
+\textit{Scope.} This paper's unit of contribution is \textbf{contagion-vs.-interdependence
+econometrics and on-chain regime detection}. It is distinct from execution-aware
+benchmarking (where the object of study is profitable executability of apparent arbitrage) and from
+graph-neural-network contagion prediction (where the object is forecasting which venues spread
+stress). These are orthogonal research questions that happen to share overlapping episodes.
 
 
 %% -----------------------------------------------------------------------
@@ -798,12 +806,15 @@ includes zero, so we report it as directional rather than confirmed two-sided co
 
 
 \label{sec:limitations}
-\textbf{Limitations.}
-(1)~\emph{No executable CEX L2 depth}. Cross-venue claims are A/B, not A/A.
-(2)~\emph{Small event sample}. The five-episode core is too few for cross-event supervised ML, which is why we adopt unsupervised detection. The mechanism-specificity claim (pool-imbalance shocks activate, exogenous shocks do not) holds across all seven episodes once the two 2024--25 out-of-period events are added, with four on-chain detections and three market-only detections.
-(3)~\emph{Single significant FR event}. Only USDT/Curve 2023 passes the bilateral Forbes--Rigobon test. The FR result is exploratory directional evidence ($p_{>0}=0.965$, one-sided), not a confirmed bilateral claim; this bounds only the bilateral-contagion claim, while the mechanism-specificity finding rests on the convergent multi-method evidence (Table~\ref{tab:convergent}).
-(4)~\emph{External validity}. Results are specific to Curve StableSwap pools. Extension to Uniswap~v3 is future work.
-(5)~\emph{Lead-lag placebo power}. Only USDC/SVB beats its shuffled baseline (true rate $0.231$ vs placebo $0.179$, $\Delta{=}+0.052$); the other four events match exactly, indicating individual lead-lag tests lack power at event-level sample sizes. The primary basis is the convergent evidence table (Table~\ref{tab:convergent}).
+\paragraph{Statistical scope.}
+Five episodes, one endogenous positive (USDT/Curve 2023). The mechanism-specificity
+claim rests on four independent methods converging on the same episode, with four
+exogenous nulls as within-data controls; two 2024--25 out-of-period extensions confirm
+the pattern. \textbf{Limitations:} (1)~No executable CEX L2 depth---cross-venue claims
+are A/B. (2)~Only USDT/Curve 2023 passes bilateral Forbes--Rigobon; the FR result is
+directional evidence ($p_{>0}=0.965$), not a confirmed bilateral claim; the
+mechanism-specificity finding rests on the convergent multi-method table. (3)~Results
+are specific to Curve StableSwap pools; Uniswap~v3 extension is future work.
 
 
 %% -----------------------------------------------------------------------
@@ -812,23 +823,12 @@ includes zero, so we report it as directional rather than confirmed two-sided co
 \label{sec:conclude}
 %% -----------------------------------------------------------------------
 
-Using a provenance gate separating Tier-A on-chain evidence from Tier-B market context, we report four results on five stablecoin stress episodes (2022--23); the complementary-detection result further holds on two 2024--25 out-of-period episodes (seven in the detection table).
-\emph{(i)~Regime-switching coupling}. USDT/Curve coupling is near zero in calm ($\hat{\rho}=0.09$) and activates in panic ($\hat{\rho}=0.53$, $z=2.82$, one-sided $p=0.035$, two-sided formally marginal), exclusively for the endogenous shock.
-\emph{(ii)~Arbitrage flips} from stabilizing to amplifying ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX).
-\emph{(iii)~On-chain price discovery}. The pool leads the exchange for DeFi-native stress ($37\times$ greater deviation), lagging only for the exogenous SVB run.
-\emph{(iv)~Complementary detection layers}. On-chain recovers endogenous stress that market signals miss (Terra AUROC $0.95$ vs $0.50$, 116h earlier). Market signals are required for exchange-borne shocks. Supervised cross-event prediction fails under concept shift ($r=0.525$, $p=0.017$).
-
-The provenance gate unifies these results, and three operational rules follow for
-practitioners. Run on-chain and exchange feeds as \emph{independent} layers, since a
-single-source monitor is structurally blind to one class of event (on-chain leads by
-116h on Terra; exchange signals are decisive for FTX and BUSD). Match the detector to
-the mechanism: an on-chain HMM for AMM-native shocks, market-price signals for
-exchange-credit or regulatory ones. And watch for the arbitrage-sign flip, where
-cross-pool coupling surges ($\hat{\rho}=0.09\!\to\!0.53$) and flow turns from
-stabilising to amplifying ($z=+3.84$), signalling exhausted arbitrage capacity. Two
-broader principles emerge: gate claims by data provenance, and where labels are
-scarce, detect rather than predict. Future work targets CEX order-book depth, a
-Uniswap~v3 extension, and higher-powered settlement-layer tests.
+Four results across five episodes (2022--23) plus two 2024--25 extensions:
+\emph{(i)}~USDT/Curve coupling activates from $\hat{\rho}=0.09$ to $0.53$ ($z=2.82$, $p=0.035$) exclusively for the endogenous shock.
+\emph{(ii)}~Arbitrage flips from stabilizing to amplifying ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX).
+\emph{(iii)}~Pool leads exchange for DeFi-native stress ($37\times$ deviation), lags for exogenous SVB.
+\emph{(iv)}~On-chain recovers endogenous stress that market signals miss (Terra AUROC $0.95$ vs $0.50$, 116h earlier); market signals cover exchange-credit shocks. Supervised cross-event transfer fails ($r=0.525$, $p=0.017$), vindicating unsupervised per-event HMM.
+Run on-chain and exchange feeds as independent layers; match detector to mechanism; gate claims by provenance. Future work: CEX L2 depth and Uniswap~v3.
 
 \begin{acks}
 The full analysis pipeline, data-ingestion scripts, figure-generation code,

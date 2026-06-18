@@ -19,8 +19,9 @@ plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5, "axes.labelsize": 8,
                      "text.color": _NAVY_INK, "axes.labelcolor": _NAVY_INK,
                      "axes.titlecolor": _NAVY_INK, "axes.edgecolor": _NAVY_INK,
                      "xtick.color": _NAVY_INK, "ytick.color": _NAVY_INK})
-# Refined Columbia palette: calm/baseline = Columbia navy; panic/pos/neg stay semantic.
-C_CALM, C_PAN, C_POS, C_NEG = "#1D4F91", "#E0533D", "#27AE60", "#C0392B"
+# Sober house palette: navy/steel/maroon only (no coral or bright green).
+# calm/baseline = navy; positive/on-chain = muted steel; panic/negative = maroon.
+C_CALM, C_PAN, C_POS, C_NEG = "#1D4F91", "#b2182b", "#5b7fa6", "#7a2230"
 S = {"usdt_curve_2023":"USDT/\nCurve","terra_luna_2022":"Terra","ftx_2022":"FTX",
      "busd_2023":"BUSD","usdc_svb_2023":"USDC/\nSVB"}
 

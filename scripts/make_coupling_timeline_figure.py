@@ -26,7 +26,7 @@ GOLD = REPO / "data" / "gold" / "dataset_contagion_features_usdt_curve_2023.parq
 OUT = REPO / "results" / "paper" / "figures" / "figure_coupling_rho_timeline.png"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
-NAVY, CALM, PANIC = "#003057", "#5B8DEF", "#E0533D"
+NAVY, CALM, PANIC = "#26425a", "#5b7fa6", "#7a2230"
 WINDOW = 36  # hours; acute-window rolling mean ~0.52 matches the FR scalar 0.53
 
 plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm",
@@ -51,8 +51,8 @@ ax.plot(t.values, rho.values, color=NAVY, lw=1.3, zorder=3)
 ax.axhline(0.0905, xmin=0, xmax=0.5, color=CALM, lw=1.0, ls=":")
 ax.axhline(0.5273, color=PANIC, lw=1.0, ls=":")
 ax.axvline(0, color="#555", lw=0.8, ls="--")
-ax.text(t.min() + 2, -0.78, "calm", color=CALM, fontsize=7.5, fontweight="bold")
-ax.text(4, -0.78, "acute", color=PANIC, fontsize=7.5, fontweight="bold")
+ax.text(t.min() + 2, -0.78, "calm", color=CALM, fontsize=7.5)
+ax.text(4, -0.78, "acute", color=PANIC, fontsize=7.5)
 ax.text(2, 0.55, r"FR $\hat{\rho}=0.53$", color=PANIC, fontsize=6.8, va="bottom")
 ax.text(t.min() + 2, 0.12, r"FR $\hat{\rho}=0.09$", color=CALM, fontsize=6.8, va="bottom")
 ax.annotate("onset", (0, -0.95), fontsize=6.8, color="#555", ha="center")

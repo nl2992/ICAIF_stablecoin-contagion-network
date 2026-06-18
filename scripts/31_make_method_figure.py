@@ -10,7 +10,7 @@ from stressnet.config import results_root
 from stressnet.utils.logging import get_logger
 logger = get_logger(__name__)
 
-CA, CB, CFX = "#27AE60", "#B9D9EB", "#E0533D"   # Tier-A green, Tier-B Columbia Blue, blocked red
+CA, CB, CFX = "#1D4F91", "#B9D9EB", "#7a2230"   # Tier-A navy, Tier-B Columbia Blue, blocked maroon
 _NAVY_INK = "#0A1F44"  # Columbia navy ink for text / arrows
 plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5,
                      "text.color": _NAVY_INK, "axes.titlecolor": _NAVY_INK})
@@ -29,7 +29,7 @@ def main():
     ax.set_xlim(0, 10); ax.set_ylim(0, 3.4); ax.axis("off")
 
     # ---- (a) three-layer node taxonomy (left) ----
-    ax.text(2.0, 3.25, r"(a) Three-layer evidence model", ha="center", fontsize=8.5, weight="bold")
+    ax.text(2.0, 3.25, r"(a) Three-layer evidence model", ha="center", fontsize=8.5)
     box(ax, 0.3, 2.30, 3.4, 0.55, "CEX layer (Binance, Coinbase)\nTier B", CB, fs=7)
     box(ax, 0.3, 1.45, 3.4, 0.55, "AMM/DEX layer (Curve pools)\nTier A", CA, fs=7, tc="white")
     box(ax, 0.3, 0.60, 3.4, 0.55, "Settlement layer (mint / burn)\nTier A", CA, fs=7, tc="white")
@@ -39,7 +39,7 @@ def main():
     ax.text(3.95, 1.72, "edge tier =\n$\\min$(node, node,\nfeature)", fontsize=6.2, va="center", color="#333")
 
     # ---- (b) three-gate pipeline (right) ----
-    ax.text(7.4, 3.25, r"(b) Provenance-gated claim pipeline", ha="center", fontsize=8.5, weight="bold")
+    ax.text(7.4, 3.25, r"(b) Provenance-gated claim pipeline", ha="center", fontsize=8.5)
     gx = 5.6
     box(ax, gx, 2.55, 1.25, 0.55, "Gate 1\nProvenance", "#F3F6FA")
     box(ax, gx+1.55, 2.55, 1.25, 0.55, "Gate 2\nStatistical", "#F3F6FA")

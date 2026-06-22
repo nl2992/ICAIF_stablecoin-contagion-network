@@ -150,31 +150,34 @@ contribution is therefore a mechanism-level decomposition of how stress moves
 through the AMM layer, not an early-warning claim for the coupling itself.  No existing stablecoin contagion study uses TokenExchange
 flow as its primary evidence layer.
 
-\textbf{Contributions.}  \emph{Methodologically}, we introduce a
-provenance-aware three-gate pipeline (data-quality tier $\to$ feature tier $\to$
-statistical significance) and a claim-level taxonomy (A/A DEX-flow, A/A
-settlement, A/B directional, B/B contextual) that caps every cross-venue claim
-at its lowest tier and blocks fixture data from reaching any conclusion.
-This discipline is itself a financial contribution. It provides a replicable
-framework for auditing model claims before they inform surveillance and risk
-systems. \emph{Empirically}, on five stress episodes we report four results.
-(1)~regime-switching contagion, USDT/Curve cross-pool coupling rises from
-$\hat{\rho}=0.09$ (calm) to $0.53$ (panic), Fisher $z=2.82$, resting not on one
-statistic but on three \emph{converging} methods on the same episode
-(Forbes--Rigobon, $96.5\%$ of bootstraps positive. An online HMM detecting the
-regime at AUROC~$0.93$. A TVP-VAR placing $\ge91\%$ of spillover post-onset), present
-only for the endogenous shock despite all five events carrying Tier-A A/A pairs. (2)~arbitrage flipping from stabilizing to amplifying under
-stress ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX). (3)~on-chain price
-discovery, the Curve pool leading the exchange and deviating $37\times$ more for
-DeFi-native stress. And (4)~a machine-learning result on
-which evidence layer detects stress first, an unsupervised online detector run
-causally on Tier-A on-chain state recovers endogenous DeFi-native stress that the
-Tier-B market layer registers at chance (Terra/LUNA causal AUROC $0.95$ vs
-$0.50$, $116$h earlier), while market data is required for exchange-borne shocks.
-The layers are complementary, and supervised cross-event prediction fails under
-concept shift (leave-one-event-out mean AUROC ${\approx}0.60$ with off-diagonal
-transfer at chance, $0.50$; KL distribution shift predicts the degradation,
-$r=0.525$, $p=0.017$).
+\textbf{Thesis.} On-chain flow detects endogenous DeFi-native stress that
+price-only monitors miss, and a provenance gate tells us which of those claims to trust.
+
+\textbf{Contributions.}
+\begin{itemize}
+\item \textbf{A provenance-gated claim pipeline (lead contribution).} A three-gate
+pipeline (data-quality tier $\to$ feature tier $\to$ statistical significance) and a
+claim-level taxonomy (A/A DEX-flow, A/A settlement, A/B directional, B/B contextual)
+caps every cross-venue claim at its lowest tier and blocks fixture data from reaching
+any conclusion---a replicable framework for auditing model claims before they inform
+surveillance and risk systems.
+\item \textbf{Regime-switching contagion.} USDT/Curve cross-pool coupling rises from
+$\hat{\rho}=0.09$ (calm) to $0.53$ (panic), Fisher $z=2.82$, resting on three
+\emph{converging} methods (Forbes--Rigobon with $96.5\%$ of bootstraps positive; an
+online HMM detecting the regime at AUROC~$0.93$; a TVP-VAR placing $\ge91\%$ of spillover
+post-onset), present only for the endogenous shock despite all five events carrying
+Tier-A A/A pairs.
+\item \textbf{Arbitrage sign-flip.} On-chain arbitrage flips from stabilizing to
+amplifying under stress ($z=+3.84$ USDT/Curve, $+3.69$ BUSD, $-2.80$ FTX).
+\item \textbf{On-chain price discovery.} The Curve pool leads the exchange and deviates
+$37\times$ more for DeFi-native stress.
+\item \textbf{Which layer detects first, and an honest null.} An unsupervised online
+detector run causally on Tier-A on-chain state recovers endogenous stress the Tier-B
+market layer registers at chance (Terra/LUNA causal AUROC $0.95$ vs $0.50$, $116$h
+earlier), while market data is required for exchange-borne shocks---the layers are
+complementary. Supervised cross-event prediction fails under concept shift
+(leave-one-event-out mean AUROC ${\approx}0.60$, off-diagonal transfer at chance $0.50$).
+\end{itemize}
 
 \textbf{Implications for DeFi risk practitioners.}  Risk managers on CEX-only feeds
 would be structurally blind to pool-imbalance shocks. Terra/LUNA went undetected

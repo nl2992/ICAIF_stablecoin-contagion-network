@@ -11,10 +11,10 @@ its verified provenance tier, what features it populates, and what is missing or
 
 | Symbol | Meaning |
 |--------|---------|
-| ✅ A | Tier A — execution-grade, directly from on-chain logs or L2 book |
-| ⚠️ B | Tier B — real data, sufficient for context; not execution-grade |
-| 🔴 FIX | `fixture_non_empirical` — synthetic pipeline data, **not paper-claimable** |
-| ❌ | Not fetched / missing |
+| A | Tier A — execution-grade, directly from on-chain logs or L2 book |
+| B | Tier B — real data, sufficient for context; not execution-grade |
+| FIX | `fixture_non_empirical` — synthetic pipeline data, **not paper-claimable** |
+| — | Not fetched / missing |
 
 ---
 
@@ -22,17 +22,17 @@ its verified provenance tier, what features it populates, and what is missing or
 
 | Node | `tier_actual` | Source | Populated features | Notes |
 |---|---|---|---|---|
-| `usdc_mint_burn` | ✅ **A** | Etherscan ERC-20 Transfer logs | `mint_burn_net_1h`, `basis_vs_usd` | Genuine Tier A: 4 real hourly mint/burn events |
-| `curve_3pool` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 312 hourly rows; raw on-chain flow is Tier A; derived reserve proxy is Tier B |
-| `usdc_binance` | ⚠️ B | Binance Vision bookTicker (BBO) | `spread_bps`, `basis_vs_usd` | `depth_10bps_bid_usd = null` |
-| `usdt_binance` | ⚠️ B | Binance Vision bookTicker (BBO) | `spread_bps`, `basis_vs_usd` | Same as above |
-| `usdc_coinbase` | ⚠️ B | Coinbase REST 1-min candles | `spread_bps`, `basis_vs_usd` | OHLCV proxy only |
-| `eth_usdc_exchange_flows` | ⚠️ B | CoinMetrics exchange netflows | `exchange_netflow_1h` | Pre-aggregated |
-| `eth_usdt_exchange_flows` | ⚠️ B | CoinMetrics exchange netflows | `exchange_netflow_1h` | Same |
-| `usdc_kraken` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | No free historical depth; spread also synthetic |
-| `usdt_kraken` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | Same |
-| `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic `reserve_imbalance` | The Graph subgraph not fetched |
-| `eth_bridge_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flow values | Dune query not executed |
+| `usdc_mint_burn` | **A** | Etherscan ERC-20 Transfer logs | `mint_burn_net_1h`, `basis_vs_usd` | Genuine Tier A: 4 real hourly mint/burn events |
+| `curve_3pool` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 312 hourly rows; raw on-chain flow is Tier A; derived reserve proxy is Tier B |
+| `usdc_binance` | B | Binance Vision bookTicker (BBO) | `spread_bps`, `basis_vs_usd` | `depth_10bps_bid_usd = null` |
+| `usdt_binance` | B | Binance Vision bookTicker (BBO) | `spread_bps`, `basis_vs_usd` | Same as above |
+| `usdc_coinbase` | B | Coinbase REST 1-min candles | `spread_bps`, `basis_vs_usd` | OHLCV proxy only |
+| `eth_usdc_exchange_flows` | B | CoinMetrics exchange netflows | `exchange_netflow_1h` | Pre-aggregated |
+| `eth_usdt_exchange_flows` | B | CoinMetrics exchange netflows | `exchange_netflow_1h` | Same |
+| `usdc_kraken` | **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | No free historical depth; spread also synthetic |
+| `usdt_kraken` | **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | Same |
+| `uniswap_usdc_usdt_005` | **FIX** | `deterministic_pipeline_fixture` | Synthetic `reserve_imbalance` | The Graph subgraph not fetched |
+| `eth_bridge_flows` | **FIX** | `deterministic_pipeline_fixture` | Synthetic flow values | Dune query not executed |
 
 **A/A provenance-valid pair**: `usdc_mint_burn (A) ↔ curve_3pool (A)` via `usdc_net_sold_1h`
 and `mint_burn_net_1h`.
@@ -53,10 +53,10 @@ tested with this feature. `reserve_imbalance` is Tier B derived.
 
 | Node | `tier_actual` | Source | Populated features | Notes |
 |---|---|---|---|---|
-| `curve_3pool` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 701 hourly rows |
-| `curve_ust_wormhole` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 180 hourly rows; pool nearly drained (extreme values expected) |
-| `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
-| `ust_binance` | ⚠️ B | Binance Vision aggTrades | `spread_bps`, `basis_vs_usd` | Trade-level; `depth_10bps_bid_usd = null` |
+| `curve_3pool` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 701 hourly rows |
+| `curve_ust_wormhole` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 180 hourly rows; pool nearly drained (extreme values expected) |
+| `usdt_binance` | B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
+| `ust_binance` | B | Binance Vision aggTrades | `spread_bps`, `basis_vs_usd` | Trade-level; `depth_10bps_bid_usd = null` |
 
 **A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_ust_wormhole (A)` via `usdc_net_sold_1h`
 (3pool USDC flow vs UST/3CRV pool imbalance).
@@ -75,14 +75,14 @@ may be downgraded to Tier B in robustness checks. `reserve_imbalance` is Tier B 
 
 | Node | `tier_actual` | Source | Populated features | Notes |
 |---|---|---|---|---|
-| `curve_3pool` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 379 hourly rows |
-| `curve_crvusd_usdt` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 285 hourly rows; decimal bug **fixed** (was ~1e10, now -0.41 to +0.02) |
-| `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
-| `eth_usdt_exchange_flows` | ⚠️ B | CoinMetrics | `exchange_netflow_1h` | |
-| `usdt_mint_burn` | ✅ **A** | Etherscan `eth_getLogs` (Issue/Redeem) | `mint_burn_net_1h` | USDT uses `Issue(uint256)`/`Redeem(uint256)` events; decoded via `ingest_tether_issue_redeem()` in `etherscan.py`; `TETHER_MINT_CONFIGS` registry used |
-| `usdt_kraken` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | |
-| `uniswap_usdc_usdt_005` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic pool state | |
-| `tron_usdt_exchange_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flows | TronGrid not implemented |
+| `curve_3pool` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 379 hourly rows |
+| `curve_crvusd_usdt` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 285 hourly rows; decimal bug **fixed** (was ~1e10, now -0.41 to +0.02) |
+| `usdt_binance` | B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
+| `eth_usdt_exchange_flows` | B | CoinMetrics | `exchange_netflow_1h` | |
+| `usdt_mint_burn` | **A** | Etherscan `eth_getLogs` (Issue/Redeem) | `mint_burn_net_1h` | USDT uses `Issue(uint256)`/`Redeem(uint256)` events; decoded via `ingest_tether_issue_redeem()` in `etherscan.py`; `TETHER_MINT_CONFIGS` registry used |
+| `usdt_kraken` | **FIX** | `deterministic_pipeline_fixture` | Synthetic depth/imbalance | |
+| `uniswap_usdc_usdt_005` | **FIX** | `deterministic_pipeline_fixture` | Synthetic pool state | |
+| `tron_usdt_exchange_flows` | **FIX** | `deterministic_pipeline_fixture` | Synthetic flows | TronGrid not implemented |
 
 **A/A provenance-valid pair**: `curve_3pool (A) ↔ curve_crvusd_usdt (A)` — both Etherscan on-chain flow features.
 
@@ -103,12 +103,12 @@ lead-lag analysis. `claim_strength = robust`, `paper_claim_allowed = True`. Thes
 
 | Node | `tier_actual` | Source | Populated features | Notes |
 |---|---|---|---|---|
-| `curve_3pool` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 718 hourly rows |
-| `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
-| `busd_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
-| `eth_usdc_exchange_flows` | ⚠️ B | CoinMetrics | `exchange_netflow_1h` | |
-| `eth_usdt_exchange_flows` | ⚠️ B | CoinMetrics | `exchange_netflow_1h` | |
-| `eth_bridge_flows` | 🔴 **FIX** | `deterministic_pipeline_fixture` | Synthetic flow values | |
+| `curve_3pool` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 718 hourly rows |
+| `usdt_binance` | B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
+| `busd_binance` | B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
+| `eth_usdc_exchange_flows` | B | CoinMetrics | `exchange_netflow_1h` | |
+| `eth_usdt_exchange_flows` | B | CoinMetrics | `exchange_netflow_1h` | |
+| `eth_bridge_flows` | **FIX** | `deterministic_pipeline_fixture` | Synthetic flow values | |
 
 **A/B edges only**: `curve_3pool (A) ↔ usdt_binance (B)` etc. No second A node in this event yet.
 
@@ -118,10 +118,10 @@ lead-lag analysis. `claim_strength = robust`, `paper_claim_allowed = True`. Thes
 
 | Node | `tier_actual` | Source | Populated features | Notes |
 |---|---|---|---|---|
-| `curve_3pool` | ✅ **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 864 hourly rows |
-| `busd_binance` | ⚠️ B | Binance Vision bookTicker + klines | `spread_bps`, `basis_vs_usd` | |
-| `usdc_binance` | ⚠️ B | Binance Vision klines | `spread_bps`, `basis_vs_usd` | |
-| `usdt_binance` | ⚠️ B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
+| `curve_3pool` | **A** | Etherscan TokenExchange events | `usdc_net_sold_1h`\*, `reserve_imbalance`†, `implied_pool_price`† | 864 hourly rows |
+| `busd_binance` | B | Binance Vision bookTicker + klines | `spread_bps`, `basis_vs_usd` | |
+| `usdc_binance` | B | Binance Vision klines | `spread_bps`, `basis_vs_usd` | |
+| `usdt_binance` | B | Binance Vision bookTicker | `spread_bps`, `basis_vs_usd` | |
 
 **A/B edges only**: No second A node in this event. A/B claim possible with `curve_3pool (A)` as anchor.
 

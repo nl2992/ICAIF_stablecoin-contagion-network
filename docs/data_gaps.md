@@ -27,7 +27,7 @@ Gap severity:
 |---|---|---|---|---|
 | UST/Binance L2 archive | P0 | ust_binance | aggTrades only | Tardis historical; may be available; UST delisted |
 | `usdt_binance` L2 | P1 | usdt_binance | BBO | Tardis (event outside free window) |
-| On-chain Curve UST pool | P1 | curve_ust_wormhole | Etherscan logs ✅ | Already Tier A |
+| On-chain Curve UST pool | P1 | curve_ust_wormhole | Etherscan logs | Already Tier A |
 | Terra on-chain (non-EVM) | P2 | — | missing | Terra blockchain archive (out of scope v1) |
 
 ## usdt_curve_2023 (USDT/Curve stress, June 2023)
